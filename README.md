@@ -381,7 +381,7 @@ cavuno jobs list --status published --limit 100 \
 - API reference: <https://cavuno.com/docs/api>
 - Source: <https://github.com/wollemiahq/cavuno-cli>
 - Issues: <https://github.com/wollemiahq/cavuno-cli/issues>
-- Support: <support@cavuno.com>
+- Support: <hi@cavuno.com>
 
 ## License
 

@@ -9,7 +9,7 @@ the latest release before reporting an issue that may already be fixed.
 
 Do not open a public issue for a suspected vulnerability.
 
-Email support@cavuno.com with:
+Email hi@cavuno.com with:
 
 - the affected package and version;
 - a clear description of the impact;

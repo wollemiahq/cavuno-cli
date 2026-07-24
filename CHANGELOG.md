@@ -1,7 +1,12 @@
 # Changelog
 
-This changelog starts with the standalone public CLI. It records changes that
-affect installation, commands, API compatibility, or automation behavior.
+This changelog records changes that affect installation, commands, API
+compatibility, or automation behavior.
+
+## Unreleased
+
+- Changed the public contact address to `hi@cavuno.com`.
+- Simplified repository documentation for external contributors.
 
 ## 1.0.1 — 2026-07-24
 

@@ -13,4 +13,4 @@ official Cavuno product.
 Do not use Cavuno branding in a project name, package name, domain, social
 account, or logo in a way that could confuse people about its source.
 
-For permission beyond these nominative uses, contact support@cavuno.com.
+For permission beyond these nominative uses, contact hi@cavuno.com.
