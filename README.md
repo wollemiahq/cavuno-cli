@@ -1,8 +1,12 @@
-# cavuno
+# Cavuno CLI
 
-Command-line client for the [Cavuno](https://cavuno.com) v1 REST API. Manage jobs, companies, blog content, media, board settings, domains, async operations, and taxonomies from a terminal, shell script, or CI pipeline.
+The official command-line client for the
+[Cavuno job board platform](https://cavuno.com). Manage jobs, companies, blog
+content, media, board settings, domains, asynchronous operations, and
+taxonomies through the Cavuno REST API from a terminal, shell script, CI
+pipeline, or AI agent.
 
-Full reference: **[cavuno.com/docs/cli](https://cavuno.com/docs/cli)**
+Full reference: **[Cavuno CLI documentation](https://cavuno.com/docs/cli)**
 
 ## Install
 
@@ -372,8 +376,10 @@ cavuno jobs list --status published --limit 100 \
 
 ## Links
 
+- Cavuno: <https://cavuno.com>
 - Reference docs: <https://cavuno.com/docs/cli>
 - API reference: <https://cavuno.com/docs/api>
+- Source: <https://github.com/wollemiahq/cavuno-cli>
 - Issues: <https://github.com/wollemiahq/cavuno-cli/issues>
 - Support: <support@cavuno.com>
 
