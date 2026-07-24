@@ -3,7 +3,7 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
-## Unreleased
+## 1.0.2 — 2026-07-24
 
 - Changed the public contact address to `hi@cavuno.com`.
 - Simplified repository documentation for external contributors.
