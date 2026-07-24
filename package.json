@@ -19,12 +19,12 @@
   "homepage": "https://cavuno.com/docs/cli",
   "bugs": {
     "url": "https://github.com/wollemiahq/cavuno-cli/issues",
-    "email": "support@cavuno.com"
+    "email": "hi@cavuno.com"
   },
   "license": "MIT",
   "author": {
     "name": "Cavuno",
-    "email": "support@cavuno.com",
+    "email": "hi@cavuno.com",
     "url": "https://cavuno.com"
   },
   "repository": {
