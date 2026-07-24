@@ -1,0 +1,77 @@
+{
+  "name": "cavuno",
+  "version": "1.0.1",
+  "description": "Command-line interface for managing and automating Cavuno job boards through the REST API",
+  "keywords": [
+    "ai-agent",
+    "cavuno",
+    "cli",
+    "command-line",
+    "hiring",
+    "job-board",
+    "job-board-api",
+    "job-board-automation",
+    "job-board-cli",
+    "openapi",
+    "recruitment",
+    "rest-api"
+  ],
+  "homepage": "https://cavuno.com/docs/cli",
+  "bugs": {
+    "url": "https://github.com/wollemiahq/cavuno-cli/issues",
+    "email": "support@cavuno.com"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Cavuno",
+    "email": "support@cavuno.com",
+    "url": "https://cavuno.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wollemiahq/cavuno-cli.git"
+  },
+  "bin": {
+    "cavuno": "build/index.js"
+  },
+  "files": [
+    "build",
+    "manifest.json",
+    "LICENSE",
+    "TRADEMARKS.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:tsc": "tsc && chmod +x ./build/index.js",
+    "build:watch": "tsc --watch",
+    "clean": "git clean -xdf .turbo build node_modules",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "generate-manifest": "tsx scripts/generate-manifest.ts",
+    "assert-publish-target": "node -e \"const p=require('./package.json'); if(p.name!=='cavuno'){throw new Error('Refusing to publish: package.json name is '+p.name+', expected cavuno')}; if(p.private){throw new Error('Refusing to publish: package.json has private:true')}\"",
+    "prepublishOnly": "pnpm run assert-publish-target && pnpm run build && pnpm run generate-manifest"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "openapi-fetch": "^0.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.9",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "packageManager": "pnpm@10.19.0"
+}

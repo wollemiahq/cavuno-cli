@@ -1,0 +1,5213 @@
+{
+  "version": "1.0.1",
+  "generatedAt": "2026-07-24T00:10:36.029Z",
+  "groups": [
+    {
+      "name": "jobs",
+      "description": "Manage jobs in the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List jobs (paginated).",
+          "synopsis": "cavuno jobs list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (draft|published|expired|archived)",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Filter by company ID",
+              "required": false
+            },
+            {
+              "flags": "--search <query>",
+              "description": "Free-text search; routes through POST /v1/jobs/search",
+              "required": false
+            },
+            {
+              "flags": "--skills <slugs>",
+              "description": "Comma-separated canonical skill slugs",
+              "required": false
+            },
+            {
+              "flags": "--categories <slugs>",
+              "description": "Comma-separated canonical category slugs",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor from previous response",
+              "required": false
+            }
+          ],
+          "examples": [
+            "# All jobs (first page)\ncavuno jobs list",
+            "# Published only\ncavuno jobs list --status published --limit 100",
+            "# Published jobs at a single company\ncavuno jobs list --status published --company-id k17abc..."
+          ],
+          "mapsTo": "GET /v1/jobs (POST /v1/jobs/search when --search, --skills, or --categories is set)"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single job by ID (enriched with description, company, places).",
+          "synopsis": "cavuno jobs get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno jobs get k17abc...",
+            "cavuno jobs get k17abc... | jq -r .title"
+          ],
+          "mapsTo": "GET /v1/jobs/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a draft job.",
+          "synopsis": "cavuno jobs create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "Job title (required)",
+              "required": true
+            },
+            {
+              "flags": "--description <text>",
+              "description": "Description (markdown/HTML)",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "URL slug; auto-derived from title if omitted",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Company ID (must belong to your account)",
+              "required": false
+            },
+            {
+              "flags": "--application-url <url>",
+              "description": "Application URL or `mailto:`/email",
+              "required": false
+            },
+            {
+              "flags": "--employment-type <type>",
+              "description": "full_time|part_time|contract|internship|temporary|volunteer|other",
+              "required": false
+            },
+            {
+              "flags": "--remote-option <opt>",
+              "description": "on_site|hybrid|remote",
+              "required": false
+            },
+            {
+              "flags": "--seniority <level>",
+              "description": "entry_level|associate|mid_level|senior|lead|principal|director|executive",
+              "required": false
+            },
+            {
+              "flags": "--remote-sponsorship <opt>",
+              "description": "yes|no|unknown — visa sponsorship for remote candidates",
+              "required": false
+            },
+            {
+              "flags": "--remote-permits <json>",
+              "description": "JSON array, e.g. '[{\"type\":\"country\",\"value\":\"US\"}]' — work-permit scope",
+              "required": false
+            },
+            {
+              "flags": "--remote-timezones <json>",
+              "description": "JSON array, e.g. '[{\"type\":\"all\",\"value\":\"all\"}]' — timezone constraint (auto-derived from --remote-permits when omitted)",
+              "required": false
+            },
+            {
+              "flags": "--office-locations <json>",
+              "description": "JSON array, e.g. '[{\"city\":\"Berlin\",\"country\":\"DE\"}]' — required for on_site/hybrid",
+              "required": false
+            },
+            {
+              "flags": "--in-office-period <opt>",
+              "description": "per_week|per_month|per_year — denominator for --in-office-frequency (hybrid)",
+              "required": false
+            },
+            {
+              "flags": "--in-office-frequency <n>",
+              "description": "In-office count per period (hybrid)",
+              "required": false
+            },
+            {
+              "flags": "--salary-min <n>",
+              "description": "Minimum salary",
+              "required": false
+            },
+            {
+              "flags": "--salary-max <n>",
+              "description": "Maximum salary",
+              "required": false
+            },
+            {
+              "flags": "--salary-currency <code>",
+              "description": "ISO 4217 currency (e.g. USD, EUR, GBP)",
+              "required": false
+            },
+            {
+              "flags": "--salary-timeframe <opt>",
+              "description": "per_year|per_month|per_week|per_day|per_hour",
+              "required": false
+            },
+            {
+              "flags": "--education-requirements <list>",
+              "description": "Comma-separated values: high_school,associate_degree,bachelor_degree,professional_certificate,postgraduate_degree,no_requirements",
+              "required": false
+            },
+            {
+              "flags": "--skills <slugs>",
+              "description": "Comma-separated canonical skill slugs",
+              "required": false
+            },
+            {
+              "flags": "--categories <slugs>",
+              "description": "Comma-separated canonical category slugs",
+              "required": false
+            },
+            {
+              "flags": "--experience-months <n>",
+              "description": "Minimum experience required, in months",
+              "required": false
+            },
+            {
+              "flags": "--experience-in-place-of-education",
+              "description": "Allow equivalent experience to substitute for education",
+              "required": false
+            },
+            {
+              "flags": "--is-featured",
+              "description": "Mark as a featured job on the public board",
+              "required": false
+            },
+            {
+              "flags": "--expires-at <iso>",
+              "description": "Expiry as ISO 8601 datetime (defaults to 30 days from creation when omitted)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "# Minimal\ncavuno jobs create --title \"Senior Backend Engineer\"",
+            "# Common remote-only case\ncavuno jobs create \\\n  --title \"Senior Platform Engineer\" \\\n  --description \"We’re hiring...\" \\\n  --employment-type full_time \\\n  --remote-option remote \\\n  --seniority senior \\\n  --company-id k18acme...",
+            "# Hybrid role (requires --office-locations)\ncavuno jobs create \\\n  --title \"Staff Engineer\" \\\n  --remote-option hybrid \\\n  --in-office-period per_week \\\n  --in-office-frequency 2 \\\n  --office-locations '[{\"city\":\"Berlin\",\"country\":\"DE\"}]'",
+            "# Capture the new ID\nNEW_ID=$(cavuno jobs create --title \"Test\" | jq -r .id)"
+          ],
+          "mapsTo": "POST /v1/jobs"
+        },
+        {
+          "name": "update",
+          "description": "Update fields on an existing job.",
+          "synopsis": "cavuno jobs update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "1–200 chars",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "Description (markdown/HTML)",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Company ID (must belong to your account)",
+              "required": false
+            },
+            {
+              "flags": "--application-url <url>",
+              "description": "Application URL or `mailto:`/email",
+              "required": false
+            },
+            {
+              "flags": "--employment-type <type>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--remote-option <opt>",
+              "description": "on_site|hybrid|remote",
+              "required": false
+            },
+            {
+              "flags": "--seniority <level>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--remote-sponsorship <opt>",
+              "description": "yes|no|unknown",
+              "required": false
+            },
+            {
+              "flags": "--remote-permits <json>",
+              "description": "JSON array; pass `[]` to clear",
+              "required": false
+            },
+            {
+              "flags": "--remote-timezones <json>",
+              "description": "JSON array; pass `[]` to clear (PATCH never auto-re-derives)",
+              "required": false
+            },
+            {
+              "flags": "--office-locations <json>",
+              "description": "JSON array; required when --remote-option is on_site/hybrid",
+              "required": false
+            },
+            {
+              "flags": "--in-office-period <opt>",
+              "description": "per_week|per_month|per_year",
+              "required": false
+            },
+            {
+              "flags": "--in-office-frequency <n>",
+              "description": "Hybrid in-office count per period",
+              "required": false
+            },
+            {
+              "flags": "--salary-min <n>",
+              "description": "Minimum salary",
+              "required": false
+            },
+            {
+              "flags": "--salary-max <n>",
+              "description": "Maximum salary",
+              "required": false
+            },
+            {
+              "flags": "--salary-currency <code>",
+              "description": "ISO 4217 currency (e.g. USD, EUR, GBP)",
+              "required": false
+            },
+            {
+              "flags": "--salary-timeframe <opt>",
+              "description": "per_year|per_month|per_week|per_day|per_hour",
+              "required": false
+            },
+            {
+              "flags": "--education-requirements <list>",
+              "description": "Comma-separated list",
+              "required": false
+            },
+            {
+              "flags": "--skills <slugs>",
+              "description": "Comma-separated canonical skill slugs; pass an empty value to clear",
+              "required": false
+            },
+            {
+              "flags": "--categories <slugs>",
+              "description": "Comma-separated canonical category slugs; pass an empty value to clear",
+              "required": false
+            },
+            {
+              "flags": "--experience-months <n>",
+              "description": "Minimum experience required, in months",
+              "required": false
+            },
+            {
+              "flags": "--experience-in-place-of-education <bool>",
+              "description": "true|false (string accepted; PATCH semantics — explicit value required)",
+              "required": false
+            },
+            {
+              "flags": "--is-featured <bool>",
+              "description": "true|false (string accepted; PATCH semantics — explicit value required)",
+              "required": false
+            },
+            {
+              "flags": "--expires-at <iso>",
+              "description": "ISO 8601 datetime (parsed to epoch ms); pass `null` to clear",
+              "required": false
+            }
+          ],
+          "examples": [
+            "# Rename\ncavuno jobs update k17abc... --title \"Renamed role\"",
+            "# Re-author the remote-permit set + sponsorship\ncavuno jobs update k17abc... \\\n  --remote-permits '[{\"type\":\"country\",\"value\":\"US\"}]' \\\n  --remote-sponsorship yes",
+            "# Clear an existing expiry\ncavuno jobs update k17abc... --expires-at null",
+            "# Mark as featured\ncavuno jobs update k17abc... --is-featured true"
+          ],
+          "mapsTo": "PATCH /v1/jobs/:id"
+        },
+        {
+          "name": "publish",
+          "description": "Publish a job (draft or expired → published).",
+          "synopsis": "cavuno jobs publish <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--expires-at <iso>",
+              "description": "Optional ISO 8601 expiry timestamp",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno jobs publish k17abc...",
+            "cavuno jobs publish k17abc... --expires-at 2026-12-31T23:59:59Z"
+          ],
+          "mapsTo": "POST /v1/jobs/:id/publish"
+        },
+        {
+          "name": "pause",
+          "description": "Pause a published job (transition to draft).",
+          "synopsis": "cavuno jobs pause <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno jobs pause k17abc..."
+          ],
+          "mapsTo": "POST /v1/jobs/:id/pause"
+        },
+        {
+          "name": "expire",
+          "description": "Expire a published job immediately (sets expiresAt = now).",
+          "synopsis": "cavuno jobs expire <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno jobs expire k17abc..."
+          ],
+          "mapsTo": "POST /v1/jobs/:id/expire"
+        },
+        {
+          "name": "duplicate",
+          "description": "Duplicate a job (creates a new draft copy).",
+          "synopsis": "cavuno jobs duplicate <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno jobs duplicate k17abc...",
+            "NEW_ID=$(cavuno jobs duplicate k17abc... | jq -r .id)"
+          ],
+          "mapsTo": "POST /v1/jobs/:id/duplicate"
+        },
+        {
+          "name": "delete",
+          "description": "Hard-delete a job. Irreversible.",
+          "synopsis": "cavuno jobs delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno jobs delete k17abc... --yes"
+          ],
+          "mapsTo": "DELETE /v1/jobs/:id"
+        },
+        {
+          "name": "batch",
+          "description": "Run a batch of job operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
+          "synopsis": "cavuno jobs batch [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno jobs batch --file ops.json",
+            "echo '{\"operations\":[]}' | cavuno jobs batch"
+          ],
+          "mapsTo": "POST /v1/jobs/batch"
+        }
+      ]
+    },
+    {
+      "name": "usage",
+      "description": "Inspect actionable product capacity (jobs, subscribers, seats).",
+      "commands": [
+        {
+          "name": "get",
+          "description": "Show used, limit, and remaining capacity for active jobs, confirmed subscribers, and team seats.",
+          "synopsis": "cavuno usage get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno usage get"
+          ],
+          "mapsTo": "GET /v1/usage"
+        }
+      ]
+    },
+    {
+      "name": "me",
+      "description": "Show the authenticated operator identity (Board, role, permissions, scopes).",
+      "commands": [
+        {
+          "name": "get",
+          "description": "Retrieve the current Board, actor type, live role/permissions, and credential scopes.",
+          "synopsis": "cavuno me get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno me get"
+          ],
+          "mapsTo": "GET /v1/me"
+        }
+      ]
+    },
+    {
+      "name": "companies",
+      "description": "Manage companies in the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List companies (paginated).",
+          "synopsis": "cavuno companies list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <query>",
+              "description": "Substring search on name",
+              "required": false
+            },
+            {
+              "flags": "--markets <slugs>",
+              "description": "Comma-separated canonical market slugs",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list",
+            "cavuno companies list --search acme --limit 10"
+          ],
+          "mapsTo": "GET /v1/companies"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single company by ID.",
+          "synopsis": "cavuno companies get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno companies get k18acme..."
+          ],
+          "mapsTo": "GET /v1/companies/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a company.",
+          "synopsis": "cavuno companies create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Company name (required)",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "URL slug; auto-derived from --name if omitted",
+              "required": false
+            },
+            {
+              "flags": "--website <url>",
+              "description": "Website URL",
+              "required": false
+            },
+            {
+              "flags": "--summary <text>",
+              "description": "Short summary (≤280 chars)",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "Long-form description (≤25,000 chars)",
+              "required": false
+            },
+            {
+              "flags": "--x-url <handle-or-url>",
+              "description": "X (Twitter) handle or profile URL",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-url <url-or-path>",
+              "description": "LinkedIn company page URL or path",
+              "required": false
+            },
+            {
+              "flags": "--facebook-url <url-or-path>",
+              "description": "Facebook company page URL or path",
+              "required": false
+            },
+            {
+              "flags": "--markets <slugs>",
+              "description": "Comma-separated canonical market slugs",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies create --name \"Acme Corp\"",
+            "cavuno companies create \\\n  --name \"Acme Corp\" \\\n  --website https://acme.com \\\n  --summary \"World-class widgets\""
+          ],
+          "mapsTo": "POST /v1/companies"
+        },
+        {
+          "name": "update",
+          "description": "Update a company (partial).",
+          "synopsis": "cavuno companies update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New name",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "New URL slug",
+              "required": false
+            },
+            {
+              "flags": "--website <url>",
+              "description": "New website URL",
+              "required": false
+            },
+            {
+              "flags": "--summary <text>",
+              "description": "New summary",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "New long-form description",
+              "required": false
+            },
+            {
+              "flags": "--x-url <handle-or-url>",
+              "description": "New X handle or profile URL",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-url <url-or-path>",
+              "description": "New LinkedIn URL or path",
+              "required": false
+            },
+            {
+              "flags": "--facebook-url <url-or-path>",
+              "description": "New Facebook URL or path",
+              "required": false
+            },
+            {
+              "flags": "--markets <slugs>",
+              "description": "Comma-separated canonical market slugs; pass an empty string to clear",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies update k18acme... --name \"Acme, Inc.\"",
+            "cavuno companies update k18acme... --website https://acme.io"
+          ],
+          "mapsTo": "PATCH /v1/companies/:id"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a company and cascade-delete its jobs.",
+          "synopsis": "cavuno companies delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies delete k18acme... --yes"
+          ],
+          "mapsTo": "DELETE /v1/companies/:id"
+        },
+        {
+          "name": "upload-logo",
+          "description": "Upload or replace a company logo.",
+          "synopsis": "cavuno companies upload-logo <id> <file>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "file",
+              "description": "Path to a PNG, JPEG, WebP, or GIF logo file",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno companies upload-logo k18acme... ./acme-logo.png"
+          ],
+          "mapsTo": "POST /v1/companies/:id/logo"
+        },
+        {
+          "name": "delete-logo",
+          "description": "Delete a company logo.",
+          "synopsis": "cavuno companies delete-logo <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies delete-logo k18acme... --yes"
+          ],
+          "mapsTo": "DELETE /v1/companies/:id/logo"
+        },
+        {
+          "name": "find-by-domain",
+          "description": "Resolve a company by website domain (uses search endpoint).",
+          "synopsis": "cavuno companies find-by-domain <domain>",
+          "arguments": [
+            {
+              "name": "domain",
+              "description": "Website domain (e.g. acme.com)",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno companies find-by-domain acme.com"
+          ],
+          "mapsTo": "POST /v1/companies/search"
+        },
+        {
+          "name": "find-or-create",
+          "description": "Resolve to an existing company by domain or create one.",
+          "synopsis": "cavuno companies find-or-create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Company name",
+              "required": true
+            },
+            {
+              "flags": "--website <url>",
+              "description": "Website URL (used for dedup)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies find-or-create --name \"Acme Corp\" --website acme.com"
+          ],
+          "mapsTo": "POST /v1/companies/find-or-create"
+        },
+        {
+          "name": "search",
+          "description": "Search companies by name and market.",
+          "synopsis": "cavuno companies search [query] [options]",
+          "arguments": [
+            {
+              "name": "query",
+              "description": "Free-text query",
+              "required": false,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--markets <slugs>",
+              "description": "Comma-separated canonical market slugs",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 25)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies search \"acme\" --limit 10"
+          ],
+          "mapsTo": "POST /v1/companies/search"
+        },
+        {
+          "name": "list-jobs",
+          "description": "List jobs at a company (any status, optional filter).",
+          "synopsis": "cavuno companies list-jobs <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (draft|published|expired|archived)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list-jobs k18acme... --status published"
+          ],
+          "mapsTo": "GET /v1/companies/:id/jobs"
+        },
+        {
+          "name": "batch",
+          "description": "Run a batch of company operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
+          "synopsis": "cavuno companies batch [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies batch --file ops.json"
+          ],
+          "mapsTo": "POST /v1/companies/batch"
+        }
+      ]
+    },
+    {
+      "name": "blog",
+      "description": "Manage blog posts, authors, and tags.",
+      "commands": [
+        {
+          "name": "posts list",
+          "description": "List posts (paginated).",
+          "synopsis": "cavuno blog posts list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (draft|scheduled|published)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts list --status draft"
+          ],
+          "mapsTo": "GET /v1/blog/posts"
+        },
+        {
+          "name": "posts get",
+          "description": "Fetch a post by ID (includes html).",
+          "synopsis": "cavuno blog posts get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog posts get k97..."
+          ],
+          "mapsTo": "GET /v1/blog/posts/:id"
+        },
+        {
+          "name": "posts create",
+          "description": "Create a post (defaults to draft).",
+          "synopsis": "cavuno blog posts create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "Post title (required)",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "URL slug; auto-derived from --title",
+              "required": false
+            },
+            {
+              "flags": "--html <html>",
+              "description": "Rich-text HTML body (sanitized server-side)",
+              "required": false
+            },
+            {
+              "flags": "--custom-excerpt <text>",
+              "description": "Excerpt",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "draft|scheduled|published",
+              "required": false
+            },
+            {
+              "flags": "--published-at <iso>",
+              "description": "ISO datetime (required for scheduled)",
+              "required": false
+            },
+            {
+              "flags": "--featured",
+              "description": "Mark as featured",
+              "required": false
+            },
+            {
+              "flags": "--author-ids <ids>",
+              "description": "Comma-separated author IDs",
+              "required": false
+            },
+            {
+              "flags": "--tag-ids <ids>",
+              "description": "Comma-separated tag IDs",
+              "required": false
+            },
+            {
+              "flags": "--cover-storage-id <id>",
+              "description": "Cover image storage ID",
+              "required": false
+            },
+            {
+              "flags": "--og-image-storage-id <id>",
+              "description": "OG image storage ID",
+              "required": false
+            },
+            {
+              "flags": "--feature-image-alt <text>",
+              "description": "Feature image alt text",
+              "required": false
+            },
+            {
+              "flags": "--feature-image-caption <text>",
+              "description": "Feature image caption",
+              "required": false
+            },
+            {
+              "flags": "--seo-title <text>",
+              "description": "SEO meta title",
+              "required": false
+            },
+            {
+              "flags": "--seo-description <text>",
+              "description": "SEO meta description",
+              "required": false
+            },
+            {
+              "flags": "--canonical-url <url>",
+              "description": "Canonical URL",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts create --title \"Hiring trends\""
+          ],
+          "mapsTo": "POST /v1/blog/posts"
+        },
+        {
+          "name": "posts update",
+          "description": "Update a post (partial). Status changes use publish/unpublish.",
+          "synopsis": "cavuno blog posts update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--html <html>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--custom-excerpt <text>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--featured",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--author-ids <ids>",
+              "description": "Comma-separated author IDs",
+              "required": false
+            },
+            {
+              "flags": "--tag-ids <ids>",
+              "description": "Comma-separated tag IDs",
+              "required": false
+            },
+            {
+              "flags": "--feature-image-alt <text>",
+              "description": "Feature image alt text",
+              "required": false
+            },
+            {
+              "flags": "--feature-image-caption <text>",
+              "description": "Feature image caption",
+              "required": false
+            },
+            {
+              "flags": "--seo-title <text>",
+              "description": "SEO meta title",
+              "required": false
+            },
+            {
+              "flags": "--seo-description <text>",
+              "description": "SEO meta description",
+              "required": false
+            },
+            {
+              "flags": "--canonical-url <url>",
+              "description": "Canonical URL",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts update k97... --title \"New\""
+          ],
+          "mapsTo": "PATCH /v1/blog/posts/:id"
+        },
+        {
+          "name": "posts publish",
+          "description": "Publish a post.",
+          "synopsis": "cavuno blog posts publish <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog posts publish k97..."
+          ],
+          "mapsTo": "POST /v1/blog/posts/:id/publish"
+        },
+        {
+          "name": "posts unpublish",
+          "description": "Unpublish a post.",
+          "synopsis": "cavuno blog posts unpublish <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog posts unpublish k97..."
+          ],
+          "mapsTo": "POST /v1/blog/posts/:id/unpublish"
+        },
+        {
+          "name": "posts toggle-featured",
+          "description": "Toggle featured on a post.",
+          "synopsis": "cavuno blog posts toggle-featured <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog posts toggle-featured k97..."
+          ],
+          "mapsTo": "POST /v1/blog/posts/:id/toggle-featured"
+        },
+        {
+          "name": "posts search",
+          "description": "Title search across all statuses (includes drafts).",
+          "synopsis": "cavuno blog posts search <query> [options]",
+          "arguments": [
+            {
+              "name": "query",
+              "description": "Search query",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Narrow to one status",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts search \"hiring\""
+          ],
+          "mapsTo": "POST /v1/blog/posts/search"
+        },
+        {
+          "name": "posts batch",
+          "description": "Run a batch of blog post operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
+          "synopsis": "cavuno blog posts batch [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts batch --file ops.json"
+          ],
+          "mapsTo": "POST /v1/blog/posts/batch"
+        },
+        {
+          "name": "posts delete",
+          "description": "Delete a post.",
+          "synopsis": "cavuno blog posts delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Post ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog posts delete k97... --yes"
+          ],
+          "mapsTo": "DELETE /v1/blog/posts/:id"
+        },
+        {
+          "name": "authors list",
+          "description": "List authors.",
+          "synopsis": "cavuno blog authors list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog authors list"
+          ],
+          "mapsTo": "GET /v1/blog/authors"
+        },
+        {
+          "name": "authors get",
+          "description": "Fetch an author by ID.",
+          "synopsis": "cavuno blog authors get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Author ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog authors get k57..."
+          ],
+          "mapsTo": "GET /v1/blog/authors/:id"
+        },
+        {
+          "name": "authors create",
+          "description": "Create an author.",
+          "synopsis": "cavuno blog authors create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Author name (required)",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--bio <bio>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--email <email>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--website-url <url>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--twitter-url <url>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-url <url>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--github-url <url>",
+              "description": "",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog authors create --name \"Alex Chen\""
+          ],
+          "mapsTo": "POST /v1/blog/authors"
+        },
+        {
+          "name": "authors update",
+          "description": "Update an author (partial).",
+          "synopsis": "cavuno blog authors update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Author ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--bio <bio>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--email <email>",
+              "description": "",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog authors update k57... --bio \"…\""
+          ],
+          "mapsTo": "PATCH /v1/blog/authors/:id"
+        },
+        {
+          "name": "authors delete",
+          "description": "Delete an author (posts keep the stale ID).",
+          "synopsis": "cavuno blog authors delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Author ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog authors delete k57... --yes"
+          ],
+          "mapsTo": "DELETE /v1/blog/authors/:id"
+        },
+        {
+          "name": "tags list",
+          "description": "List tags.",
+          "synopsis": "cavuno blog tags list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog tags list"
+          ],
+          "mapsTo": "GET /v1/blog/tags"
+        },
+        {
+          "name": "tags get",
+          "description": "Fetch a tag by ID.",
+          "synopsis": "cavuno blog tags get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Tag ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno blog tags get kn7..."
+          ],
+          "mapsTo": "GET /v1/blog/tags/:id"
+        },
+        {
+          "name": "tags create",
+          "description": "Create a tag.",
+          "synopsis": "cavuno blog tags create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Tag name (required)",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--visibility <vis>",
+              "description": "public|internal",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog tags create --name \"Hiring\""
+          ],
+          "mapsTo": "POST /v1/blog/tags"
+        },
+        {
+          "name": "tags update",
+          "description": "Update a tag (partial).",
+          "synopsis": "cavuno blog tags update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Tag ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "",
+              "required": false
+            },
+            {
+              "flags": "--visibility <vis>",
+              "description": "",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog tags update kn7... --name \"X\""
+          ],
+          "mapsTo": "PATCH /v1/blog/tags/:id"
+        },
+        {
+          "name": "tags delete",
+          "description": "Delete a tag (posts keep the stale ID).",
+          "synopsis": "cavuno blog tags delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Tag ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno blog tags delete kn7... --yes"
+          ],
+          "mapsTo": "DELETE /v1/blog/tags/:id"
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "description": "Manage singleton board settings.",
+      "commands": [
+        {
+          "name": "get",
+          "description": "Fetch the singleton board settings.",
+          "synopsis": "cavuno settings get",
+          "arguments": [],
+          "options": [],
+          "examples": []
+        },
+        {
+          "name": "update",
+          "description": "Update fields on the singleton board settings.",
+          "synopsis": "cavuno settings update [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Board name",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Board slug (cascades to account slug)",
+              "required": false
+            },
+            {
+              "flags": "--blog-enabled <bool>",
+              "description": "Toggle blog feature flag (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--candidates-enabled <bool>",
+              "description": "Toggle candidate-area flag (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--require-cookie-consent <bool>",
+              "description": "Toggle cookie consent banner (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--talent-directory-visibility <mode>",
+              "description": "Talent directory mode: off | public | employers_only",
+              "required": false
+            },
+            {
+              "flags": "--talent-directory-enabled <bool>",
+              "description": "Legacy shorthand for talent directory (true→public, false→off)",
+              "required": false
+            },
+            {
+              "flags": "--cookie-banner-title <text>",
+              "description": "Cookie banner title",
+              "required": false
+            },
+            {
+              "flags": "--cookie-banner-description <text>",
+              "description": "Cookie banner description",
+              "required": false
+            },
+            {
+              "flags": "--cookie-banner-reject-label <text>",
+              "description": "Cookie banner reject button label",
+              "required": false
+            },
+            {
+              "flags": "--cookie-banner-accept-label <text>",
+              "description": "Cookie banner accept button label",
+              "required": false
+            },
+            {
+              "flags": "--cookie-banner-manage-label <text>",
+              "description": "Cookie banner manage/preferences label",
+              "required": false
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "get-adsense",
+          "description": "Fetch the AdSense configuration.",
+          "synopsis": "cavuno settings get-adsense",
+          "arguments": [],
+          "options": [],
+          "examples": []
+        },
+        {
+          "name": "delete-hero",
+          "description": "Remove the hero image (storage object + reference).",
+          "synopsis": "cavuno settings delete-hero [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno settings delete-hero --yes"
+          ],
+          "mapsTo": "DELETE /v1/settings/hero"
+        },
+        {
+          "name": "update-adsense",
+          "description": "Update the AdSense configuration.",
+          "synopsis": "cavuno settings update-adsense [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--enabled <bool>",
+              "description": "Toggle AdSense (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--client-id <id>",
+              "description": "AdSense publisher id (ca-pub-…); pass empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--ads-txt <text>",
+              "description": "Inline ads.txt content; pass empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--slots-json <json>",
+              "description": "AdSense slots as JSON: '{\"slot_a\":{\"enabled\":true,\"slotId\":\"123\"}}'",
+              "required": false
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "set-password-protection",
+          "description": "Enable board password protection. Reads the password from stdin to avoid leaking it via shell history. Pipe a password: echo \"pw\" | cavuno settings set-password-protection",
+          "synopsis": "cavuno settings set-password-protection",
+          "arguments": [],
+          "options": [],
+          "examples": []
+        },
+        {
+          "name": "delete-password-protection",
+          "description": "Disable board password protection (clears the stored hash).",
+          "synopsis": "cavuno settings delete-password-protection [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno settings delete-password-protection --yes"
+          ],
+          "mapsTo": "DELETE /v1/settings/password-protection"
+        },
+        {
+          "name": "job-form-set-custom-fields",
+          "description": "Replace the board custom job field definitions (whole-array PUT). Pass JSON via --file or stdin: { \"customFields\": [...] }. Empty array removes all. Changing type on an existing key is rejected.",
+          "synopsis": "cavuno settings job-form-set-custom-fields [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno settings job-form-set-custom-fields --file custom-fields.json"
+          ],
+          "mapsTo": "PUT /v1/settings/job-form/custom-fields"
+        }
+      ]
+    },
+    {
+      "name": "media",
+      "description": "Upload + fetch media (images) via the v1 dispatcher.",
+      "commands": [
+        {
+          "name": "upload",
+          "description": "Upload a file. Purpose must be one of: board_logo, board_hero, account_avatar, company_logo, blog_image.",
+          "synopsis": "cavuno media upload <file> [options]",
+          "arguments": [
+            {
+              "name": "file",
+              "description": "Path to the local file to upload",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--purpose <purpose>",
+              "description": "Upload purpose (see help)",
+              "required": true
+            },
+            {
+              "flags": "--resource-id <id>",
+              "description": "Optional resource ID for purpose-bound uploads",
+              "required": false
+            },
+            {
+              "flags": "--account-id <id>",
+              "description": "Tenant account ID (defaults to api key tenant)",
+              "required": false
+            }
+          ],
+          "examples": []
+        },
+        {
+          "name": "get",
+          "description": "Fetch media metadata + a fresh signed URL by storage ID.",
+          "synopsis": "cavuno media get <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Storage ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--account-id <id>",
+              "description": "Tenant account ID (defaults to api key tenant)",
+              "required": false
+            }
+          ],
+          "examples": []
+        }
+      ]
+    },
+    {
+      "name": "domains",
+      "description": "Manage custom domains for the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List custom domains.",
+          "synopsis": "cavuno domains list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-50 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno domains list"
+          ],
+          "mapsTo": "GET /v1/domains"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a custom domain by ID.",
+          "synopsis": "cavuno domains get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno domains get domain_123"
+          ],
+          "mapsTo": "GET /v1/domains/:id"
+        },
+        {
+          "name": "add",
+          "description": "Add a custom domain and print verification instructions.",
+          "synopsis": "cavuno domains add <host>",
+          "arguments": [
+            {
+              "name": "host",
+              "description": "Hostname, for example jobs.example.com",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno domains add jobs.example.com"
+          ],
+          "mapsTo": "POST /v1/domains"
+        },
+        {
+          "name": "verify",
+          "description": "Start custom-domain verification.",
+          "synopsis": "cavuno domains verify <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno domains verify domain_123",
+            "cavuno domains verify domain_123 --wait"
+          ],
+          "mapsTo": "POST /v1/domains/:id/verify"
+        },
+        {
+          "name": "remove",
+          "description": "Delete a custom domain.",
+          "synopsis": "cavuno domains remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno domains remove domain_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/domains/:id"
+        }
+      ]
+    },
+    {
+      "name": "operations",
+      "description": "Poll and cancel async operations by ID.",
+      "commands": [
+        {
+          "name": "get",
+          "description": "Fetch a single operation by ID.",
+          "synopsis": "cavuno operations get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Operation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno operations get op_123"
+          ],
+          "mapsTo": "GET /v1/operations/:id"
+        },
+        {
+          "name": "cancel",
+          "description": "Request cancellation of an operation.",
+          "synopsis": "cavuno operations cancel <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Operation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno operations cancel op_123"
+          ],
+          "mapsTo": "POST /v1/operations/:id/cancel"
+        },
+        {
+          "name": "wait",
+          "description": "Poll an operation until it reaches a terminal state (succeeded/failed/cancelled).",
+          "synopsis": "cavuno operations wait <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Operation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno operations wait op_123",
+            "cavuno operations wait op_123 --interval-ms 500 --timeout-ms 60000"
+          ],
+          "mapsTo": "GET /v1/operations/:id (poll)"
+        }
+      ]
+    },
+    {
+      "name": "taxonomies",
+      "description": "Manage taxonomy skills, categories, and markets; list remote permits/timezones.",
+      "commands": [
+        {
+          "name": "remote-permits",
+          "description": "List remote-work permit options.",
+          "synopsis": "cavuno taxonomies remote-permits",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies remote-permits"
+          ],
+          "mapsTo": "GET /v1/taxonomies/remote-permits"
+        },
+        {
+          "name": "remote-timezones",
+          "description": "List remote-work timezone options.",
+          "synopsis": "cavuno taxonomies remote-timezones",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies remote-timezones"
+          ],
+          "mapsTo": "GET /v1/taxonomies/remote-timezones"
+        },
+        {
+          "name": "skills list",
+          "description": "List skills.",
+          "synopsis": "cavuno taxonomies skills list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            },
+            {
+              "flags": "--search <q>",
+              "description": "Search name/slug",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies skills list"
+          ],
+          "mapsTo": "GET /v1/taxonomies/skills"
+        },
+        {
+          "name": "skills get",
+          "description": "Get a skill by id.",
+          "synopsis": "cavuno taxonomies skills get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies skills get <id>"
+          ],
+          "mapsTo": "GET /v1/taxonomies/skills/:id"
+        },
+        {
+          "name": "skills create",
+          "description": "Create a skill.",
+          "synopsis": "cavuno taxonomies skills create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug (default: from name)",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            },
+            {
+              "flags": "--alias-slugs <slugs>",
+              "description": "Comma-separated initial aliases",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies skills create --name \"Example\" --slug example"
+          ],
+          "mapsTo": "POST /v1/taxonomies/skills"
+        },
+        {
+          "name": "skills update",
+          "description": "Update a skill.",
+          "synopsis": "cavuno taxonomies skills update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies skills update <id> --name \"New name\""
+          ],
+          "mapsTo": "PATCH /v1/taxonomies/skills/:id"
+        },
+        {
+          "name": "skills delete",
+          "description": "Delete a skill.",
+          "synopsis": "cavuno taxonomies skills delete <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies skills delete <id>"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/skills/:id"
+        },
+        {
+          "name": "skills add-alias",
+          "description": "Add aliases to a skill (dual-write).",
+          "synopsis": "cavuno taxonomies skills add-alias <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--alias <aliases>",
+              "description": "Alias slug or comma-separated list",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies skills add-alias <id> --alias other-slug"
+          ],
+          "mapsTo": "POST /v1/taxonomies/skills/:id/aliases"
+        },
+        {
+          "name": "skills remove-alias",
+          "description": "Remove an alias from a skill.",
+          "synopsis": "cavuno taxonomies skills remove-alias <id> <alias>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "alias",
+              "description": "Alias slug to remove",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies skills remove-alias <id> other-slug"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/skills/:id/aliases/:alias"
+        },
+        {
+          "name": "categories tree",
+          "description": "List categories as a nested tree.",
+          "synopsis": "cavuno taxonomies categories tree",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies categories tree"
+          ],
+          "mapsTo": "GET /v1/taxonomies/categories/tree"
+        },
+        {
+          "name": "categories list",
+          "description": "List categories.",
+          "synopsis": "cavuno taxonomies categories list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            },
+            {
+              "flags": "--search <q>",
+              "description": "Search name/slug",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies categories list"
+          ],
+          "mapsTo": "GET /v1/taxonomies/categories"
+        },
+        {
+          "name": "categories get",
+          "description": "Get a categorie by id.",
+          "synopsis": "cavuno taxonomies categories get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies categories get <id>"
+          ],
+          "mapsTo": "GET /v1/taxonomies/categories/:id"
+        },
+        {
+          "name": "categories create",
+          "description": "Create a categorie.",
+          "synopsis": "cavuno taxonomies categories create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug (default: from name)",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            },
+            {
+              "flags": "--alias-slugs <slugs>",
+              "description": "Comma-separated initial aliases",
+              "required": false
+            },
+            {
+              "flags": "--parent-id <id>",
+              "description": "Parent category id",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies categories create --name \"Example\" --slug example"
+          ],
+          "mapsTo": "POST /v1/taxonomies/categories"
+        },
+        {
+          "name": "categories update",
+          "description": "Update a categorie.",
+          "synopsis": "cavuno taxonomies categories update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            },
+            {
+              "flags": "--parent-id <id>",
+              "description": "Parent category id",
+              "required": false
+            },
+            {
+              "flags": "--clear-parent",
+              "description": "Clear parent (root)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies categories update <id> --name \"New name\""
+          ],
+          "mapsTo": "PATCH /v1/taxonomies/categories/:id"
+        },
+        {
+          "name": "categories delete",
+          "description": "Delete a categorie.",
+          "synopsis": "cavuno taxonomies categories delete <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies categories delete <id>"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/categories/:id"
+        },
+        {
+          "name": "categories add-alias",
+          "description": "Add aliases to a categorie (dual-write).",
+          "synopsis": "cavuno taxonomies categories add-alias <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--alias <aliases>",
+              "description": "Alias slug or comma-separated list",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies categories add-alias <id> --alias other-slug"
+          ],
+          "mapsTo": "POST /v1/taxonomies/categories/:id/aliases"
+        },
+        {
+          "name": "categories remove-alias",
+          "description": "Remove an alias from a categorie.",
+          "synopsis": "cavuno taxonomies categories remove-alias <id> <alias>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "alias",
+              "description": "Alias slug to remove",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies categories remove-alias <id> other-slug"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/categories/:id/aliases/:alias"
+        },
+        {
+          "name": "markets list",
+          "description": "List markets.",
+          "synopsis": "cavuno taxonomies markets list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            },
+            {
+              "flags": "--search <q>",
+              "description": "Search name/slug",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies markets list"
+          ],
+          "mapsTo": "GET /v1/taxonomies/markets"
+        },
+        {
+          "name": "markets get",
+          "description": "Get a market by id.",
+          "synopsis": "cavuno taxonomies markets get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies markets get <id>"
+          ],
+          "mapsTo": "GET /v1/taxonomies/markets/:id"
+        },
+        {
+          "name": "markets create",
+          "description": "Create a market.",
+          "synopsis": "cavuno taxonomies markets create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": true
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug (default: from name)",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            },
+            {
+              "flags": "--alias-slugs <slugs>",
+              "description": "Comma-separated initial aliases",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies markets create --name \"Example\" --slug example"
+          ],
+          "mapsTo": "POST /v1/taxonomies/markets"
+        },
+        {
+          "name": "markets update",
+          "description": "Update a market.",
+          "synopsis": "cavuno taxonomies markets update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": false
+            },
+            {
+              "flags": "--slug <slug>",
+              "description": "Canonical slug",
+              "required": false
+            },
+            {
+              "flags": "--source-locale <locale>",
+              "description": "Source locale",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies markets update <id> --name \"New name\""
+          ],
+          "mapsTo": "PATCH /v1/taxonomies/markets/:id"
+        },
+        {
+          "name": "markets delete",
+          "description": "Delete a market.",
+          "synopsis": "cavuno taxonomies markets delete <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies markets delete <id>"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/markets/:id"
+        },
+        {
+          "name": "markets add-alias",
+          "description": "Add aliases to a market (dual-write).",
+          "synopsis": "cavuno taxonomies markets add-alias <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--alias <aliases>",
+              "description": "Alias slug or comma-separated list",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno taxonomies markets add-alias <id> --alias other-slug"
+          ],
+          "mapsTo": "POST /v1/taxonomies/markets/:id/aliases"
+        },
+        {
+          "name": "markets remove-alias",
+          "description": "Remove an alias from a market.",
+          "synopsis": "cavuno taxonomies markets remove-alias <id> <alias>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Opaque object id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "alias",
+              "description": "Alias slug to remove",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno taxonomies markets remove-alias <id> other-slug"
+          ],
+          "mapsTo": "DELETE /v1/taxonomies/markets/:id/aliases/:alias"
+        }
+      ]
+    },
+    {
+      "name": "candidates",
+      "description": "Manage candidates in the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List candidates (paginated).",
+          "synopsis": "cavuno candidates list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <query>",
+              "description": "Substring search on email / display name",
+              "required": false
+            },
+            {
+              "flags": "--handle <handle>",
+              "description": "Exact profile handle lookup",
+              "required": false
+            },
+            {
+              "flags": "--has-resume",
+              "description": "Only candidates with a resume on file",
+              "required": false
+            },
+            {
+              "flags": "--created-from <iso>",
+              "description": "Filter to candidates created on/after",
+              "required": false
+            },
+            {
+              "flags": "--created-to <iso>",
+              "description": "Filter to candidates created on/before",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno candidates list",
+            "cavuno candidates list --search alice --has-resume --limit 10"
+          ],
+          "mapsTo": "GET /v1/candidates"
+        },
+        {
+          "name": "resume",
+          "description": "Download a candidate resume through the protected API.",
+          "synopsis": "cavuno candidates resume <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Candidate ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--output <path>",
+              "description": "File path to write",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno candidates resume nh7abc... --output ./candidate-resume.pdf"
+          ],
+          "mapsTo": "GET /v1/candidates/:id/resume"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single candidate by ID (with profile + counts).",
+          "synopsis": "cavuno candidates get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Candidate ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno candidates get nh7abc..."
+          ],
+          "mapsTo": "GET /v1/candidates/:id"
+        },
+        {
+          "name": "delete",
+          "description": "Permanently erase a candidate and all associated data (GDPR cascade). Returns a candidates.remove operation to poll.",
+          "synopsis": "cavuno candidates delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Candidate ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno candidates delete nh7abc... --yes",
+            "cavuno candidates delete nh7abc... --yes --wait"
+          ],
+          "mapsTo": "DELETE /v1/candidates/:id"
+        }
+      ]
+    },
+    {
+      "name": "employers",
+      "description": "Manage employers, memberships, and company claims.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List employers (paginated).",
+          "synopsis": "cavuno employers list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <query>",
+              "description": "Substring search on email / display name",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers list",
+            "cavuno employers list --search acme"
+          ],
+          "mapsTo": "GET /v1/employers"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single employer by ID (with memberships + claims).",
+          "synopsis": "cavuno employers get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Employer ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno employers get nh7abc..."
+          ],
+          "mapsTo": "GET /v1/employers/:id"
+        },
+        {
+          "name": "delete",
+          "description": "Permanently erase an employer and all associated data, including memberships/claims (GDPR cascade). Returns an employers.remove operation to poll.",
+          "synopsis": "cavuno employers delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Employer ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers delete nh7abc... --yes",
+            "cavuno employers delete nh7abc... --yes --wait"
+          ],
+          "mapsTo": "DELETE /v1/employers/:id"
+        },
+        {
+          "name": "memberships",
+          "description": "List employer↔company memberships (paginated).",
+          "synopsis": "cavuno employers memberships [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (pending|approved|rejected)",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Filter to a single company",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers memberships --status approved"
+          ],
+          "mapsTo": "GET /v1/employers/memberships"
+        },
+        {
+          "name": "membership",
+          "description": "Fetch a single employer↔company membership by ID.",
+          "synopsis": "cavuno employers membership <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Membership ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno employers membership pd7abc..."
+          ],
+          "mapsTo": "GET /v1/employers/memberships/:id"
+        },
+        {
+          "name": "claims",
+          "description": "List company claims (defaults to pending).",
+          "synopsis": "cavuno employers claims [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (pending|approved|rejected)",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Filter to a single company",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers claims",
+            "cavuno employers claims --status approved"
+          ],
+          "mapsTo": "GET /v1/employers/claims"
+        },
+        {
+          "name": "approve-claim",
+          "description": "Approve a pending company claim (idempotent).",
+          "synopsis": "cavuno employers approve-claim <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Claim ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers approve-claim pd7abc..."
+          ],
+          "mapsTo": "POST /v1/employers/claims/:id/approve"
+        },
+        {
+          "name": "reject-claim",
+          "description": "Reject a pending company claim (idempotent).",
+          "synopsis": "cavuno employers reject-claim <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Claim ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employers reject-claim pd7abc..."
+          ],
+          "mapsTo": "POST /v1/employers/claims/:id/reject"
+        }
+      ]
+    },
+    {
+      "name": "employer-subscriptions",
+      "description": "Read employer subscriptions on the tenant board (billing.read).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List employer subscriptions.",
+          "synopsis": "cavuno employer-subscriptions list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (active, canceled, …)",
+              "required": false
+            },
+            {
+              "flags": "--company-id <id>",
+              "description": "Filter by company id",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno employer-subscriptions list",
+            "cavuno employer-subscriptions list --status active"
+          ],
+          "mapsTo": "GET /v1/employer-subscriptions"
+        },
+        {
+          "name": "get",
+          "description": "Get one employer subscription by id.",
+          "synopsis": "cavuno employer-subscriptions get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Employer subscription id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno employer-subscriptions get es_…"
+          ],
+          "mapsTo": "GET /v1/employer-subscriptions/:id"
+        }
+      ]
+    },
+    {
+      "name": "coupons",
+      "description": "Manage Board coupons and promotion codes (billing.read / billing.manage).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List Board coupons.",
+          "synopsis": "cavuno coupons list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno coupons list"
+          ],
+          "mapsTo": "GET /v1/coupons"
+        },
+        {
+          "name": "get",
+          "description": "Get a coupon by id.",
+          "synopsis": "cavuno coupons get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Coupon id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno coupons get coupon_xxx"
+          ],
+          "mapsTo": "GET /v1/coupons/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a Board coupon.",
+          "synopsis": "cavuno coupons create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Coupon name",
+              "required": true
+            },
+            {
+              "flags": "--percent-off <n>",
+              "description": "Percent off (0-100)",
+              "required": false
+            },
+            {
+              "flags": "--amount-off <n>",
+              "description": "Fixed discount in the currency major unit (e.g. 10 for $10, 1000 for ¥1000)",
+              "required": false
+            },
+            {
+              "flags": "--currency <code>",
+              "description": "Currency for fixed amount (e.g. usd)",
+              "required": false
+            },
+            {
+              "flags": "--duration <duration>",
+              "description": "once | forever | repeating",
+              "required": true
+            },
+            {
+              "flags": "--duration-in-months <n>",
+              "description": "Required when duration=repeating",
+              "required": false
+            },
+            {
+              "flags": "--max-redemptions <n>",
+              "description": "Max redemptions",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno coupons create --name \"Spring sale\" --percent-off 20 --duration once"
+          ],
+          "mapsTo": "POST /v1/coupons"
+        },
+        {
+          "name": "rename",
+          "description": "Rename a coupon.",
+          "synopsis": "cavuno coupons rename <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Coupon id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New name",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno coupons rename coupon_xxx --name \"Fall sale\""
+          ],
+          "mapsTo": "PATCH /v1/coupons/:id"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a coupon (destructive).",
+          "synopsis": "cavuno coupons delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Coupon id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno coupons delete coupon_xxx --yes"
+          ],
+          "mapsTo": "DELETE /v1/coupons/:id"
+        },
+        {
+          "name": "promotion-code-create",
+          "description": "Create a promotion code for a coupon.",
+          "synopsis": "cavuno coupons promotion-code-create <couponId> [options]",
+          "arguments": [
+            {
+              "name": "couponId",
+              "description": "Coupon id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--code <code>",
+              "description": "Promotion code string",
+              "required": true
+            },
+            {
+              "flags": "--max-redemptions <n>",
+              "description": "Max redemptions",
+              "required": false
+            },
+            {
+              "flags": "--expires-at <iso>",
+              "description": "ISO-8601 expiry",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno coupons promotion-code-create coupon_xxx --code SPRING20"
+          ],
+          "mapsTo": "POST /v1/coupons/:id/promotion-codes"
+        },
+        {
+          "name": "promotion-code-archive",
+          "description": "Archive (deactivate) a promotion code.",
+          "synopsis": "cavuno coupons promotion-code-archive <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Promotion code id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno coupons promotion-code-archive promotion_xxx"
+          ],
+          "mapsTo": "POST /v1/coupons/promotion-codes/:id/archive"
+        }
+      ]
+    },
+    {
+      "name": "reporting",
+      "description": "Manage reporting integrations.",
+      "commands": [
+        {
+          "name": "integrations",
+          "description": "List the reporting integrations for the account.",
+          "synopsis": "cavuno reporting integrations",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno reporting integrations"
+          ],
+          "mapsTo": "GET /v1/integrations/reporting"
+        },
+        {
+          "name": "get",
+          "description": "Fetch one reporting integration by provider.",
+          "synopsis": "cavuno reporting get <provider>",
+          "arguments": [
+            {
+              "name": "provider",
+              "description": "search_console | adsense | tinybird | stripe",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno reporting get search_console"
+          ],
+          "mapsTo": "GET /v1/integrations/reporting/:provider"
+        },
+        {
+          "name": "connect",
+          "description": "Start the connect flow for a provider (returns an OAuth URL / redirect).",
+          "synopsis": "cavuno reporting connect <provider> [options]",
+          "arguments": [
+            {
+              "name": "provider",
+              "description": "search_console | adsense | tinybird | stripe",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno reporting connect search_console"
+          ],
+          "mapsTo": "POST /v1/integrations/reporting/:provider/connect"
+        },
+        {
+          "name": "enable",
+          "description": "Enable collection for an existing integration.",
+          "synopsis": "cavuno reporting enable <provider> [options]",
+          "arguments": [
+            {
+              "name": "provider",
+              "description": "The provider to enable",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno reporting enable adsense"
+          ],
+          "mapsTo": "PATCH /v1/integrations/reporting/:provider"
+        },
+        {
+          "name": "disable",
+          "description": "Pause collection for an existing integration.",
+          "synopsis": "cavuno reporting disable <provider> [options]",
+          "arguments": [
+            {
+              "name": "provider",
+              "description": "The provider to disable",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno reporting disable adsense"
+          ],
+          "mapsTo": "PATCH /v1/integrations/reporting/:provider"
+        },
+        {
+          "name": "disconnect",
+          "description": "Disconnect an integration (delete the row).",
+          "synopsis": "cavuno reporting disconnect <provider> [options]",
+          "arguments": [
+            {
+              "name": "provider",
+              "description": "The provider to disconnect",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno reporting disconnect adsense --yes"
+          ],
+          "mapsTo": "DELETE /v1/integrations/reporting/:provider"
+        }
+      ]
+    },
+    {
+      "name": "billing",
+      "description": "Read account billing status and manage the platform subscription.",
+      "commands": [
+        {
+          "name": "subscription",
+          "description": "Show the account's platform subscription.",
+          "synopsis": "cavuno billing subscription",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno billing subscription"
+          ],
+          "mapsTo": "GET /v1/billing/subscription"
+        },
+        {
+          "name": "connect",
+          "description": "Show the Board's payment connection readiness.",
+          "synopsis": "cavuno billing connect",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno billing connect"
+          ],
+          "mapsTo": "GET /v1/billing/connect"
+        },
+        {
+          "name": "checkout",
+          "description": "Create a hosted checkout URL for a target plan.",
+          "synopsis": "cavuno billing checkout [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--plan <key>",
+              "description": "Plan key (starter|basic|grow|advanced|enterprise)",
+              "required": true
+            },
+            {
+              "flags": "--interval <interval>",
+              "description": "Billing interval (monthly|annual; default monthly)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno billing checkout --plan starter",
+            "cavuno billing checkout --plan basic --interval annual"
+          ],
+          "mapsTo": "POST /v1/billing/checkout"
+        },
+        {
+          "name": "upgrade",
+          "description": "Create a hosted human-confirmation URL for a plan change.",
+          "synopsis": "cavuno billing upgrade [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--plan <key>",
+              "description": "Target plan key (starter|basic|grow|advanced|enterprise)",
+              "required": true
+            },
+            {
+              "flags": "--interval <interval>",
+              "description": "Billing interval (monthly|annual; default monthly)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno billing upgrade --plan basic",
+            "cavuno billing upgrade --plan grow --interval annual"
+          ],
+          "mapsTo": "POST /v1/billing/upgrade"
+        }
+      ]
+    },
+    {
+      "name": "plans",
+      "description": "Manage employer plans the account sells (pricing, features). Distinct from `billing` (your platform subscription).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List employer plans for the authenticated account.",
+          "synopsis": "cavuno plans list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno plans list"
+          ],
+          "mapsTo": "GET /v1/plans"
+        },
+        {
+          "name": "get",
+          "description": "Get one employer plan by id.",
+          "synopsis": "cavuno plans get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Plan id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno plans get plans_xxx"
+          ],
+          "mapsTo": "GET /v1/plans/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create an employer plan (metadata only; set price separately).",
+          "synopsis": "cavuno plans create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Plan display name",
+              "required": true
+            },
+            {
+              "flags": "--kind <kind>",
+              "description": "Plan kind: free | one_time | bundle | subscription",
+              "required": true
+            },
+            {
+              "flags": "--description <text>",
+              "description": "Plan description",
+              "required": false
+            },
+            {
+              "flags": "--billing-interval <interval>",
+              "description": "month | year (subscription)",
+              "required": false
+            },
+            {
+              "flags": "--purpose <purpose>",
+              "description": "job_posting | talent_access",
+              "required": false
+            },
+            {
+              "flags": "--public",
+              "description": "List the plan publicly",
+              "required": false
+            },
+            {
+              "flags": "--recommended",
+              "description": "Mark as recommended",
+              "required": false
+            },
+            {
+              "flags": "--display-order <n>",
+              "description": "Display order integer",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno plans create --name \"Pro\" --kind subscription --billing-interval month --public"
+          ],
+          "mapsTo": "POST /v1/plans"
+        },
+        {
+          "name": "update",
+          "description": "Update plan metadata (archive with --archived).",
+          "synopsis": "cavuno plans update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Plan id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New display name",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "New description",
+              "required": false
+            },
+            {
+              "flags": "--public",
+              "description": "Publish the plan",
+              "required": false
+            },
+            {
+              "flags": "--private",
+              "description": "Unpublish the plan",
+              "required": false
+            },
+            {
+              "flags": "--recommended",
+              "description": "Mark recommended",
+              "required": false
+            },
+            {
+              "flags": "--not-recommended",
+              "description": "Clear recommended",
+              "required": false
+            },
+            {
+              "flags": "--archived",
+              "description": "Archive the plan",
+              "required": false
+            },
+            {
+              "flags": "--unarchived",
+              "description": "Unarchive the plan",
+              "required": false
+            },
+            {
+              "flags": "--display-order <n>",
+              "description": "Display order integer",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno plans update plans_xxx --name \"Pro+\"",
+            "cavuno plans update plans_xxx --archived"
+          ],
+          "mapsTo": "PATCH /v1/plans/:id"
+        },
+        {
+          "name": "set-price",
+          "description": "Set the single checkout price (requires a ready payment connection).",
+          "synopsis": "cavuno plans set-price <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Plan id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--currency <code>",
+              "description": "ISO 4217 currency, e.g. usd",
+              "required": true
+            },
+            {
+              "flags": "--amount-cents <n>",
+              "description": "Amount in smallest currency unit",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno plans set-price plans_xxx --currency usd --amount-cents 9900"
+          ],
+          "mapsTo": "PUT /v1/plans/:id/price"
+        },
+        {
+          "name": "get-features",
+          "description": "List feature key/value pairs for a plan.",
+          "synopsis": "cavuno plans get-features <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Plan id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno plans get-features plans_xxx"
+          ],
+          "mapsTo": "GET /v1/plans/:id/features"
+        },
+        {
+          "name": "set-features",
+          "description": "Replace plan feature values. Pass JSON: '[{\"key\":\"jobs.max_active\",\"value\":\"10\"}]'.",
+          "synopsis": "cavuno plans set-features <id> <featuresJson>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Plan id",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "featuresJson",
+              "description": "JSON array of {key, value}",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno plans set-features plans_xxx '[{\"key\":\"jobs.max_active\",\"value\":\"10\"}]'"
+          ],
+          "mapsTo": "PUT /v1/plans/:id/features"
+        }
+      ]
+    },
+    {
+      "name": "transactions",
+      "description": "Read the board transactions ledger (billing.read). List + get only.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List transactions (date-desc, or relevance when --search).",
+          "synopsis": "cavuno transactions list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "Filter: paid | open | void | uncollectible",
+              "required": false
+            },
+            {
+              "flags": "--kind <kind>",
+              "description": "Filter: card_post | invoice | subscription",
+              "required": false
+            },
+            {
+              "flags": "--search <q>",
+              "description": "Full-text search (mutually exclusive with --order-id / --subscription-id)",
+              "required": false
+            },
+            {
+              "flags": "--order-id <id>",
+              "description": "Filter by jobOrders id (mutually exclusive with --search / --subscription-id)",
+              "required": false
+            },
+            {
+              "flags": "--subscription-id <id>",
+              "description": "Filter by employerSubscriptions id (mutually exclusive with --search / --order-id)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno transactions list",
+            "cavuno transactions list --status paid --kind invoice",
+            "cavuno transactions list --search \"Acme\""
+          ],
+          "mapsTo": "GET /v1/transactions"
+        },
+        {
+          "name": "get",
+          "description": "Get one transaction by id.",
+          "synopsis": "cavuno transactions get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Transaction id",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno transactions get tx_…"
+          ],
+          "mapsTo": "GET /v1/transactions/:id"
+        }
+      ]
+    },
+    {
+      "name": "indexing",
+      "description": "Google Indexing configuration and the IndexNow toggle.",
+      "commands": [
+        {
+          "name": "config",
+          "description": "Show the indexing + IndexNow configuration.",
+          "synopsis": "cavuno indexing config",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno indexing config"
+          ],
+          "mapsTo": "GET /v1/integrations/indexing"
+        },
+        {
+          "name": "enable-indexnow",
+          "description": "Enable IndexNow (Bing/Yandex instant indexing).",
+          "synopsis": "cavuno indexing enable-indexnow [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno indexing enable-indexnow"
+          ],
+          "mapsTo": "POST /v1/integrations/indexing/toggle-indexnow"
+        },
+        {
+          "name": "disable-indexnow",
+          "description": "Disable IndexNow.",
+          "synopsis": "cavuno indexing disable-indexnow [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno indexing disable-indexnow"
+          ],
+          "mapsTo": "POST /v1/integrations/indexing/toggle-indexnow"
+        }
+      ]
+    },
+    {
+      "name": "imports",
+      "description": "Bulk-load jobs from CSV files (upload → confirm → execute).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List import batches (paginated, most recent first).",
+          "synopsis": "cavuno imports list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (pending|processing|completed|partial|failed)",
+              "required": false
+            },
+            {
+              "flags": "--from <iso>",
+              "description": "Only batches created at or after this ISO date",
+              "required": false
+            },
+            {
+              "flags": "--to <iso>",
+              "description": "Only batches created at or before this ISO date",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-50 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno imports list",
+            "cavuno imports list --status completed --limit 10"
+          ],
+          "mapsTo": "GET /v1/imports"
+        },
+        {
+          "name": "get",
+          "description": "Fetch one import batch (status, errors, proposed mapping).",
+          "synopsis": "cavuno imports get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Import batch ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno imports get imports_k25abc"
+          ],
+          "mapsTo": "GET /v1/imports/:id"
+        },
+        {
+          "name": "create",
+          "description": "Upload a CSV and start discovery. Returns an imports.parse operation to poll.",
+          "synopsis": "cavuno imports create <file> [options]",
+          "arguments": [
+            {
+              "name": "file",
+              "description": "Path to the local .csv file to upload",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno imports create ./jobs.csv",
+            "cavuno imports create ./jobs.csv --wait"
+          ],
+          "mapsTo": "POST /v1/imports"
+        },
+        {
+          "name": "confirm",
+          "description": "Confirm the mapping and start execution. Returns an imports.confirm operation to poll.",
+          "synopsis": "cavuno imports confirm <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Import batch ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--inline-mapping <json>",
+              "description": "A first-time or revised mapping as a JSON string. Omit to use the batch-attached mapping.",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno imports confirm imports_k25abc",
+            "cavuno imports confirm imports_k25abc --wait"
+          ],
+          "mapsTo": "POST /v1/imports/:id/confirm"
+        },
+        {
+          "name": "cancel",
+          "description": "Cancel a pending or running import batch (cooperative — rows already written remain).",
+          "synopsis": "cavuno imports cancel <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Import batch ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno imports cancel imports_k25abc"
+          ],
+          "mapsTo": "POST /v1/imports/:id/cancel"
+        },
+        {
+          "name": "quota",
+          "description": "Show the account's daily import usage and reset boundary.",
+          "synopsis": "cavuno imports quota",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno imports quota"
+          ],
+          "mapsTo": "GET /v1/imports/quota"
+        }
+      ]
+    },
+    {
+      "name": "backfill",
+      "description": "Manage Backfill rules, company sources, and aggregate progress (dashboard-shaped Operator surface).",
+      "commands": [
+        {
+          "name": "progress",
+          "description": "Show aggregate Backfill progress for the Board (onboarding-shaped).",
+          "synopsis": "cavuno backfill progress",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno backfill progress"
+          ],
+          "mapsTo": "GET /v1/backfill/progress"
+        },
+        {
+          "name": "rules list",
+          "description": "List named Backfill rules for the Board.",
+          "synopsis": "cavuno backfill rules list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno backfill rules list"
+          ],
+          "mapsTo": "GET /v1/backfill/rules"
+        },
+        {
+          "name": "rules get",
+          "description": "Retrieve a Backfill rule by Cavuno ID.",
+          "synopsis": "cavuno backfill rules get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Backfill rule ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno backfill rules get <id>"
+          ],
+          "mapsTo": "GET /v1/backfill/rules/{id}"
+        },
+        {
+          "name": "rules create",
+          "description": "Create a named Backfill rule. Pass --rules as a JSON array of rule cards.",
+          "synopsis": "cavuno backfill rules create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Rule display name",
+              "required": true
+            },
+            {
+              "flags": "--rules <json>",
+              "description": "JSON array of { match, conditions[] } rule cards",
+              "required": true
+            },
+            {
+              "flags": "--filters <json>",
+              "description": "JSON object of filters (countries, subdivisions, seniorities, employmentTypes, workplaceTypes)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill rules create --name Engineering --rules '[{\"match\":\"any\",\"conditions\":[{\"field\":\"title\",\"operator\":\"contains_any\",\"terms\":[\"engineer\"]}]}]'"
+          ],
+          "mapsTo": "POST /v1/backfill/rules"
+        },
+        {
+          "name": "rules update",
+          "description": "Partially update a Backfill rule (name, rules, and/or filters).",
+          "synopsis": "cavuno backfill rules update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Backfill rule ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New display name",
+              "required": false
+            },
+            {
+              "flags": "--rules <json>",
+              "description": "JSON array of rule cards replacing the current rules",
+              "required": false
+            },
+            {
+              "flags": "--filters <json>",
+              "description": "JSON object of filters replacing the current filters",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill rules update <id> --name \"Platform eng\""
+          ],
+          "mapsTo": "PATCH /v1/backfill/rules/{id}"
+        },
+        {
+          "name": "rules remove",
+          "description": "Delete a named Backfill rule.",
+          "synopsis": "cavuno backfill rules remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Backfill rule ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill rules remove <id> --yes"
+          ],
+          "mapsTo": "DELETE /v1/backfill/rules/{id}"
+        },
+        {
+          "name": "companies list",
+          "description": "List companies for one Backfill tab state (backfilling | available | needs_match | not_backfilling).",
+          "synopsis": "cavuno backfill companies list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--state <state>",
+              "description": "Tab state: backfilling | available | needs_match | not_backfilling",
+              "required": true
+            },
+            {
+              "flags": "--search <text>",
+              "description": "Case-insensitive name filter",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size (1-100)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Opaque pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies list --state available",
+            "cavuno backfill companies list --state needs_match --search Acme"
+          ],
+          "mapsTo": "GET /v1/backfill/companies"
+        },
+        {
+          "name": "companies start",
+          "description": "Start Backfill for a Cavuno company.",
+          "synopsis": "cavuno backfill companies start <companyId> [options]",
+          "arguments": [
+            {
+              "name": "companyId",
+              "description": "Cavuno company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies start <companyId>"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/{companyId}/start"
+        },
+        {
+          "name": "companies stop",
+          "description": "Stop Backfill for a Cavuno company.",
+          "synopsis": "cavuno backfill companies stop <companyId> [options]",
+          "arguments": [
+            {
+              "name": "companyId",
+              "description": "Cavuno company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies stop <companyId>"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/{companyId}/stop"
+        },
+        {
+          "name": "companies bulk-start",
+          "description": "Start Backfill for up to 100 Cavuno company IDs (ordered partial success).",
+          "synopsis": "cavuno backfill companies bulk-start [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--company-ids <ids>",
+              "description": "Comma-separated Cavuno company IDs",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies bulk-start --company-ids co1,co2"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/bulk-start"
+        },
+        {
+          "name": "companies bulk-stop",
+          "description": "Stop Backfill for up to 100 Cavuno company IDs (ordered partial success).",
+          "synopsis": "cavuno backfill companies bulk-stop [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--company-ids <ids>",
+              "description": "Comma-separated Cavuno company IDs",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies bulk-stop --company-ids co1,co2"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/bulk-stop"
+        },
+        {
+          "name": "companies match",
+          "description": "Confirm a needs_match candidate by list index. Optionally start backfill.",
+          "synopsis": "cavuno backfill companies match <companyId> [options]",
+          "arguments": [
+            {
+              "name": "companyId",
+              "description": "Cavuno company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--candidate-index <n>",
+              "description": "Zero-based candidate index from list",
+              "required": true
+            },
+            {
+              "flags": "--start",
+              "description": "Start backfill after linking the match (default false)",
+              "required": false,
+              "defaultValue": "false"
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies match <companyId> --candidate-index 0 --start"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/{companyId}/match"
+        },
+        {
+          "name": "companies mark-no-match",
+          "description": "Mark a needs_match company as no match.",
+          "synopsis": "cavuno backfill companies mark-no-match <companyId> [options]",
+          "arguments": [
+            {
+              "name": "companyId",
+              "description": "Cavuno company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill companies mark-no-match <companyId>"
+          ],
+          "mapsTo": "POST /v1/backfill/companies/{companyId}/mark-no-match"
+        }
+      ]
+    },
+    {
+      "name": "analytics",
+      "description": "Typed Board homepage analytics (overview metrics and traffic tables).",
+      "commands": [
+        {
+          "name": "overview",
+          "description": "Show homepage-shaped analytics overview metrics for the Board.",
+          "synopsis": "cavuno analytics overview [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--start <date>",
+              "description": "Inclusive range start (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--end <date>",
+              "description": "Inclusive range end (YYYY-MM-DD, UTC)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno analytics overview",
+            "cavuno analytics overview --start 2026-01-01 --end 2026-01-30"
+          ],
+          "mapsTo": "GET /v1/analytics/overview"
+        },
+        {
+          "name": "traffic",
+          "description": "Show homepage-shaped traffic tables (pages, sources, locations, devices).",
+          "synopsis": "cavuno analytics traffic [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--start <date>",
+              "description": "Inclusive range start (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--end <date>",
+              "description": "Inclusive range end (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Max rows per table (1–10)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno analytics traffic",
+            "cavuno analytics traffic --start 2026-01-01 --end 2026-01-30 --limit 5"
+          ],
+          "mapsTo": "GET /v1/analytics/traffic"
+        }
+      ]
+    },
+    {
+      "name": "paywall",
+      "description": "Manage the candidate-access paywall (atomic configuration + six offers) and list subscriptions.",
+      "commands": [
+        {
+          "name": "get",
+          "description": "Show the atomic candidate paywall configuration and six fixed offers.",
+          "synopsis": "cavuno paywall get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno paywall get"
+          ],
+          "mapsTo": "GET /v1/paywall"
+        },
+        {
+          "name": "replace",
+          "description": "Atomically replace the candidate paywall configuration and all six offers. Requires --idempotency-key (or CAVUNO_IDEMPOTENCY_KEY).",
+          "synopsis": "cavuno paywall replace [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--body <json>",
+              "description": "Full candidate_paywall JSON body (complete resource replace)",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno paywall replace --body '{\"enabled\":false,\"previewCount\":5,...}' --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "PUT /v1/paywall"
+        },
+        {
+          "name": "subscriptions",
+          "description": "List candidate paywall subscriptions (read-only grants).",
+          "synopsis": "cavuno paywall subscriptions [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by subscription status",
+              "required": false
+            },
+            {
+              "flags": "--kind <kind>",
+              "description": "Filter by kind: recurring | lifetime",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1–100",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor from a previous response",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno paywall subscriptions",
+            "cavuno paywall subscriptions --status active --kind recurring"
+          ],
+          "mapsTo": "GET /v1/paywall/subscriptions"
+        }
+      ]
+    },
+    {
+      "name": "sales-led-plans",
+      "description": "Manage contact-led employer pricing cards (CRUD, reorder, publish, hide, archive).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List active sales-led plans for the Board.",
+          "synopsis": "cavuno sales-led-plans list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno sales-led-plans list"
+          ],
+          "mapsTo": "GET /v1/sales-led-plans"
+        },
+        {
+          "name": "get",
+          "description": "Retrieve one sales-led plan by ID.",
+          "synopsis": "cavuno sales-led-plans get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Sales-led plan ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno sales-led-plans get <id>"
+          ],
+          "mapsTo": "GET /v1/sales-led-plans/{id}"
+        },
+        {
+          "name": "create",
+          "description": "Create a sales-led plan. Requires --idempotency-key (or CAVUNO_IDEMPOTENCY_KEY).",
+          "synopsis": "cavuno sales-led-plans create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--body <json>",
+              "description": "CreateSalesLedPlanBody JSON",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans create --body '{\"name\":\"Full search\",...}' --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "POST /v1/sales-led-plans"
+        },
+        {
+          "name": "update",
+          "description": "Update a sales-led plan (full field replace). Requires --idempotency-key.",
+          "synopsis": "cavuno sales-led-plans update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Sales-led plan ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--body <json>",
+              "description": "UpdateSalesLedPlanBody JSON",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans update <id> --body '{\"name\":\"…\",...}' --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "PATCH /v1/sales-led-plans/{id}"
+        },
+        {
+          "name": "reorder",
+          "description": "Atomically reorder the complete active set. Requires --idempotency-key.",
+          "synopsis": "cavuno sales-led-plans reorder [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--body <json>",
+              "description": "ReorderSalesLedPlansBody JSON ({\"orders\":[{\"id\":\"…\",\"displayOrder\":0},…]})",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans reorder --body '{\"orders\":[...]}' --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "POST /v1/sales-led-plans/reorder"
+        },
+        {
+          "name": "publish",
+          "description": "Publish a sales-led plan. Requires --idempotency-key.",
+          "synopsis": "cavuno sales-led-plans publish <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Sales-led plan ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans publish <id> --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "POST /v1/sales-led-plans/{id}/publish"
+        },
+        {
+          "name": "hide",
+          "description": "Hide a sales-led plan. Requires --idempotency-key.",
+          "synopsis": "cavuno sales-led-plans hide <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Sales-led plan ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans hide <id> --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "POST /v1/sales-led-plans/{id}/hide"
+        },
+        {
+          "name": "archive",
+          "description": "Irreversibly archive a sales-led plan. Requires --idempotency-key.",
+          "synopsis": "cavuno sales-led-plans archive <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Sales-led plan ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno sales-led-plans archive <id> --idempotency-key $(uuidgen)"
+          ],
+          "mapsTo": "POST /v1/sales-led-plans/{id}/archive"
+        }
+      ]
+    },
+    {
+      "name": "members",
+      "description": "Manage the members of the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List account members.",
+          "synopsis": "cavuno members list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--role <role>",
+              "description": "Filter by role (owner|admin|member)",
+              "required": false
+            },
+            {
+              "flags": "--suspended <bool>",
+              "description": "Filter by suspension state (true|false)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members list",
+            "cavuno members list --role admin --suspended false"
+          ],
+          "mapsTo": "GET /v1/members"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single member by user ID.",
+          "synopsis": "cavuno members get <userId>",
+          "arguments": [
+            {
+              "name": "userId",
+              "description": "The user ID of the member",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno members get users_k800abc"
+          ],
+          "mapsTo": "GET /v1/members/:userId"
+        },
+        {
+          "name": "update",
+          "description": "Change a member's role. Only an owner may set `owner`; the primary owner's role is immutable (use transfer-ownership).",
+          "synopsis": "cavuno members update <userId> [options]",
+          "arguments": [
+            {
+              "name": "userId",
+              "description": "The user ID of the member",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--role <role>",
+              "description": "The new role (owner|admin|member)",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members update users_k800abc --role admin"
+          ],
+          "mapsTo": "PATCH /v1/members/:userId"
+        },
+        {
+          "name": "remove",
+          "description": "Remove a member from the account. The account owner cannot be removed — transfer ownership first.",
+          "synopsis": "cavuno members remove <userId> [options]",
+          "arguments": [
+            {
+              "name": "userId",
+              "description": "The user ID of the member",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members remove users_k800abc --yes"
+          ],
+          "mapsTo": "DELETE /v1/members/:userId"
+        },
+        {
+          "name": "suspend",
+          "description": "Suspend a member: they keep their role but lose all permission evaluations. The primary owner cannot be suspended.",
+          "synopsis": "cavuno members suspend <userId> [options]",
+          "arguments": [
+            {
+              "name": "userId",
+              "description": "The user ID of the member",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members suspend users_k800abc"
+          ],
+          "mapsTo": "POST /v1/members/:userId/suspend"
+        },
+        {
+          "name": "unsuspend",
+          "description": "Reinstate a suspended member.",
+          "synopsis": "cavuno members unsuspend <userId> [options]",
+          "arguments": [
+            {
+              "name": "userId",
+              "description": "The user ID of the member",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members unsuspend users_k800abc"
+          ],
+          "mapsTo": "POST /v1/members/:userId/unsuspend"
+        },
+        {
+          "name": "transfer-ownership",
+          "description": "Transfer the primary-owner role to another member. Only the current primary owner may do this — you will be demoted to admin and the transfer cannot be undone without the new owner transferring it back.",
+          "synopsis": "cavuno members transfer-ownership <newOwnerUserId> [options]",
+          "arguments": [
+            {
+              "name": "newOwnerUserId",
+              "description": "The user ID of the member who will become the primary owner",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno members transfer-ownership users_k900abc --yes"
+          ],
+          "mapsTo": "POST /v1/members/transfer-ownership"
+        }
+      ]
+    },
+    {
+      "name": "invitations",
+      "description": "Manage pending invitations for the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List invitations (paginated). Accept tokens are redacted.",
+          "synopsis": "cavuno invitations list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (pending|expired|accepted|declined)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno invitations list",
+            "cavuno invitations list --status pending"
+          ],
+          "mapsTo": "GET /v1/invitations"
+        },
+        {
+          "name": "create",
+          "description": "Invite a new member by email. The response includes the accept token and URL (returned only here and on renew).",
+          "synopsis": "cavuno invitations create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--email <email>",
+              "description": "The email address to invite",
+              "required": true
+            },
+            {
+              "flags": "--role <role>",
+              "description": "The role on accept (admin|member)",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno invitations create --email new@acme.com --role member"
+          ],
+          "mapsTo": "POST /v1/invitations"
+        },
+        {
+          "name": "update",
+          "description": "Change a pending invitation's role.",
+          "synopsis": "cavuno invitations update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "The invitation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--role <role>",
+              "description": "The new role (admin|member)",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno invitations update invitations_k900abc --role admin"
+          ],
+          "mapsTo": "PATCH /v1/invitations/:id"
+        },
+        {
+          "name": "renew",
+          "description": "Rotate the accept token and extend the expiry by 7 days. This INVALIDATES the previous accept link and resends the email; the response includes the new token and URL.",
+          "synopsis": "cavuno invitations renew <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "The invitation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno invitations renew invitations_k900abc"
+          ],
+          "mapsTo": "POST /v1/invitations/:id/renew"
+        },
+        {
+          "name": "revoke",
+          "description": "Cancel a pending invitation.",
+          "synopsis": "cavuno invitations revoke <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "The invitation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno invitations revoke invitations_k900abc --yes"
+          ],
+          "mapsTo": "DELETE /v1/invitations/:id"
+        }
+      ]
+    },
+    {
+      "name": "subscribers",
+      "description": "Manage alert subscribers for the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List subscribers (paginated).",
+          "synopsis": "cavuno subscribers list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <query>",
+              "description": "Case-insensitive substring match on email",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "Filter by lifecycle status: confirmed | unconfirmed | unsubscribed | waitlisted",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno subscribers list",
+            "cavuno subscribers list --status confirmed --search alice --limit 20"
+          ],
+          "mapsTo": "GET /v1/subscribers"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a single subscriber by ID (with alerts inline).",
+          "synopsis": "cavuno subscribers get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Subscriber ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno subscribers get sub_123"
+          ],
+          "mapsTo": "GET /v1/subscribers/:id"
+        },
+        {
+          "name": "count",
+          "description": "Count confirmed subscribers for the account.",
+          "synopsis": "cavuno subscribers count",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno subscribers count"
+          ],
+          "mapsTo": "GET /v1/subscribers/count"
+        },
+        {
+          "name": "alerts",
+          "description": "List a subscriber's alerts.",
+          "synopsis": "cavuno subscribers alerts <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Subscriber ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno subscribers alerts sub_123"
+          ],
+          "mapsTo": "GET /v1/subscribers/:id/alerts"
+        },
+        {
+          "name": "unsubscribe",
+          "description": "Admin-unsubscribe a subscriber (sets unsubscribedAt, deactivates alerts). Reversible with resubscribe.",
+          "synopsis": "cavuno subscribers unsubscribe <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Subscriber ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno subscribers unsubscribe sub_123"
+          ],
+          "mapsTo": "POST /v1/subscribers/:id/unsubscribe"
+        },
+        {
+          "name": "resubscribe",
+          "description": "Admin-resubscribe a previously unsubscribed subscriber (clears unsubscribedAt, reactivates alerts).",
+          "synopsis": "cavuno subscribers resubscribe <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Subscriber ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno subscribers resubscribe sub_123"
+          ],
+          "mapsTo": "POST /v1/subscribers/:id/resubscribe"
+        },
+        {
+          "name": "export",
+          "description": "Export subscribers. csv (default) starts an async operation whose result carries a downloadUrl; json returns an inline list capped at 10,000 rows.",
+          "synopsis": "cavuno subscribers export [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--export-format <format>",
+              "description": "Export format: csv (async, default) or json (inline, max 10,000 rows)",
+              "required": false,
+              "defaultValue": "csv"
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno subscribers export --export-format csv --wait",
+            "cavuno subscribers export --export-format json"
+          ],
+          "mapsTo": "GET /v1/subscribers/export"
+        },
+        {
+          "name": "import",
+          "description": "Bulk-import subscribers from a CSV file (async). Imported subscribers stay unconfirmed until they complete opt-in.",
+          "synopsis": "cavuno subscribers import <file> [options]",
+          "arguments": [
+            {
+              "name": "file",
+              "description": "Path to the CSV file (header row with an email column)",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--no-send-confirmation",
+              "description": "Skip the double-opt-in confirmation email",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll the returned operation until it reaches a terminal state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds (default 2000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up after this many milliseconds (default 3600000)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno subscribers import ./subscribers.csv --wait",
+            "cavuno subscribers import ./subscribers.csv --no-send-confirmation"
+          ],
+          "mapsTo": "POST /v1/subscribers/import"
+        }
+      ]
+    },
+    {
+      "name": "redirects",
+      "description": "Manage board redirect rules for the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List redirect rules.",
+          "synopsis": "cavuno redirects list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <prefix>",
+              "description": "Prefix match on fromPath",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno redirects list",
+            "cavuno redirects list --search /old"
+          ],
+          "mapsTo": "GET /v1/redirects"
+        },
+        {
+          "name": "create",
+          "description": "Create a redirect rule.",
+          "synopsis": "cavuno redirects create <fromPath> <toPath> [options]",
+          "arguments": [
+            {
+              "name": "fromPath",
+              "description": "Source path, for example /old-careers",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "toPath",
+              "description": "Destination path, for example /jobs",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status-code <code>",
+              "description": "HTTP status code: 301 or 302 (default 301)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno redirects create /old-careers /jobs",
+            "cavuno redirects create /old /new --status-code 302"
+          ],
+          "mapsTo": "POST /v1/redirects"
+        },
+        {
+          "name": "update",
+          "description": "Update a redirect rule.",
+          "synopsis": "cavuno redirects update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Redirect ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--from-path <path>",
+              "description": "New source path",
+              "required": false
+            },
+            {
+              "flags": "--to-path <path>",
+              "description": "New destination path",
+              "required": false
+            },
+            {
+              "flags": "--status-code <code>",
+              "description": "HTTP status code: 301 or 302",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno redirects update k200abc --to-path /jobs",
+            "cavuno redirects update k200abc --from-path /old --status-code 302"
+          ],
+          "mapsTo": "PATCH /v1/redirects/:id"
+        },
+        {
+          "name": "remove",
+          "description": "Delete a redirect rule.",
+          "synopsis": "cavuno redirects remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Redirect ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno redirects remove k200abc --yes"
+          ],
+          "mapsTo": "DELETE /v1/redirects/:id"
+        },
+        {
+          "name": "batch",
+          "description": "Run a batch of redirect operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
+          "synopsis": "cavuno redirects batch [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno redirects batch --file ops.json"
+          ],
+          "mapsTo": "POST /v1/redirects/batch"
+        }
+      ]
+    }
+  ]
+}

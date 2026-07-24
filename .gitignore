@@ -1,0 +1,8 @@
+node_modules/
+.turbo/
+.public-package/
+build/
+*.tgz
+.env
+.env.*
+!.env.example
