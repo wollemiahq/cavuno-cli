@@ -23,3 +23,14 @@ documented Cavuno API.
 
 By submitting a contribution, you agree that it may be distributed under the
 MIT License and that you have the right to submit it.
+
+## Releases
+
+Releases are published from `main` by the repository's `Publish to npm`
+workflow. Maintainers update the package version and changelog in a pull
+request, merge it after CI passes, and then run the publishing workflow from
+`main`.
+
+The workflow uses npm trusted publishing with short-lived GitHub Actions
+credentials. Published packages include provenance linking the npm artifact to
+the public source commit and workflow that produced it.
