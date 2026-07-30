@@ -3,6 +3,24 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.1.0 — 2026-07-30
+
+- Renamed the blog image flags to match the media workflow: `--cover-storage-id`
+  is now `--cover-media-id` and `--og-image-storage-id` is now
+  `--og-image-media-id`. Pass the id returned by
+  `cavuno media upload --purpose blog_image`. The previous flags stored an
+  identifier the API could not resolve, so scripts using them were not working
+  as intended and must be updated.
+- Added the `company_not_backfillable` error code (exit code 4), returned when a
+  company is registered for backfill but is not backfillable.
+
+## 1.0.4 — 2026-07-24
+
+- Aligned npm, GitHub, README, and command help copy around managing a Cavuno
+  job board from the command line.
+- Made the private Cavuno source the canonical input to audited public
+  repository synchronization and trusted npm publishing.
+
 ## 1.0.3 — 2026-07-24
 
 - Added verifiable npm provenance generated from the public Cavuno CLI source

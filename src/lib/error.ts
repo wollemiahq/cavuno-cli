@@ -9,7 +9,6 @@
  * renders the same API error envelope.
  */
 import { formatApiError } from '../api/index.js';
-
 import { CliError } from './auth.js';
 
 interface ErrorEnvelope {
@@ -108,6 +107,7 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   backfill_candidate_conflict: 4,
   backfill_company_not_startable: 4,
   backfill_company_not_stoppable: 4,
+  company_not_backfillable: 4,
   // members / invitations / roles / permissions
   members_not_found: 4,
   members_cannot_change_primary_owner: 7,

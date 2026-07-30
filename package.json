@@ -1,7 +1,7 @@
 {
   "name": "cavuno",
-  "version": "1.0.3",
-  "description": "Command-line interface for managing and automating Cavuno job boards through the REST API",
+  "version": "1.1.0",
+  "description": "Manage your Cavuno job board from the command line.",
   "keywords": [
     "ai-agent",
     "cavuno",

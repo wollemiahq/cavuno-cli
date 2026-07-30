@@ -63,7 +63,7 @@ export function createCliProgram(version: string) {
   const program = new Command();
   program
     .name('cavuno')
-    .description('Cavuno v1 REST API command-line client.')
+    .description('Manage your Cavuno job board from the command line.')
     .version(version)
     .option(
       '--api-url <url>',
