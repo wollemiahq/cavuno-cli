@@ -112,8 +112,14 @@ export function registerBlogCommand(root: Command): void {
       .option('--featured', 'Mark as featured')
       .option('--author-ids <ids>', 'Comma-separated author IDs', csv)
       .option('--tag-ids <ids>', 'Comma-separated tag IDs', csv)
-      .option('--cover-storage-id <id>', 'Cover image storage ID')
-      .option('--og-image-storage-id <id>', 'OG image storage ID')
+      .option(
+        '--cover-media-id <id>',
+        'Cover image media id from `cavuno media upload --purpose blog_image`',
+      )
+      .option(
+        '--og-image-media-id <id>',
+        'OG image media id from `cavuno media upload --purpose blog_image`',
+      )
       .option('--feature-image-alt <text>', 'Feature image alt text')
       .option('--feature-image-caption <text>', 'Feature image caption')
       .option('--seo-title <text>', 'SEO meta title')
@@ -132,8 +138,8 @@ export function registerBlogCommand(root: Command): void {
           'featured',
           'authorIds',
           'tagIds',
-          'coverStorageId',
-          'ogImageStorageId',
+          'coverMediaId',
+          'ogImageMediaId',
           'featureImageAlt',
           'featureImageCaption',
           'seoTitle',

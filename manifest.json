@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "generatedAt": "2026-07-24T04:10:44.770Z",
+  "version": "1.1.0",
+  "generatedAt": "2026-07-30T01:38:08.828Z",
   "groups": [
     {
       "name": "jobs",
@@ -987,13 +987,13 @@
               "required": false
             },
             {
-              "flags": "--cover-storage-id <id>",
-              "description": "Cover image storage ID",
+              "flags": "--cover-media-id <id>",
+              "description": "Cover image media id from `cavuno media upload --purpose blog_image`",
               "required": false
             },
             {
-              "flags": "--og-image-storage-id <id>",
-              "description": "OG image storage ID",
+              "flags": "--og-image-media-id <id>",
+              "description": "OG image media id from `cavuno media upload --purpose blog_image`",
               "required": false
             },
             {

@@ -1,6 +1,15 @@
 name: Publish to npm
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'src/**'
+      - 'manifest.json'
+      - 'CHANGELOG.md'
   workflow_dispatch:
 
 permissions:
@@ -29,38 +38,49 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Install npm with trusted publishing support
-        run: npm install --global npm@11.13.0
-
-      - name: Verify npm supports trusted publishing
-        run: |
-          npm_version="$(npm --version)"
-          node -e "const [major, minor, patch] = process.argv[1].split('.').map(Number); if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) throw new Error('npm 11.5.1 or later is required for trusted publishing')" "${npm_version}"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify release is unpublished
+      - name: Check release status
+        id: release
         shell: bash
         run: |
           package_name="$(node -p "require('./package.json').name")"
           package_version="$(node -p "require('./package.json').version")"
           if npm view "${package_name}@${package_version}" version >/dev/null 2>&1; then
-            echo "::error::${package_name}@${package_version} is already published"
-            exit 1
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "${package_name}@${package_version} is already published"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Install npm with trusted publishing support
+        if: steps.release.outputs.publish == 'true'
+        run: npm install --global npm@11.13.0
+
+      - name: Verify npm supports trusted publishing
+        if: steps.release.outputs.publish == 'true'
+        run: |
+          npm_version="$(npm --version)"
+          node -e "const [major, minor, patch] = process.argv[1].split('.').map(Number); if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) throw new Error('npm 11.5.1 or later is required for trusted publishing')" "${npm_version}"
+
+      - name: Install dependencies
+        if: steps.release.outputs.publish == 'true'
+        run: pnpm install --frozen-lockfile
+
       - name: Typecheck
+        if: steps.release.outputs.publish == 'true'
         run: pnpm typecheck
 
       - name: Test
+        if: steps.release.outputs.publish == 'true'
         run: pnpm test
 
       - name: Build
+        if: steps.release.outputs.publish == 'true'
         run: pnpm build
 
       - name: Inspect package contents
+        if: steps.release.outputs.publish == 'true'
         run: npm pack --dry-run
 
       - name: Publish
+        if: steps.release.outputs.publish == 'true'
         run: npm publish

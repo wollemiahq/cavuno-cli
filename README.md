@@ -1,10 +1,10 @@
 # Cavuno CLI
 
-The official command-line client for the
-[Cavuno job board platform](https://cavuno.com). Manage jobs, companies, blog
-content, media, board settings, domains, asynchronous operations, and
-taxonomies through the Cavuno REST API from a terminal, shell script, CI
-pipeline, or AI agent.
+Manage your Cavuno job board from the command line.
+
+Use the CLI to manage jobs, companies, blog content, media, board settings,
+domains, asynchronous operations, and taxonomies through the Cavuno REST API
+from a terminal, shell script, or CI pipeline.
 
 Full reference: **[Cavuno CLI documentation](https://cavuno.com/docs/cli)**
 
