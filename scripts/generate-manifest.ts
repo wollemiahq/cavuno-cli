@@ -20,3 +20,7 @@ console.log(
     `${manifest.groups.reduce((n, g) => n + g.commands.length, 0)} commands ` +
     `→ ${outPath}`,
 );
+
+// Release lineage: 1.1.0 renames the blog cover/OG flags to --cover-media-id and
+// --og-image-media-id (old --*-storage-id names removed) and adds the
+// company_not_backfillable error code. No other published-surface change.

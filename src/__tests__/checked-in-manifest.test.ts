@@ -14,6 +14,12 @@ const packageJson = JSON.parse(
 ) as { version: string };
 
 describe('checked-in CLI manifest', () => {
+  it('uses the canonical public description', () => {
+    expect(createCliProgram(packageJson.version).description()).toBe(
+      'Manage your Cavuno job board from the command line.',
+    );
+  });
+
   it('exactly matches the complete generated public CLI structure', () => {
     const program = createCliProgram(packageJson.version);
     expect(program.commands.map((command) => command.name()).sort()).toEqual(
