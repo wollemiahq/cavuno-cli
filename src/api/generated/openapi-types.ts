@@ -4996,8 +4996,11 @@ export interface components {
                 subscriberId: string;
                 /** @description The job-filter criteria the alert matches against. */
                 filters?: unknown;
-                /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                frequency: string;
+                /**
+                 * @description Weekly delivery cadence.
+                 * @enum {string}
+                 */
+                frequency: "weekly";
                 /** @description Whether the alert is currently active. */
                 isActive: boolean;
                 /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
@@ -11488,8 +11491,11 @@ export interface operations {
                             subscriberId: string;
                             /** @description The job-filter criteria the alert matches against. */
                             filters?: unknown;
-                            /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                            frequency: string;
+                            /**
+                             * @description Weekly delivery cadence.
+                             * @enum {string}
+                             */
+                            frequency: "weekly";
                             /** @description Whether the alert is currently active. */
                             isActive: boolean;
                             /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
