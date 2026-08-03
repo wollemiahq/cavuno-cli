@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.3.0 — 2026-08-03
+
+- Added read-only Search Console commands for agent-driven reporting and
+  diagnostics.
+
+## 1.2.0 — 2026-08-01
+
+- Repaired the audited public-repository export metadata and synchronized the
+  generated CLI manifest used by standalone releases.
+
 ## 1.1.0 — 2026-07-30
 
 - Renamed the blog image flags to match the media workflow: `--cover-storage-id`
