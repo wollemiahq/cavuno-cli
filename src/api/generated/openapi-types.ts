@@ -23,6 +23,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/search-console/inspect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Inspect a URL in Google Search Console
+         * @description Returns Google’s complete indexed-version URL Inspection result for a URL inside the Board’s stored reporting coverage. This does not run a live test and does not request indexing.
+         */
+        post: operations["inspectSearchConsoleUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/search-console/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Query Google Search Console performance
+         * @description Runs a live, finalized Search Analytics query against the Board’s connected Google Search Console property. Uses Google’s request and row shape while enforcing the Board’s stored reporting coverage. Results are top rows and are not exhaustive.
+         */
+        post: operations["querySearchConsole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/traffic": {
         parameters: {
             query?: never;
@@ -74,7 +114,7 @@ export interface paths {
         put?: never;
         /**
          * Bulk-start Backfill for companies
-         * @description Start backfill for up to 100 Cavuno company IDs. Preserves order and returns per-item success or product error without provider detail. Requires an `Idempotency-Key` header.
+         * @description Start backfill for up to 100 Cavuno company IDs. Preserves order and returns per-item success or product error without provider detail (a not-Backfillable company reports `company_not_backfillable`). Requires an `Idempotency-Key` header.
          */
         post: operations["createBackfillCompaniesBulkStart"];
         delete?: never;
@@ -154,7 +194,7 @@ export interface paths {
         put?: never;
         /**
          * Start Backfill for a company
-         * @description Start collecting jobs for a Cavuno company. Registration uses an existing provider match or the company website, resolved server-side. Requires an `Idempotency-Key` header.
+         * @description Start collecting jobs for a Cavuno company. Registration uses an existing provider match or the company website, resolved server-side. A company with no supported ATS detected on its website and no confirmed match is rejected with `company_not_backfillable` (422). Requires an `Idempotency-Key` header.
          */
         post: operations["createBackfillCompanyStart"];
         delete?: never;
@@ -359,6 +399,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/blog/authors/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog authors
+         * @description Exports the account’s blog authors. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogAuthors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/blog/authors/{id}": {
         parameters: {
             query?: never;
@@ -425,6 +485,26 @@ export interface paths {
          * @description Runs up to 50 blog post operations in a single request (5 MB body limit). Each sub-operation runs independently. A `publish`/`unpublish` sub-op uses `{ method: "POST", action: "publish", resourceId }` and requires `blog.publish`. Idempotency keys are honored on the batch itself, not on individual sub-operations.
          */
         post: operations["batchBlogPosts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/blog/posts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog posts
+         * @description Exports the account’s blog posts. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogPosts"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -557,6 +637,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/blog/tags/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog tags
+         * @description Exports the account’s blog tags. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogTags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/blog/tags/{id}": {
         parameters: {
             query?: never;
@@ -597,6 +697,26 @@ export interface paths {
          * @description Returns the candidates (board users with role `candidate`) of the authenticated account. Per-candidate saved-job and alert counts are not inlined here. Fetch them via `GET /v1/candidates/{id}`. Requires `candidates.read`.
          */
         get: operations["listCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidates/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export candidates
+         * @description Exports the account’s candidates. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). Resume blobs are never inlined — a candidate with a resume carries a `resumeUrl` pointing at the authenticated `GET /v1/candidates/{id}/resume` stream. `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `candidates.read`.
+         */
+        get: operations["exportCandidates"];
         put?: never;
         post?: never;
         delete?: never;
@@ -687,6 +807,26 @@ export interface paths {
          * @description Runs up to 100 company operations in a single request, with a 5 MB request body limit. Each sub-operation runs independently. Idempotency keys are honored on the batch itself, not on individual sub-operations.
          */
         post: operations["batchCompanies"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export companies
+         * @description Exports the account’s companies. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `companies.read`.
+         */
+        get: operations["exportCompanies"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1061,6 +1201,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employers/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export employers
+         * @description Exports the account’s employers. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `employers.read`.
+         */
+        get: operations["exportEmployers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employers/memberships": {
         parameters: {
             query?: never;
@@ -1312,7 +1472,7 @@ export interface paths {
         head?: never;
         /**
          * Enable or disable a reporting integration
-         * @description Pauses or resumes collection for an existing integration without disconnecting it.
+         * @description Pauses or resumes collection for an existing integration without disconnecting it. For Search Console, an account administrator with integration-management permission can also explicitly keep reads restricted to stored Board hostnames or authorize the entire selected Google property.
          */
         patch: operations["updateIntegrationsReporting"];
         trace?: never;
@@ -1463,6 +1623,26 @@ export interface paths {
          * @description Runs up to 100 job operations in a single request. Supported sub-operations are create (`POST`), update (`PATCH`), delete (`DELETE`), publish, pause, expire, and duplicate. Each sub-operation runs independently; the response is HTTP 200 for any well-formed batch, and the per-operation outcome is reported on each entry of the `data` array.
          */
         post: operations["batchJobs"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export jobs
+         * @description Exports the account’s jobs. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `jobs.read`.
+         */
+        get: operations["exportJobs"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1819,6 +1999,26 @@ export interface paths {
          * @description Requests cancellation of an operation. A pending operation is cancelled immediately. A running operation is flagged for cancellation; the worker observes the flag at its next checkpoint. Operations that have already reached a terminal state cannot be cancelled. Cancellation does not roll back work that has already completed.
          */
         post: operations["cancelOperation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/operations/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an operation output
+         * @description Streams the file output of a completed operation (e.g. the CSV produced by an `exports.generate` or `subscribers.export` run). Returns `200 text/csv` with a `Content-Disposition` attachment once the operation has succeeded and produced an output. Any operation that is missing, not yours, not a public kind, not yet succeeded, or has no stored output returns `404 operations_not_found`. The underlying storage URL is never exposed — the bytes are streamed through the API. Requires `operations.read`.
+         */
+        get: operations["downloadOperationOutput"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2338,7 +2538,7 @@ export interface paths {
         };
         /**
          * Export subscribers
-         * @description Exports the account’s subscribers. `format=json` returns an inline list (max 10,000 rows). `format=csv` (default) returns `202` with an operation. Poll it, then download the CSV from the result `downloadUrl`. Requires `alerts.read`.
+         * @description Exports the account’s subscribers. `format=json` returns an inline list (max 10,000 rows). `format=csv` (default) returns `202` with an operation. Poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `alerts.read`.
          */
         get: operations["exportSubscribers"];
         put?: never;
@@ -4030,6 +4230,13 @@ export interface components {
                 details?: unknown;
             };
         };
+        /** @description A single export row. Fields mirror the entity’s CSV columns (camelCase); array fields are JSON arrays and timestamps are epoch-millisecond UTC numbers. */
+        ExportRow: {
+            /** @description Stable identifier for the exported row. */
+            id: string;
+        } & {
+            [key: string]: unknown;
+        };
         FindOrCreateCompanyBody: {
             /** @description The company's display name. */
             name: string;
@@ -4480,7 +4687,7 @@ export interface components {
              * @description Operation kind, identifying which workflow the operation runs.
              * @enum {string}
              */
-            kind: "domains.verify" | "imports.parse" | "imports.confirm" | "subscribers.export" | "subscribers.import" | "candidates.remove" | "employers.remove";
+            kind: "domains.verify" | "imports.parse" | "imports.confirm" | "subscribers.export" | "subscribers.import" | "exports.generate" | "candidates.remove" | "employers.remove";
             /**
              * @description Current state of the operation.
              * @enum {string}
@@ -4567,7 +4774,12 @@ export interface components {
         };
         PatchReportingIntegrationBody: {
             /** @description Whether collection is enabled for this integration. */
-            enabled: boolean;
+            enabled?: boolean;
+            /**
+             * @description Search Console only. board_hosts restricts reads to stored Board hostnames; whole_property explicitly authorizes the entire selected Google property.
+             * @enum {string}
+             */
+            searchConsoleCoverageMode?: "board_hosts" | "whole_property";
         };
         PatchSettingsBody: {
             /** @description Display name of the board. */
@@ -4846,6 +5058,73 @@ export interface components {
                 markets?: string[];
             };
         };
+        SearchConsoleInspectionResponse: {
+            /** @enum {string} */
+            object: "search_console_url_inspection";
+            inspectionResult?: {
+                inspectionResultLink?: string;
+                indexStatusResult?: {
+                    verdict?: string;
+                    coverageState?: string;
+                    lastCrawlTime?: string;
+                    pageFetchState?: string;
+                    robotsTxtState?: string;
+                    indexingState?: string;
+                    googleCanonical?: string;
+                    userCanonical?: string;
+                    crawledAs?: string;
+                    sitemap?: string[];
+                    referringUrls?: string[];
+                };
+                richResultsResult?: {
+                    [key: string]: unknown;
+                };
+                ampResult?: {
+                    [key: string]: unknown;
+                };
+                mobileUsabilityResult?: {
+                    [key: string]: unknown;
+                };
+            };
+            cavuno: {
+                coverage: {
+                    /** @enum {string} */
+                    mode: "board_hosts" | "whole_property";
+                    hostnames: string[];
+                };
+                /** @enum {boolean} */
+                indexedVersionOnly: true;
+            };
+        };
+        SearchConsoleQueryResponse: {
+            /** @enum {string} */
+            object: "search_console_query";
+            rows: {
+                keys?: string[];
+                clicks?: number;
+                impressions?: number;
+                ctr?: number;
+                position?: number;
+            }[];
+            responseAggregationType?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            cavuno: {
+                coverage: {
+                    /** @enum {string} */
+                    mode: "board_hosts" | "whole_property";
+                    hostnames: string[];
+                };
+                /** @enum {string} */
+                dataState: "final";
+                /** @enum {string} */
+                dataTimezone: "America/Los_Angeles";
+                latestObservedDate?: string;
+                /** @enum {boolean} */
+                exhaustive: false;
+            };
+        };
         SearchJobsBody: {
             /** @description Free-text search query matched against job title and description. Up to 200 characters. */
             query?: string;
@@ -4996,8 +5275,11 @@ export interface components {
                 subscriberId: string;
                 /** @description The job-filter criteria the alert matches against. */
                 filters?: unknown;
-                /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                frequency: string;
+                /**
+                 * @description Weekly delivery cadence.
+                 * @enum {string}
+                 */
+                frequency: "weekly";
                 /** @description Whether the alert is currently active. */
                 isActive: boolean;
                 /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
@@ -5357,6 +5639,166 @@ export interface operations {
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    inspectSearchConsoleUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uri
+                     * @description Canonical HTTPS Board URL covered by the connected property.
+                     */
+                    inspectionUrl: string;
+                    /** @description Optional BCP-47 language code, such as en-AU. */
+                    languageCode?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The indexed-version URL Inspection result. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchConsoleInspectionResponse"];
+                };
+            };
+            /** @description The URL is outside the Board’s reporting coverage. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Search Console is not connected or access was lost. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description URL Inspection quota was reached. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google rejected the validated request. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    querySearchConsole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    startDate: string;
+                    endDate: string;
+                    dimensions?: ("country" | "date" | "device" | "page" | "query" | "searchAppearance")[];
+                    /** @enum {string} */
+                    type?: "web" | "image" | "video" | "news" | "discover" | "googleNews";
+                    dimensionFilterGroups?: {
+                        /** @enum {string} */
+                        groupType: "and";
+                        filters: {
+                            /** @enum {string} */
+                            dimension: "country" | "device" | "page" | "query" | "searchAppearance";
+                            /** @enum {string} */
+                            operator: "contains" | "equals" | "notContains" | "notEquals" | "includingRegex" | "excludingRegex";
+                            expression: string;
+                        }[];
+                    }[];
+                    /** @enum {string} */
+                    aggregationType?: "auto" | "byPage" | "byProperty";
+                    rowLimit?: number;
+                    startRow?: number;
+                    /** @enum {string} */
+                    dataState?: "final";
+                };
+            };
+        };
+        responses: {
+            /** @description Live finalized Search Console performance rows. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchConsoleQueryResponse"];
+                };
+            };
+            /** @description Search Console is not connected or access was lost. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console quota was reached. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google rejected the validated request. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console is unavailable. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6050,6 +6492,55 @@ export interface operations {
             };
         };
     };
+    exportBlogAuthors: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog author export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/authors/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getBlogAuthor: {
         parameters: {
             query?: never;
@@ -6286,6 +6777,55 @@ export interface operations {
             };
             /** @description The request body exceeded 5 MB. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportBlogPosts: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog post export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/posts/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6671,6 +7211,55 @@ export interface operations {
             };
         };
     };
+    exportBlogTags: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog tag export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/tags/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getBlogTag: {
         parameters: {
             query?: never;
@@ -6835,6 +7424,55 @@ export interface operations {
                         nextCursor: string | null;
                         data: components["schemas"]["Candidate"][];
                     };
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportCandidates: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of candidate export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/candidates/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
                 };
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -7068,6 +7706,55 @@ export interface operations {
             };
             /** @description The request body exceeded 5 MB. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportCompanies: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of company export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/companies/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8085,6 +8772,55 @@ export interface operations {
             };
             /** @description The claim has already been resolved. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportEmployers: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of employer export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/employers/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9159,6 +9895,55 @@ export interface operations {
             };
         };
     };
+    exportJobs: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of job export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/jobs/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     searchJobs: {
         parameters: {
             query?: never;
@@ -10043,6 +10828,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    downloadOperationOutput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier for the operation. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The operation output, streamed as a file attachment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -11320,7 +12137,7 @@ export interface operations {
     exportSubscribers: {
         parameters: {
             query?: {
-                /** @description Export format. `json` streams an inline list (capped at 10,000 rows); `csv` starts an async `subscribers.export` operation whose result carries a `downloadUrl`. */
+                /** @description Export format. `json` streams an inline list (capped at 10,000 rows); `csv` starts an async `subscribers.export` operation whose CSV is downloadable from `GET /v1/operations/{id}/download` once it succeeds. */
                 format?: "csv" | "json";
             };
             header?: never;
@@ -11346,7 +12163,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description A `subscribers.export` operation was started (`format=csv`). Poll the operation; its result carries `downloadUrl` and `rowCount`. */
+            /** @description A `subscribers.export` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -11488,8 +12305,11 @@ export interface operations {
                             subscriberId: string;
                             /** @description The job-filter criteria the alert matches against. */
                             filters?: unknown;
-                            /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                            frequency: string;
+                            /**
+                             * @description Weekly delivery cadence.
+                             * @enum {string}
+                             */
+                            frequency: "weekly";
                             /** @description Whether the alert is currently active. */
                             isActive: boolean;
                             /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
