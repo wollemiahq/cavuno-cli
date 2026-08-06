@@ -117,6 +117,49 @@ export {
   type InvitationRole,
 } from './invitations.js';
 export { formatApiError } from './error-formatter.js';
+export {
+  verifyWebhook,
+  createWebhooksClient,
+  type VerifyWebhookOptions,
+  type VerifyWebhookResult,
+  type WebhooksClient,
+  type WebhookEndpointListQuery,
+  type WebhookDeliveryListQuery,
+  type CreateWebhookEndpointBody,
+  type UpdateWebhookEndpointBody,
+} from './webhooks.js';
+export {
+  createMarketingPermissionsClient,
+  type MarketingPermissionsClient,
+  type MarketingPermissionsListQuery,
+} from './marketing-permissions.js';
+export {
+  CANDIDATE_CHANGED_FIELDS,
+  type CandidateChangedField,
+  type CandidateWebhookSnapshot,
+  type CandidateWebhookTombstone,
+  type CandidateCreatedWebhookEvent,
+  type CandidateUpdatedWebhookEvent,
+  type CandidateDeletedWebhookEvent,
+  type CandidateWebhookEvent,
+  COMPANY_CHANGED_FIELDS,
+  type CompanyChangedField,
+  type CompanyWebhookSnapshot,
+  type CompanyWebhookTombstone,
+  type CompanyCreatedWebhookEvent,
+  type CompanyUpdatedWebhookEvent,
+  type CompanyDeletedWebhookEvent,
+  type CompanyWebhookEvent,
+  JOB_CHANGED_FIELDS,
+  type JobChangedField,
+  type WebhookEventEnvelope,
+  type JobWebhookSnapshot,
+  type JobWebhookTombstone,
+  type JobCreatedWebhookEvent,
+  type JobUpdatedWebhookEvent,
+  type JobDeletedWebhookEvent,
+  type JobWebhookEvent,
+} from './webhook-events.js';
 export type {
   paths,
   components,
