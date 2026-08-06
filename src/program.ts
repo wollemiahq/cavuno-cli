@@ -14,19 +14,21 @@ import { registerImportsCommand } from './commands/imports.js';
 import { registerIndexingCommand } from './commands/indexing.js';
 import { registerInvitationsCommand } from './commands/invitations.js';
 import { registerJobsCommand, registerUsageCommand } from './commands/jobs.js';
+import { registerMarketingPermissionsCommand } from './commands/marketing-permissions.js';
 import { registerMeCommand } from './commands/me.js';
 import { registerMediaCommand } from './commands/media.js';
 import { registerMembersCommand } from './commands/members.js';
 import { registerOperationsCommand } from './commands/operations.js';
 import { registerPaywallCommand } from './commands/paywall.js';
 import { registerPlansCommand } from './commands/plans.js';
-import { registerSalesLedPlansCommand } from './commands/sales-led-plans.js';
 import { registerRedirectsCommand } from './commands/redirects.js';
 import { registerReportingCommand } from './commands/reporting.js';
+import { registerSalesLedPlansCommand } from './commands/sales-led-plans.js';
 import { registerSettingsCommand } from './commands/settings.js';
 import { registerSubscribersCommand } from './commands/subscribers.js';
 import { registerTaxonomiesCommand } from './commands/taxonomies.js';
 import { registerTransactionsCommand } from './commands/transactions.js';
+import { registerWebhooksCommand } from './commands/webhooks.js';
 
 export const PUBLIC_GROUPS = [
   'jobs',
@@ -57,6 +59,8 @@ export const PUBLIC_GROUPS = [
   'invitations',
   'subscribers',
   'redirects',
+  'webhooks',
+  'marketing-permissions',
 ];
 
 export function createCliProgram(version: string) {
@@ -103,6 +107,8 @@ export function createCliProgram(version: string) {
   registerInvitationsCommand(program);
   registerSubscribersCommand(program);
   registerRedirectsCommand(program);
+  registerWebhooksCommand(program);
+  registerMarketingPermissionsCommand(program);
 
   return program;
 }
