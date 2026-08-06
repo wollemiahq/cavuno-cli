@@ -56,6 +56,7 @@ cavuno subscribers  # Manage alert subscribers (list, export, import)
 cavuno taxonomies   # remote helpers + skills/categories/markets CRUD
 cavuno members      # Manage the account roster, roles, suspension, ownership
 cavuno invitations  # Manage pending invitations
+cavuno webhooks     # Manage webhook endpoints and inspect/replay deliveries
 ```
 
 ### Jobs
@@ -198,6 +199,41 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno domains add <host>` | Register a custom domain |
 | `cavuno domains verify <id>` | Start async DNS verification |
 | `cavuno domains remove <id>` | Delete a custom domain |
+
+### Webhooks
+
+Outbound webhooks push job, company, and candidate changes to a URL you choose,
+so your systems react as changes happen instead of polling. They require a paid
+plan (Starter and above); a Free-plan board gets `402 plan_upgrade_required`.
+Reads need the `webhooks.read` scope and writes need `webhooks.manage`, plus the
+matching read scope for each event family.
+
+| Command | Description |
+|---|---|
+| `cavuno webhooks endpoints list` | List webhook endpoints (`--limit`, `--cursor`) |
+| `cavuno webhooks endpoints get <id>` | Fetch an endpoint by ID |
+| `cavuno webhooks endpoints create <url>` | Create an endpoint (`--event-type`). Prints the signing secret **once** |
+| `cavuno webhooks endpoints update <id>` | Update URL, event types, or status |
+| `cavuno webhooks endpoints delete <id>` | Retire an endpoint; config is kept so past deliveries stay replayable |
+| `cavuno webhooks endpoints rotate-secret <id>` | Rotate the signing secret. Prints the new secret **once** |
+| `cavuno webhooks endpoints test <id>` | Send one synthetic signed delivery |
+| `cavuno webhooks deliveries list` | List deliveries, newest first (`--endpoint-id`, `--status`) |
+| `cavuno webhooks deliveries get <id>` | Fetch a delivery with its attempt history |
+| `cavuno webhooks deliveries replay <id>` | Replay a completed delivery, reusing the frozen event body |
+
+```bash
+cavuno webhooks endpoints create https://hooks.example.com/cavuno \
+  --event-type job.created --event-type job.updated
+cavuno webhooks endpoints test whe_123
+cavuno webhooks deliveries list --status terminal
+cavuno webhooks deliveries replay whd_456
+```
+
+Capture the secret from `create` and `rotate-secret` immediately — Cavuno stores
+only an encrypted form and will not show it again. Rotation keeps the previous
+secret valid for 24 hours so receivers can roll over without dropping events.
+See the [webhooks documentation](https://cavuno.com/docs/webhooks) for the event
+catalogue, payload shapes, and signature verification.
 
 ### Redirects
 
