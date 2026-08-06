@@ -3,6 +3,36 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.4.0 — 2026-08-06
+
+- **Outbound webhooks**: new `webhooks` command group for managing
+  webhook subscriptions.
+- **Marketing consent**: marketing-permission surfaces rewired
+  to user-sourced consent — consent lives on the board user and flows
+  through the same /v1 contract the SDK uses.
+
+## 1.3.2 — 2026-08-04
+
+- No user-facing changes. Internal release tooling only (public repository
+  lockfiles regenerated for the tsgo provider); commands, installation, and
+  automation behavior are unchanged.
+
+## 1.3.1 — 2026-08-03
+
+- No user-facing changes. Internal build tooling only (TypeScript program
+  layout and compiler migration); commands, installation, and automation
+  behavior are unchanged.
+
+## 1.3.0 — 2026-08-03
+
+- Added read-only Search Console commands for agent-driven reporting and
+  diagnostics.
+
+## 1.2.0 — 2026-08-01
+
+- Repaired the audited public-repository export metadata and synchronized the
+  generated CLI manifest used by standalone releases.
+
 ## 1.1.0 — 2026-07-30
 
 - Renamed the blog image flags to match the media workflow: `--cover-storage-id`
