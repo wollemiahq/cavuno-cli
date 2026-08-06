@@ -136,6 +136,17 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   redirects_not_found: 4,
   redirects_from_path_taken: 7,
   redirects_invalid_status_code: 2,
+  // WHK — webhooks
+  webhooks_not_found: 4,
+  webhooks_delivery_open: 7,
+  webhooks_delivery_unreplayable: 7,
+  webhooks_invalid_url: 2,
+  webhooks_invalid_event_types: 2,
+  // Create-time capacity cap — same exit family as other webhook BAD_REQUEST
+  // validation codes (invalid_url / invalid_event_types → 2).
+  webhooks_endpoint_limit: 2,
+  // MKT — marketing consent (operator withdraw / list)
+  marketing_permissions_not_found: 4,
   rate_limited: 6,
   too_many_filter_values: 2,
   internal_error: 10,
