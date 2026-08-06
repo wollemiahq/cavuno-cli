@@ -23,6 +23,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/search-console/inspect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Inspect a URL in Google Search Console
+         * @description Returns Google’s complete indexed-version URL Inspection result for a URL inside the Board’s stored reporting coverage. This does not run a live test and does not request indexing.
+         */
+        post: operations["inspectSearchConsoleUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/search-console/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Query Google Search Console performance
+         * @description Runs a live, finalized Search Analytics query against the Board’s connected Google Search Console property. Uses Google’s request and row shape while enforcing the Board’s stored reporting coverage. Results are top rows and are not exhaustive.
+         */
+        post: operations["querySearchConsole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/traffic": {
         parameters: {
             query?: never;
@@ -74,7 +114,7 @@ export interface paths {
         put?: never;
         /**
          * Bulk-start Backfill for companies
-         * @description Start backfill for up to 100 Cavuno company IDs. Preserves order and returns per-item success or product error without provider detail. Requires an `Idempotency-Key` header.
+         * @description Start backfill for up to 100 Cavuno company IDs. Preserves order and returns per-item success or product error without provider detail (a not-Backfillable company reports `company_not_backfillable`). Requires an `Idempotency-Key` header.
          */
         post: operations["createBackfillCompaniesBulkStart"];
         delete?: never;
@@ -154,7 +194,7 @@ export interface paths {
         put?: never;
         /**
          * Start Backfill for a company
-         * @description Start collecting jobs for a Cavuno company. Registration uses an existing provider match or the company website, resolved server-side. Requires an `Idempotency-Key` header.
+         * @description Start collecting jobs for a Cavuno company. Registration uses an existing provider match or the company website, resolved server-side. A company with no supported ATS detected on its website and no confirmed match is rejected with `company_not_backfillable` (422). Requires an `Idempotency-Key` header.
          */
         post: operations["createBackfillCompanyStart"];
         delete?: never;
@@ -359,6 +399,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/blog/authors/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog authors
+         * @description Exports the account’s blog authors. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogAuthors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/blog/authors/{id}": {
         parameters: {
             query?: never;
@@ -425,6 +485,26 @@ export interface paths {
          * @description Runs up to 50 blog post operations in a single request (5 MB body limit). Each sub-operation runs independently. A `publish`/`unpublish` sub-op uses `{ method: "POST", action: "publish", resourceId }` and requires `blog.publish`. Idempotency keys are honored on the batch itself, not on individual sub-operations.
          */
         post: operations["batchBlogPosts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/blog/posts/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog posts
+         * @description Exports the account’s blog posts. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogPosts"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -557,6 +637,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/blog/tags/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export blog tags
+         * @description Exports the account’s blog tags. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `blog.read`.
+         */
+        get: operations["exportBlogTags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/blog/tags/{id}": {
         parameters: {
             query?: never;
@@ -597,6 +697,26 @@ export interface paths {
          * @description Returns the candidates (board users with role `candidate`) of the authenticated account. Per-candidate saved-job and alert counts are not inlined here. Fetch them via `GET /v1/candidates/{id}`. Requires `candidates.read`.
          */
         get: operations["listCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/candidates/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export candidates
+         * @description Exports the account’s candidates. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). Resume blobs are never inlined — a candidate with a resume carries a `resumeUrl` pointing at the authenticated `GET /v1/candidates/{id}/resume` stream. `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `candidates.read`.
+         */
+        get: operations["exportCandidates"];
         put?: never;
         post?: never;
         delete?: never;
@@ -687,6 +807,26 @@ export interface paths {
          * @description Runs up to 100 company operations in a single request, with a 5 MB request body limit. Each sub-operation runs independently. Idempotency keys are honored on the batch itself, not on individual sub-operations.
          */
         post: operations["batchCompanies"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export companies
+         * @description Exports the account’s companies. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `companies.read`.
+         */
+        get: operations["exportCompanies"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1061,6 +1201,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employers/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export employers
+         * @description Exports the account’s employers. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `employers.read`.
+         */
+        get: operations["exportEmployers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employers/memberships": {
         parameters: {
             query?: never;
@@ -1312,7 +1472,7 @@ export interface paths {
         head?: never;
         /**
          * Enable or disable a reporting integration
-         * @description Pauses or resumes collection for an existing integration without disconnecting it.
+         * @description Pauses or resumes collection for an existing integration without disconnecting it. For Search Console, an account administrator with integration-management permission can also explicitly keep reads restricted to stored Board hostnames or authorize the entire selected Google property.
          */
         patch: operations["updateIntegrationsReporting"];
         trace?: never;
@@ -1469,6 +1629,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export jobs
+         * @description Exports the account’s jobs. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `jobs.read`.
+         */
+        get: operations["exportJobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs/search": {
         parameters: {
             query?: never;
@@ -1591,6 +1771,46 @@ export interface paths {
          * @description Publishes a draft or expired job, making it visible on the public board. Plan and quota limits are enforced. `expiresAt` accepts an ISO 8601 string to set a new expiry, `null` to clear, or may be omitted. When omitted, a stored future expiry is preserved; a stored past expiry (e.g. set by a prior `expire` call) is cleared automatically so a republished job is never published with a stale past timestamp.
          */
         post: operations["publishJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/marketing-permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List marketing consent decisions
+         * @description Every recorded consent decision on the board, read from the user records. People who have never decided are absent — absence of a record means no consent, never a default. Pages may run short of `limit`; follow `nextCursor` for completeness — `hasMore`, not page length, is the signal. `email` is an exact-match lookup returning at most one item; use it to resolve a provider unsubscribe to a board user.
+         */
+        get: operations["listMarketingPermissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/marketing-permissions/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Withdraw marketing consent for a board user
+         * @description Operator-initiated withdrawal (`reason: operator_request`) — the right move when someone asks the operator directly to be removed. `{id}` is the board user id. Idempotent: re-withdrawing changes nothing and emits no event. Emits `marketing_permission.withdrawn` on a real transition.
+         */
+        post: operations["createMarketingPermissionWithdraw"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1819,6 +2039,26 @@ export interface paths {
          * @description Requests cancellation of an operation. A pending operation is cancelled immediately. A running operation is flagged for cancellation; the worker observes the flag at its next checkpoint. Operations that have already reached a terminal state cannot be cancelled. Cancellation does not roll back work that has already completed.
          */
         post: operations["cancelOperation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/operations/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an operation output
+         * @description Streams the file output of a completed operation (e.g. the CSV produced by an `exports.generate` or `subscribers.export` run). Returns `200 text/csv` with a `Content-Disposition` attachment once the operation has succeeded and produced an output. Any operation that is missing, not yours, not a public kind, not yet succeeded, or has no stored output returns `404 operations_not_found`. The underlying storage URL is never exposed — the bytes are streamed through the API. Requires `operations.read`.
+         */
+        get: operations["downloadOperationOutput"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2338,7 +2578,7 @@ export interface paths {
         };
         /**
          * Export subscribers
-         * @description Exports the account’s subscribers. `format=json` returns an inline list (max 10,000 rows). `format=csv` (default) returns `202` with an operation. Poll it, then download the CSV from the result `downloadUrl`. Requires `alerts.read`.
+         * @description Exports the account’s subscribers. `format=json` returns an inline list (max 10,000 rows). `format=csv` (default) returns `202` with an operation. Poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `alerts.read`.
          */
         get: operations["exportSubscribers"];
         put?: never;
@@ -2809,6 +3049,155 @@ export interface paths {
         get: operations["getUsage"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List webhook deliveries
+         * @description Returns Board-scoped delivery history, newest first. Optional filters: endpoint_id, status. Lease identity and raw event bodies are never included.
+         */
+        get: operations["listWebhookDeliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-deliveries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve a webhook delivery
+         * @description Returns a delivery including its most recent attempt history (≤500 attempts, ascending by attempt_number). `attempt_count` is authoritative: when it exceeds `attempts.length`, older attempts were truncated. Never exposes lease fields or serialized event bodies.
+         */
+        get: operations["getWebhookDelivery"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-deliveries/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replay a webhook delivery
+         * @description Resets a completed delivery (delivered, terminal, or exhausted) so the worker will attempt it again. Reuses the frozen event bytes and the occurrence-time endpoint configuration version; each attempt is signed with a fresh timestamp. Never creates a new domain event. Open deliveries (pending or retrying), deliveries outside the fixed 30-day retention window, and deliveries whose endpoint or frozen config version has been deleted return 409. A replayed exhausted delivery retains its attempt history, so if the replay attempt fails retryably it may exhaust again immediately: replay grants a fresh attempt, not a fresh retry budget.
+         */
+        post: operations["replayWebhookDelivery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-endpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List webhook endpoints
+         * @description Returns Board-owned webhook endpoints. Secrets are never included.
+         */
+        get: operations["listWebhookEndpoints"];
+        put?: never;
+        /**
+         * Create a webhook endpoint
+         * @description Creates an enabled Board-owned webhook endpoint and returns the signing secret once. The endpoint immediately receives the selected supported V1 event types. The secret is returned only on the original response and is not replayed by an idempotent retry — recover a lost secret by rotating.
+         */
+        post: operations["createWebhookEndpoint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-endpoints/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieve a webhook endpoint */
+        get: operations["getWebhookEndpoint"];
+        put?: never;
+        post?: never;
+        /**
+         * Retire a webhook endpoint
+         * @description Soft-retires the endpoint: future live deliveries stop and open deliveries are cancelled, but immutable configuration, destination, and signing material are retained so existing deliveries can still be inspected and manually replayed within the retention window. Retired endpoints are hidden from list/detail reads.
+         */
+        delete: operations["deleteWebhookEndpoint"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a webhook endpoint
+         * @description Updates URL, event selection, or status (pause/resume). URL or event-type changes create a new immutable configuration version.
+         */
+        patch: operations["updateWebhookEndpoint"];
+        trace?: never;
+    };
+    "/webhook-endpoints/{id}/rotate-secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate a webhook endpoint secret
+         * @description Issues a new signing secret (returned once) and keeps the previous secret verifiable for a bounded overlap window. The secret is returned only on the original response and is not replayed by an idempotent retry — recover a lost secret by rotating.
+         */
+        post: operations["rotateWebhookEndpointSecret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhook-endpoints/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a synthetic test delivery
+         * @description Sends one unmistakably synthetic signed delivery to the endpoint URL and returns a sanitized outcome. Never copies real domain data.
+         */
+        post: operations["testWebhookEndpoint"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3298,6 +3687,12 @@ export interface components {
             hasResume: boolean;
             /** @description ISO-8601 timestamp of when the candidate registered. */
             createdAt: string;
+            /** @description ISO-8601 timestamp when this Board user became an operator-visible Candidate. This is the reconciliation counterpart of candidate.created, not newsletter permission. */
+            candidateCreatedAt: string;
+            /** @description ISO-8601 timestamp of the latest approved Candidate identity update, or null for older rows. */
+            updatedAt: string | null;
+            /** @description Monotonic Candidate lifecycle revision; legacy rows are 0 until the rollout migration runs. */
+            revision: number;
             /** @description ISO-8601 timestamp of the last sign-in, or `null`. */
             lastActiveAt: string | null;
         };
@@ -3513,6 +3908,8 @@ export interface components {
             createdAt: string;
             /** @description Time at which the company was last updated, or `null` if it has never been updated. ISO 8601 datetime. */
             updatedAt: string | null;
+            /** @description Public Company lifecycle revision. Historical rows may be 0 until rollout backfill. */
+            revision: number;
             /** @description Public + admin URLs for this company. `public` may be `null` if the company lacks a slug. */
             links: components["schemas"]["ResourceLinks"] & {
                 /**
@@ -3884,6 +4281,15 @@ export interface components {
             /** @description The display name of the tag. */
             name: string;
         };
+        CreateWebhookEndpointBody: {
+            /**
+             * Format: uri
+             * @description Public HTTPS URL that will receive webhook deliveries.
+             */
+            url: string;
+            /** @description V1 event types this endpoint subscribes to (unique). */
+            event_types: ("job.created" | "job.updated" | "job.deleted" | "company.created" | "company.updated" | "company.deleted" | "candidate.created" | "candidate.updated" | "candidate.deleted" | "marketing_permission.granted" | "marketing_permission.withdrawn")[];
+        };
         CustomFieldDefinition: {
             /** @description Immutable per-board slug used as the key in a job’s `customFieldValues`. */
             key: string;
@@ -4029,6 +4435,13 @@ export interface components {
                 /** @description Structured context for some errors, such as per-field validation issues. */
                 details?: unknown;
             };
+        };
+        /** @description A single export row. Fields mirror the entity’s CSV columns (camelCase); array fields are JSON arrays and timestamps are epoch-millisecond UTC numbers. */
+        ExportRow: {
+            /** @description Stable identifier for the exported row. */
+            id: string;
+        } & {
+            [key: string]: unknown;
         };
         FindOrCreateCompanyBody: {
             /** @description The company's display name. */
@@ -4364,6 +4777,8 @@ export interface components {
             createdAt: string;
             /** @description Time at which the job was last updated. ISO 8601 datetime. */
             updatedAt: string;
+            /** @description Monotonic Job lifecycle revision used to reconcile webhook events. Legacy rows are 0 until the rollout backfill runs. */
+            revision: number;
             /** @description Canonical skill slugs assigned to the job. */
             skills: string[];
             /** @description Canonical category slugs assigned to the job. */
@@ -4385,6 +4800,23 @@ export interface components {
             aliasSlugs: string[];
             sourceLocale: string | null;
             createdAt: string;
+        };
+        MarketingPermission: {
+            id: string;
+            /** @enum {string} */
+            object: "marketing_permission";
+            email: string;
+            display_name: string | null;
+            role: string;
+            /** @enum {string} */
+            status: "granted" | "withdrawn";
+            source: string;
+            /** @enum {string|null} */
+            reason: "person_request" | "operator_request" | "account_deleted" | null;
+            granted_at: string | null;
+            withdrawn_at: string | null;
+            updated_at: string;
+            revision: number;
         };
         MatchBackfillCompanyBody: {
             /** @description Zero-based index into the short-lived candidates array from list (needs_match). Re-validated server-side. */
@@ -4480,7 +4912,7 @@ export interface components {
              * @description Operation kind, identifying which workflow the operation runs.
              * @enum {string}
              */
-            kind: "domains.verify" | "imports.parse" | "imports.confirm" | "subscribers.export" | "subscribers.import" | "candidates.remove" | "employers.remove";
+            kind: "domains.verify" | "imports.parse" | "imports.confirm" | "subscribers.export" | "subscribers.import" | "exports.generate" | "candidates.remove" | "employers.remove";
             /**
              * @description Current state of the operation.
              * @enum {string}
@@ -4567,7 +4999,12 @@ export interface components {
         };
         PatchReportingIntegrationBody: {
             /** @description Whether collection is enabled for this integration. */
-            enabled: boolean;
+            enabled?: boolean;
+            /**
+             * @description Search Console only. board_hosts restricts reads to stored Board hostnames; whole_property explicitly authorizes the entire selected Google property.
+             * @enum {string}
+             */
+            searchConsoleCoverageMode?: "board_hosts" | "whole_property";
         };
         PatchSettingsBody: {
             /** @description Display name of the board. */
@@ -4846,6 +5283,73 @@ export interface components {
                 markets?: string[];
             };
         };
+        SearchConsoleInspectionResponse: {
+            /** @enum {string} */
+            object: "search_console_url_inspection";
+            inspectionResult?: {
+                inspectionResultLink?: string;
+                indexStatusResult?: {
+                    verdict?: string;
+                    coverageState?: string;
+                    lastCrawlTime?: string;
+                    pageFetchState?: string;
+                    robotsTxtState?: string;
+                    indexingState?: string;
+                    googleCanonical?: string;
+                    userCanonical?: string;
+                    crawledAs?: string;
+                    sitemap?: string[];
+                    referringUrls?: string[];
+                };
+                richResultsResult?: {
+                    [key: string]: unknown;
+                };
+                ampResult?: {
+                    [key: string]: unknown;
+                };
+                mobileUsabilityResult?: {
+                    [key: string]: unknown;
+                };
+            };
+            cavuno: {
+                coverage: {
+                    /** @enum {string} */
+                    mode: "board_hosts" | "whole_property";
+                    hostnames: string[];
+                };
+                /** @enum {boolean} */
+                indexedVersionOnly: true;
+            };
+        };
+        SearchConsoleQueryResponse: {
+            /** @enum {string} */
+            object: "search_console_query";
+            rows: {
+                keys?: string[];
+                clicks?: number;
+                impressions?: number;
+                ctr?: number;
+                position?: number;
+            }[];
+            responseAggregationType?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            cavuno: {
+                coverage: {
+                    /** @enum {string} */
+                    mode: "board_hosts" | "whole_property";
+                    hostnames: string[];
+                };
+                /** @enum {string} */
+                dataState: "final";
+                /** @enum {string} */
+                dataTimezone: "America/Los_Angeles";
+                latestObservedDate?: string;
+                /** @enum {boolean} */
+                exhaustive: false;
+            };
+        };
         SearchJobsBody: {
             /** @description Free-text search query matched against job title and description. Up to 200 characters. */
             query?: string;
@@ -4996,8 +5500,11 @@ export interface components {
                 subscriberId: string;
                 /** @description The job-filter criteria the alert matches against. */
                 filters?: unknown;
-                /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                frequency: string;
+                /**
+                 * @description Weekly delivery cadence.
+                 * @enum {string}
+                 */
+                frequency: "weekly";
                 /** @description Whether the alert is currently active. */
                 isActive: boolean;
                 /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
@@ -5301,6 +5808,13 @@ export interface components {
             /** @description The display name of the tag. */
             name?: string;
         };
+        UpdateWebhookEndpointBody: {
+            /** Format: uri */
+            url?: string;
+            event_types?: ("job.created" | "job.updated" | "job.deleted" | "company.created" | "company.updated" | "company.deleted" | "candidate.created" | "candidate.updated" | "candidate.deleted" | "marketing_permission.granted" | "marketing_permission.withdrawn")[];
+            /** @enum {string} */
+            status?: "enabled" | "paused";
+        };
         Usage: {
             /**
              * @description String representing the object's type. Objects of the same type share the same value.
@@ -5322,6 +5836,1003 @@ export interface components {
             limit: number | null;
             /** @description Slots remaining before the limit. Null when unlimited; never negative when finite. */
             remaining: number | null;
+        };
+        /**
+         * @example display_name
+         * @enum {string}
+         */
+        WebhookCandidateChangedField: "email" | "display_name";
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECANDIDATECREATED",
+         *       "object": "event",
+         *       "type": "candidate.created",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-08-03T12:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "boardUsers_01EXAMPLE",
+         *           "object": "candidate",
+         *           "email": "candidate@example.test",
+         *           "display_name": "Example Candidate",
+         *           "created_at": "2026-08-03T12:00:00Z",
+         *           "updated_at": "2026-08-03T12:00:00Z",
+         *           "revision": 1
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookCandidateCreatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "candidate.created";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "candidate";
+                    email: string;
+                    display_name: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    created_at: string;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECANDIDATEDELETED",
+         *       "object": "event",
+         *       "type": "candidate.deleted",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-08-03T14:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "boardUsers_01EXAMPLE",
+         *           "object": "candidate",
+         *           "revision": 3,
+         *           "deleted": true,
+         *           "deleted_at": "2026-08-03T14:00:00Z",
+         *           "email": "candidate@example.test"
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookCandidateDeletedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "candidate.deleted";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Candidate permanent-erasure tombstone. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "candidate";
+                    revision: number;
+                    /** @enum {boolean} */
+                    deleted: true;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    deleted_at: string;
+                    email: string;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission.
+         * @example {
+         *       "id": "boardUsers_01EXAMPLE",
+         *       "object": "candidate",
+         *       "email": "candidate@example.test",
+         *       "display_name": "Example Candidate",
+         *       "created_at": "2026-08-03T12:00:00Z",
+         *       "updated_at": "2026-08-03T12:00:00Z",
+         *       "revision": 1
+         *     }
+         */
+        WebhookCandidateSnapshot: {
+            id: string;
+            /** @enum {string} */
+            object: "candidate";
+            email: string;
+            display_name: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            created_at: string;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            updated_at: string | null;
+            revision: number;
+        };
+        /**
+         * @description V1 Candidate permanent-erasure tombstone.
+         * @example {
+         *       "id": "boardUsers_01EXAMPLE",
+         *       "object": "candidate",
+         *       "revision": 3,
+         *       "deleted": true,
+         *       "deleted_at": "2026-08-03T14:00:00Z",
+         *       "email": "candidate@example.test"
+         *     }
+         */
+        WebhookCandidateTombstone: {
+            id: string;
+            /** @enum {string} */
+            object: "candidate";
+            revision: number;
+            /** @enum {boolean} */
+            deleted: true;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            deleted_at: string;
+            email: string;
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECANDIDATEUPDATED",
+         *       "object": "event",
+         *       "type": "candidate.updated",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-08-03T13:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "boardUsers_01EXAMPLE",
+         *           "object": "candidate",
+         *           "email": "candidate@example.test",
+         *           "display_name": "Updated Candidate",
+         *           "created_at": "2026-08-03T12:00:00Z",
+         *           "updated_at": "2026-08-03T13:00:00Z",
+         *           "revision": 2
+         *         },
+         *         "changed_fields": [
+         *           "display_name"
+         *         ]
+         *       }
+         *     }
+         */
+        WebhookCandidateUpdatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "candidate.updated";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "candidate";
+                    email: string;
+                    display_name: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    created_at: string;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Closed Candidate changed_fields vocabulary for candidate.updated. */
+                changed_fields: ("email" | "display_name")[];
+            };
+        };
+        /**
+         * @example name
+         * @enum {string}
+         */
+        WebhookCompanyChangedField: "slug" | "name" | "website" | "logo_url";
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECOMPANYCREATED",
+         *       "object": "event",
+         *       "type": "company.created",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T12:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "companies_01EXAMPLE",
+         *           "object": "company",
+         *           "slug": "acme",
+         *           "name": "Acme",
+         *           "website": "https://acme.example",
+         *           "logo_url": null,
+         *           "updated_at": "2026-07-24T12:00:00Z",
+         *           "revision": 1
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookCompanyCreatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "company.created";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "company";
+                    slug: string;
+                    name: string;
+                    website: string | null;
+                    logo_url: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECOMPANYDELETED",
+         *       "object": "event",
+         *       "type": "company.deleted",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T14:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "companies_01EXAMPLE",
+         *           "object": "company",
+         *           "revision": 3,
+         *           "deleted": true,
+         *           "deleted_at": "2026-07-24T14:00:00Z",
+         *           "slug": "acme"
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookCompanyDeletedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "company.deleted";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Company deletion tombstone. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "company";
+                    revision: number;
+                    /** @enum {boolean} */
+                    deleted: true;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    deleted_at: string;
+                    slug: string;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data.
+         * @example {
+         *       "id": "companies_01EXAMPLE",
+         *       "object": "company",
+         *       "slug": "acme",
+         *       "name": "Acme",
+         *       "website": "https://acme.example",
+         *       "logo_url": null,
+         *       "updated_at": "2026-07-24T12:00:00Z",
+         *       "revision": 1
+         *     }
+         */
+        WebhookCompanySnapshot: {
+            id: string;
+            /** @enum {string} */
+            object: "company";
+            slug: string;
+            name: string;
+            website: string | null;
+            logo_url: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            updated_at: string | null;
+            revision: number;
+        };
+        /**
+         * @description V1 Company deletion tombstone.
+         * @example {
+         *       "id": "companies_01EXAMPLE",
+         *       "object": "company",
+         *       "revision": 3,
+         *       "deleted": true,
+         *       "deleted_at": "2026-07-24T14:00:00Z",
+         *       "slug": "acme"
+         *     }
+         */
+        WebhookCompanyTombstone: {
+            id: string;
+            /** @enum {string} */
+            object: "company";
+            revision: number;
+            /** @enum {boolean} */
+            deleted: true;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            deleted_at: string;
+            slug: string;
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLECOMPANYUPDATED",
+         *       "object": "event",
+         *       "type": "company.updated",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T13:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "companies_01EXAMPLE",
+         *           "object": "company",
+         *           "slug": "acme",
+         *           "name": "Acme Corporation",
+         *           "website": "https://acme.example",
+         *           "logo_url": null,
+         *           "updated_at": "2026-07-24T13:00:00Z",
+         *           "revision": 2
+         *         },
+         *         "changed_fields": [
+         *           "name"
+         *         ]
+         *       }
+         *     }
+         */
+        WebhookCompanyUpdatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "company.updated";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "company";
+                    slug: string;
+                    name: string;
+                    website: string | null;
+                    logo_url: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Closed Company changed_fields vocabulary for company.updated. */
+                changed_fields: ("slug" | "name" | "website" | "logo_url")[];
+            };
+        };
+        WebhookDelivery: {
+            id: string;
+            /** @enum {string} */
+            object: "webhook_delivery";
+            /** @description Stable public event id (e.g. evt_…). Unchanged across retries and replay. */
+            event_id: string;
+            event_type: string;
+            endpoint_id: string;
+            /** @enum {string} */
+            status: "pending" | "retrying" | "delivered" | "terminal" | "exhausted";
+            /** @enum {string|null} */
+            terminal_reason: "http_410" | "permanent_response" | "invalid_reference" | "endpoint_paused" | "retry_attempt_limit" | "delivery_window_expired" | "retention_expired" | "endpoint_retired" | null;
+            replayable: boolean;
+            replay_expires_at: string;
+            payload_purged_at: string | null;
+            attempt_count: number;
+            next_attempt_at: string | null;
+            first_attempt_at: string | null;
+            last_attempt_at: string | null;
+            completed_at: string | null;
+            created_at: string;
+        };
+        WebhookDeliveryAttempt: {
+            attempt_number: number;
+            started_at: string;
+            duration_ms: number;
+            /** @enum {string} */
+            outcome: "delivered" | "retryable" | "terminal";
+            status_code: number | null;
+            status_class: string;
+            /** @description Sanitized diagnostic recorded at attempt time. Never a response body or secret. */
+            diagnostic: string;
+        };
+        WebhookDeliveryDetail: components["schemas"]["WebhookDelivery"] & {
+            attempts: components["schemas"]["WebhookDeliveryAttempt"][];
+        };
+        WebhookEndpoint: {
+            id: string;
+            /** @enum {string} */
+            object: "webhook_endpoint";
+            url: string;
+            event_types: string[];
+            /** @enum {string} */
+            status: "enabled" | "paused" | "failing";
+            failure_streak: number;
+            last_failure_at: string | null;
+            last_success_at: string | null;
+            health_changed_at: string | null;
+            /** @enum {string|null} */
+            health_reason: "consecutive_failures" | "retry_exhausted" | "http_410" | "operator_pause" | "operator_resume" | "synthetic_recovery" | null;
+            secret_overlap_expires_at: string | null;
+            created_at: string;
+            updated_at: string;
+        };
+        WebhookEndpointCreated: components["schemas"]["WebhookEndpoint"] & {
+            /** @description Signing secret returned exactly once on create or rotate. Store it immediately. */
+            secret: string;
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEJOBCREATED",
+         *       "object": "event",
+         *       "type": "job.created",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T12:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "jobs_01EXAMPLEJOB",
+         *           "object": "job",
+         *           "slug": "senior-engineer",
+         *           "title": "Senior Engineer",
+         *           "status": "published",
+         *           "company_id": "companies_01EXAMPLE",
+         *           "company_name": "Acme",
+         *           "location": "Remote",
+         *           "employment_type": "full_time",
+         *           "workplace_type": "remote",
+         *           "published_at": "2026-07-24T12:00:00Z",
+         *           "expires_at": "2026-08-23T12:00:00Z",
+         *           "updated_at": "2026-07-24T12:00:00Z",
+         *           "revision": 1
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookEventEnvelope: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @description Dot-delimited event type (e.g. job.created). */
+            type: string;
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description Allowlisted resource snapshot or tombstone. */
+                object: {
+                    [key: string]: unknown;
+                };
+                /** @description Closed vocabulary of fields that changed; empty for create/delete. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description A single closed Job changed_fields vocabulary member.
+         * @example title
+         * @enum {string}
+         */
+        WebhookJobChangedField: "slug" | "title" | "status" | "company_id" | "company_name" | "location" | "employment_type" | "workplace_type" | "published_at" | "expires_at";
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEJOBCREATED",
+         *       "object": "event",
+         *       "type": "job.created",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T12:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "jobs_01EXAMPLEJOB",
+         *           "object": "job",
+         *           "slug": "senior-engineer",
+         *           "title": "Senior Engineer",
+         *           "status": "published",
+         *           "company_id": "companies_01EXAMPLE",
+         *           "company_name": "Acme",
+         *           "location": "Remote",
+         *           "employment_type": "full_time",
+         *           "workplace_type": "remote",
+         *           "published_at": "2026-07-24T12:00:00Z",
+         *           "expires_at": "2026-08-23T12:00:00Z",
+         *           "updated_at": "2026-07-24T12:00:00Z",
+         *           "revision": 1
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookJobCreatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "job.created";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "job";
+                    slug: string | null;
+                    title: string;
+                    status: string;
+                    company_id: string | null;
+                    company_name: string | null;
+                    location: string | null;
+                    employment_type: string | null;
+                    workplace_type: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    published_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    expires_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEJOBDELETED",
+         *       "object": "event",
+         *       "type": "job.deleted",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T14:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "jobs_01EXAMPLEJOB",
+         *           "object": "job",
+         *           "revision": 3,
+         *           "deleted": true,
+         *           "deleted_at": "2026-07-24T14:00:00Z",
+         *           "slug": "senior-engineer",
+         *           "company_id": "companies_01EXAMPLE"
+         *         },
+         *         "changed_fields": []
+         *       }
+         *     }
+         */
+        WebhookJobDeletedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "job.deleted";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Job delete tombstone. Minimum identity to drop a downstream copy without re-fetching. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "job";
+                    revision: number;
+                    /** @enum {boolean} */
+                    deleted: true;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    deleted_at: string;
+                    slug: string | null;
+                    company_id: string | null;
+                };
+                /** @description Empty for create/delete events. */
+                changed_fields: string[];
+            };
+        };
+        /**
+         * @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row.
+         * @example {
+         *       "id": "jobs_01EXAMPLEJOB",
+         *       "object": "job",
+         *       "slug": "senior-engineer",
+         *       "title": "Senior Engineer",
+         *       "status": "published",
+         *       "company_id": "companies_01EXAMPLE",
+         *       "company_name": "Acme",
+         *       "location": "Remote",
+         *       "employment_type": "full_time",
+         *       "workplace_type": "remote",
+         *       "published_at": "2026-07-24T12:00:00Z",
+         *       "expires_at": "2026-08-23T12:00:00Z",
+         *       "updated_at": "2026-07-24T12:00:00Z",
+         *       "revision": 1
+         *     }
+         */
+        WebhookJobSnapshot: {
+            id: string;
+            /** @enum {string} */
+            object: "job";
+            slug: string | null;
+            title: string;
+            status: string;
+            company_id: string | null;
+            company_name: string | null;
+            location: string | null;
+            employment_type: string | null;
+            workplace_type: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            published_at: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            expires_at: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            updated_at: string | null;
+            revision: number;
+        };
+        /**
+         * @description V1 Job delete tombstone. Minimum identity to drop a downstream copy without re-fetching.
+         * @example {
+         *       "id": "jobs_01EXAMPLEJOB",
+         *       "object": "job",
+         *       "revision": 3,
+         *       "deleted": true,
+         *       "deleted_at": "2026-07-24T14:00:00Z",
+         *       "slug": "senior-engineer",
+         *       "company_id": "companies_01EXAMPLE"
+         *     }
+         */
+        WebhookJobTombstone: {
+            id: string;
+            /** @enum {string} */
+            object: "job";
+            revision: number;
+            /** @enum {boolean} */
+            deleted: true;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            deleted_at: string;
+            slug: string | null;
+            company_id: string | null;
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEJOBUPDATED",
+         *       "object": "event",
+         *       "type": "job.updated",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-07-24T13:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "jobs_01EXAMPLEJOB",
+         *           "object": "job",
+         *           "slug": "senior-engineer",
+         *           "title": "Staff Engineer",
+         *           "status": "published",
+         *           "company_id": "companies_01EXAMPLE",
+         *           "company_name": "Acme",
+         *           "location": "Remote",
+         *           "employment_type": "full_time",
+         *           "workplace_type": "remote",
+         *           "published_at": "2026-07-24T12:00:00Z",
+         *           "expires_at": "2026-08-23T12:00:00Z",
+         *           "updated_at": "2026-07-24T13:00:00Z",
+         *           "revision": 2
+         *         },
+         *         "changed_fields": [
+         *           "title"
+         *         ]
+         *       }
+         *     }
+         */
+        WebhookJobUpdatedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "job.updated";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "job";
+                    slug: string | null;
+                    title: string;
+                    status: string;
+                    company_id: string | null;
+                    company_name: string | null;
+                    location: string | null;
+                    employment_type: string | null;
+                    workplace_type: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    published_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    expires_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string | null;
+                    revision: number;
+                };
+                /** @description Closed Job changed_fields vocabulary for job.updated. */
+                changed_fields: ("slug" | "title" | "status" | "company_id" | "company_name" | "location" | "employment_type" | "workplace_type" | "published_at" | "expires_at")[];
+            };
+        };
+        /**
+         * @example status
+         * @enum {string}
+         */
+        WebhookMarketingPermissionChangedField: "status" | "source" | "reason" | "granted_at" | "withdrawn_at";
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEMARKETINGGRANT",
+         *       "object": "event",
+         *       "type": "marketing_permission.granted",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-08-03T15:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "boardUsers_01EXAMPLE",
+         *           "object": "marketing_permission",
+         *           "email": "person@example.test",
+         *           "display_name": "Example Person",
+         *           "role": "candidate",
+         *           "status": "granted",
+         *           "source": "candidate_sign_up",
+         *           "reason": null,
+         *           "granted_at": "2026-08-03T15:00:00Z",
+         *           "withdrawn_at": null,
+         *           "updated_at": "2026-08-03T15:00:00Z",
+         *           "revision": 1
+         *         },
+         *         "changed_fields": [
+         *           "status",
+         *           "source",
+         *           "granted_at"
+         *         ]
+         *       }
+         *     }
+         */
+        WebhookMarketingPermissionGrantedEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "marketing_permission.granted";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 marketing-permission reconciliation snapshot, projected from the board user. Explicit allowlist; never credentials, tokens, or private Candidate data. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "marketing_permission";
+                    /** Format: email */
+                    email: string;
+                    display_name: string | null;
+                    role: string;
+                    /** @enum {string} */
+                    status: "granted" | "withdrawn";
+                    source: string;
+                    /** @enum {string|null} */
+                    reason: "person_request" | "operator_request" | "account_deleted" | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    granted_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    withdrawn_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string;
+                    revision: number;
+                };
+                changed_fields: ("status" | "source" | "reason" | "granted_at" | "withdrawn_at")[];
+            };
+        };
+        /**
+         * @description V1 marketing-permission reconciliation snapshot, projected from the board user. Explicit allowlist; never credentials, tokens, or private Candidate data.
+         * @example {
+         *       "id": "boardUsers_01EXAMPLE",
+         *       "object": "marketing_permission",
+         *       "email": "person@example.test",
+         *       "display_name": "Example Person",
+         *       "role": "candidate",
+         *       "status": "granted",
+         *       "source": "candidate_sign_up",
+         *       "reason": null,
+         *       "granted_at": "2026-08-03T15:00:00Z",
+         *       "withdrawn_at": null,
+         *       "updated_at": "2026-08-03T15:00:00Z",
+         *       "revision": 1
+         *     }
+         */
+        WebhookMarketingPermissionSnapshot: {
+            id: string;
+            /** @enum {string} */
+            object: "marketing_permission";
+            /** Format: email */
+            email: string;
+            display_name: string | null;
+            role: string;
+            /** @enum {string} */
+            status: "granted" | "withdrawn";
+            source: string;
+            /** @enum {string|null} */
+            reason: "person_request" | "operator_request" | "account_deleted" | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            granted_at: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            withdrawn_at: string | null;
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            updated_at: string;
+            revision: number;
+        };
+        /**
+         * @description Common outbound webhook event envelope.
+         * @example {
+         *       "id": "evt_01EXAMPLEMARKETINGWITHDRAWAL",
+         *       "object": "event",
+         *       "type": "marketing_permission.withdrawn",
+         *       "schema_version": "1",
+         *       "occurred_at": "2026-08-03T16:00:00Z",
+         *       "board_id": "acc_01EXAMPLEBOARD",
+         *       "data": {
+         *         "object": {
+         *           "id": "boardUsers_01EXAMPLE",
+         *           "object": "marketing_permission",
+         *           "email": "person@example.test",
+         *           "display_name": "Example Person",
+         *           "role": "candidate",
+         *           "status": "withdrawn",
+         *           "source": "notification_preferences",
+         *           "reason": "person_request",
+         *           "granted_at": "2026-08-03T15:00:00Z",
+         *           "withdrawn_at": "2026-08-03T16:00:00Z",
+         *           "updated_at": "2026-08-03T16:00:00Z",
+         *           "revision": 2
+         *         },
+         *         "changed_fields": [
+         *           "status",
+         *           "source",
+         *           "reason",
+         *           "withdrawn_at"
+         *         ]
+         *       }
+         *     }
+         */
+        WebhookMarketingPermissionWithdrawnEvent: {
+            /** @description Stable public event id (evt_…). */
+            id: string;
+            /** @enum {string} */
+            object: "event";
+            /** @enum {string} */
+            type: "marketing_permission.withdrawn";
+            /** @enum {string} */
+            schema_version: "1";
+            /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+            occurred_at: string;
+            /** @description Board account id that owns the event. */
+            board_id: string;
+            data: {
+                /** @description V1 marketing-permission reconciliation snapshot, projected from the board user. Explicit allowlist; never credentials, tokens, or private Candidate data. */
+                object: {
+                    id: string;
+                    /** @enum {string} */
+                    object: "marketing_permission";
+                    /** Format: email */
+                    email: string;
+                    display_name: string | null;
+                    role: string;
+                    /** @enum {string} */
+                    status: "granted" | "withdrawn";
+                    source: string;
+                    /** @enum {string|null} */
+                    reason: "person_request" | "operator_request" | "account_deleted" | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    granted_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    withdrawn_at: string | null;
+                    /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+                    updated_at: string;
+                    revision: number;
+                };
+                changed_fields: ("status" | "source" | "reason" | "granted_at" | "withdrawn_at")[];
+            };
+        };
+        WebhookTestDelivery: {
+            /** @enum {string} */
+            object: "webhook_test_delivery";
+            delivered: boolean;
+            status: number | null;
+            status_class: string;
+            latency_ms: number;
+            diagnostic: string;
         };
     };
     responses: never;
@@ -5357,6 +6868,166 @@ export interface operations {
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    inspectSearchConsoleUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uri
+                     * @description Canonical HTTPS Board URL covered by the connected property.
+                     */
+                    inspectionUrl: string;
+                    /** @description Optional BCP-47 language code, such as en-AU. */
+                    languageCode?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The indexed-version URL Inspection result. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchConsoleInspectionResponse"];
+                };
+            };
+            /** @description The URL is outside the Board’s reporting coverage. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Search Console is not connected or access was lost. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description URL Inspection quota was reached. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google rejected the validated request. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    querySearchConsole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    startDate: string;
+                    endDate: string;
+                    dimensions?: ("country" | "date" | "device" | "page" | "query" | "searchAppearance")[];
+                    /** @enum {string} */
+                    type?: "web" | "image" | "video" | "news" | "discover" | "googleNews";
+                    dimensionFilterGroups?: {
+                        /** @enum {string} */
+                        groupType: "and";
+                        filters: {
+                            /** @enum {string} */
+                            dimension: "country" | "device" | "page" | "query" | "searchAppearance";
+                            /** @enum {string} */
+                            operator: "contains" | "equals" | "notContains" | "notEquals" | "includingRegex" | "excludingRegex";
+                            expression: string;
+                        }[];
+                    }[];
+                    /** @enum {string} */
+                    aggregationType?: "auto" | "byPage" | "byProperty";
+                    rowLimit?: number;
+                    startRow?: number;
+                    /** @enum {string} */
+                    dataState?: "final";
+                };
+            };
+        };
+        responses: {
+            /** @description Live finalized Search Console performance rows. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchConsoleQueryResponse"];
+                };
+            };
+            /** @description Search Console is not connected or access was lost. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console quota was reached. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google rejected the validated request. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Google Search Console is unavailable. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6050,6 +7721,55 @@ export interface operations {
             };
         };
     };
+    exportBlogAuthors: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog author export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/authors/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getBlogAuthor: {
         parameters: {
             query?: never;
@@ -6286,6 +8006,55 @@ export interface operations {
             };
             /** @description The request body exceeded 5 MB. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportBlogPosts: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog post export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/posts/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6671,6 +8440,55 @@ export interface operations {
             };
         };
     };
+    exportBlogTags: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of blog tag export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/blog/tags/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getBlogTag: {
         parameters: {
             query?: never;
@@ -6835,6 +8653,55 @@ export interface operations {
                         nextCursor: string | null;
                         data: components["schemas"]["Candidate"][];
                     };
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportCandidates: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of candidate export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/candidates/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
                 };
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -7068,6 +8935,55 @@ export interface operations {
             };
             /** @description The request body exceeded 5 MB. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportCompanies: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of company export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/companies/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8085,6 +10001,55 @@ export interface operations {
             };
             /** @description The claim has already been resolved. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    exportEmployers: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of employer export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/employers/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9159,6 +11124,55 @@ export interface operations {
             };
         };
     };
+    exportJobs: {
+        parameters: {
+            query?: {
+                /** @description Export format. `json` streams an inline list of job export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+                format?: "csv" | "json";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Inline JSON export (`format=json`). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/jobs/export */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["ExportRow"][];
+                    };
+                };
+            };
+            /** @description An `exports.generate` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     searchJobs: {
         parameters: {
             query?: never;
@@ -9491,6 +11505,124 @@ export interface operations {
             };
             /** @description The job is already published, or the account's published-job quota is exhausted. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listMarketingPermissions: {
+        parameters: {
+            query?: {
+                status?: "granted" | "withdrawn";
+                email?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Consent decisions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/marketing-permissions */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["MarketingPermission"][];
+                    };
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Key lacks `marketing_permissions.read`. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMarketingPermissionWithdraw: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The consent after the withdrawal. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarketingPermission"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Key lacks `marketing_permissions.manage`. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Board user not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10043,6 +12175,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperationResource"];
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    downloadOperationOutput: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier for the operation. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The operation output, streamed as a file attachment. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -11320,7 +13484,7 @@ export interface operations {
     exportSubscribers: {
         parameters: {
             query?: {
-                /** @description Export format. `json` streams an inline list (capped at 10,000 rows); `csv` starts an async `subscribers.export` operation whose result carries a `downloadUrl`. */
+                /** @description Export format. `json` streams an inline list (capped at 10,000 rows); `csv` starts an async `subscribers.export` operation whose CSV is downloadable from `GET /v1/operations/{id}/download` once it succeeds. */
                 format?: "csv" | "json";
             };
             header?: never;
@@ -11346,7 +13510,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description A `subscribers.export` operation was started (`format=csv`). Poll the operation; its result carries `downloadUrl` and `rowCount`. */
+            /** @description A `subscribers.export` operation was started (`format=csv`). Poll the operation; once it succeeds, download the CSV from `GET /v1/operations/{id}/download`. */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -11488,8 +13652,11 @@ export interface operations {
                             subscriberId: string;
                             /** @description The job-filter criteria the alert matches against. */
                             filters?: unknown;
-                            /** @description Delivery cadence: `instant`, `daily`, or `weekly`. */
-                            frequency: string;
+                            /**
+                             * @description Weekly delivery cadence.
+                             * @enum {string}
+                             */
+                            frequency: "weekly";
                             /** @description Whether the alert is currently active. */
                             isActive: boolean;
                             /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
@@ -12559,6 +14726,520 @@ export interface operations {
             };
             /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listWebhookDeliveries: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+                /** @description Filter to deliveries for a single endpoint. */
+                endpoint_id?: string;
+                /** @description Filter by public delivery lifecycle status. */
+                status?: "pending" | "retrying" | "delivered" | "terminal" | "exhausted";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/webhook-deliveries */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["WebhookDelivery"][];
+                    };
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.read or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getWebhookDelivery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook delivery ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. `attempts` holds the most recent ≤500 attempts in ascending order; `attempt_count > attempts.length` implies truncation. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDeliveryDetail"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.read or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Delivery not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    replayWebhookDelivery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook delivery ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Delivery reset to pending for a fresh attempt. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Delivery not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Cannot replay: delivery is still open, its 30-day replay window expired, or its destination no longer exists. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    listWebhookEndpoints: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/webhook-endpoints */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["WebhookEndpoint"][];
+                    };
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.read or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createWebhookEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWebhookEndpointBody"];
+            };
+        };
+        responses: {
+            /** @description Endpoint created; secret returned once. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpointCreated"];
+                };
+            };
+            /** @description Invalid URL or event types. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getWebhookEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook endpoint ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpoint"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.read or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteWebhookEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook endpoint ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Retired. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    updateWebhookEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook endpoint ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateWebhookEndpointBody"];
+            };
+        };
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpoint"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    rotateWebhookEndpointSecret: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook endpoint ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secret rotated; new secret returned once. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpointCreated"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    testWebhookEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The webhook endpoint ID. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test delivery attempted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookTestDelivery"];
+                };
+            };
+            /** @description The board's plan does not include webhooks (`plan_upgrade_required`). Webhooks require a paid plan, Starter and above. */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing webhooks.manage or a family read scope. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Endpoint not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
