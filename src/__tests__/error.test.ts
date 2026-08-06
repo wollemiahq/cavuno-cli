@@ -17,6 +17,19 @@ describe('fromApiError', () => {
     expect(err.message).toContain('Job not found');
   });
 
+  it('maps marketing_permissions_not_found → exit 4', () => {
+    const err = fromApiError(
+      {
+        error: {
+          code: 'marketing_permissions_not_found',
+          message: 'Marketing permission resource not found',
+        },
+      },
+      fakeResponse(404),
+    );
+    expect(err.exitCode).toBe(4);
+  });
+
   it('maps jobs_quota_exceeded → exit 5', () => {
     const err = fromApiError(
       { error: { code: 'jobs_quota_exceeded', message: 'Limit reached' } },
