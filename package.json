@@ -1,6 +1,6 @@
 {
   "name": "cavuno",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "Manage your Cavuno job board from the command line.",
   "keywords": [
     "ai-agent",
@@ -54,7 +54,7 @@
     "build:tsc": "tsc && chmod +x ./build/index.js",
     "build:watch": "tsc --watch",
     "clean": "git clean -xdf .turbo build node_modules",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest run",
     "generate-manifest": "tsx scripts/generate-manifest.ts",
     "assert-publish-target": "node -e \"const p=require('./package.json'); if(p.name!=='cavuno'){throw new Error('Refusing to publish: package.json name is '+p.name+', expected cavuno')}; if(p.private){throw new Error('Refusing to publish: package.json has private:true')}\"",
@@ -69,7 +69,8 @@
     "tsup": "^8.4.0",
     "tsx": "^4.19.2",
     "vitest": "^3.2.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2"
   },
   "engines": {
     "node": ">=18.18"
