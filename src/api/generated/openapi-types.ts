@@ -435,7 +435,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog author
-         * @description Permanently deletes a blog author. Posts referencing this author keep the stale ID in their `authorIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog author and schedules removal of its ID from every post `authorIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogAuthor"];
         options?: never;
@@ -673,7 +673,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog tag
-         * @description Permanently deletes a blog tag. Posts referencing this tag keep the stale ID in their `tagIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog tag and schedules removal of its ID from every post `tagIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogTag"];
         options?: never;
