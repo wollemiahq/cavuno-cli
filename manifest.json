@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "generatedAt": "2026-08-05T09:30:42.555Z",
   "groups": [
     {
@@ -1363,7 +1363,7 @@
         },
         {
           "name": "authors delete",
-          "description": "Delete an author (posts keep the stale ID).",
+          "description": "Delete an author (also clears the ID from posts).",
           "synopsis": "cavuno blog authors delete <id> [options]",
           "arguments": [
             {
@@ -1498,7 +1498,7 @@
         },
         {
           "name": "tags delete",
-          "description": "Delete a tag (posts keep the stale ID).",
+          "description": "Delete a tag (also clears the ID from posts).",
           "synopsis": "cavuno blog tags delete <id> [options]",
           "arguments": [
             {
