@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "generatedAt": "2026-07-30T01:38:08.828Z",
+  "version": "1.5.0",
+  "generatedAt": "2026-08-05T09:30:42.555Z",
   "groups": [
     {
       "name": "jobs",
@@ -5206,6 +5206,355 @@
             "cavuno redirects batch --file ops.json"
           ],
           "mapsTo": "POST /v1/redirects/batch"
+        }
+      ]
+    },
+    {
+      "name": "webhooks",
+      "description": "Manage Board-owned webhook endpoints and inspect delivery history.",
+      "commands": [
+        {
+          "name": "endpoints list",
+          "description": "List webhook endpoints.",
+          "synopsis": "cavuno webhooks endpoints list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints list"
+          ],
+          "mapsTo": "GET /v1/webhook-endpoints"
+        },
+        {
+          "name": "endpoints get",
+          "description": "Fetch a webhook endpoint by ID.",
+          "synopsis": "cavuno webhooks endpoints get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Endpoint ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno webhooks endpoints get whe_123"
+          ],
+          "mapsTo": "GET /v1/webhook-endpoints/:id"
+        },
+        {
+          "name": "endpoints create",
+          "description": "Create a webhook endpoint. Prints the one-time signing secret once.",
+          "synopsis": "cavuno webhooks endpoints create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--url <url>",
+              "description": "Public HTTPS URL that will receive deliveries",
+              "required": true
+            },
+            {
+              "flags": "--event-types <types>",
+              "description": "Comma-separated V1 event types (e.g. job.created,company.updated)",
+              "required": true
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints create --url https://hooks.example.com/cavuno --event-types job.created,job.updated"
+          ],
+          "mapsTo": "POST /v1/webhook-endpoints"
+        },
+        {
+          "name": "endpoints update",
+          "description": "Update a webhook endpoint (URL, event types, or status).",
+          "synopsis": "cavuno webhooks endpoints update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Endpoint ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--url <url>",
+              "description": "New HTTPS destination URL",
+              "required": false
+            },
+            {
+              "flags": "--event-types <types>",
+              "description": "Comma-separated V1 event types replacing the current selection",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "enabled or paused",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints update whe_123 --status paused",
+            "cavuno webhooks endpoints update whe_123 --url https://hooks.example.com/v2"
+          ],
+          "mapsTo": "PATCH /v1/webhook-endpoints/:id"
+        },
+        {
+          "name": "endpoints delete",
+          "description": "Retire a webhook endpoint (stops future delivery; keeps config for replay).",
+          "synopsis": "cavuno webhooks endpoints delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Endpoint ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints delete whe_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/webhook-endpoints/:id"
+        },
+        {
+          "name": "endpoints rotate-secret",
+          "description": "Rotate the signing secret. Prints the new secret once.",
+          "synopsis": "cavuno webhooks endpoints rotate-secret <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Endpoint ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints rotate-secret whe_123 --yes"
+          ],
+          "mapsTo": "POST /v1/webhook-endpoints/:id/rotate-secret"
+        },
+        {
+          "name": "endpoints test",
+          "description": "Send one synthetic signed test delivery to the endpoint URL.",
+          "synopsis": "cavuno webhooks endpoints test <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Endpoint ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks endpoints test whe_123 --yes"
+          ],
+          "mapsTo": "POST /v1/webhook-endpoints/:id/test"
+        },
+        {
+          "name": "deliveries list",
+          "description": "List webhook deliveries (newest first).",
+          "synopsis": "cavuno webhooks deliveries list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--endpoint <id>",
+              "description": "Filter to a single endpoint ID",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (pending|retrying|delivered|terminal|exhausted)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks deliveries list",
+            "cavuno webhooks deliveries list --endpoint whe_123 --status delivered"
+          ],
+          "mapsTo": "GET /v1/webhook-deliveries"
+        },
+        {
+          "name": "deliveries get",
+          "description": "Fetch a webhook delivery by ID (includes attempt history).",
+          "synopsis": "cavuno webhooks deliveries get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Delivery ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno webhooks deliveries get wdl_123"
+          ],
+          "mapsTo": "GET /v1/webhook-deliveries/:id"
+        },
+        {
+          "name": "deliveries replay",
+          "description": "Replay a completed delivery (delivered/terminal/exhausted). Reuses frozen event bytes with a fresh signature. Exhausted deliveries get one fresh attempt, not a fresh retry budget. Open (pending/retrying) deliveries return 409.",
+          "synopsis": "cavuno webhooks deliveries replay <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Delivery ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno webhooks deliveries replay wdl_123 --yes"
+          ],
+          "mapsTo": "POST /v1/webhook-deliveries/:id/replay"
+        }
+      ]
+    },
+    {
+      "name": "marketing-permissions",
+      "description": "Read marketing-email consent decisions off the board user records, and withdraw on request. Grants exist only on Board-user surfaces.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List recorded consent decisions. People who never decided are absent — absence means no consent, never a default.",
+          "synopsis": "cavuno marketing-permissions list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "granted or withdrawn",
+              "required": false
+            },
+            {
+              "flags": "--email <email>",
+              "description": "Exact-match lookup; returns at most one item",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size (1-100)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Opaque pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno marketing-permissions list",
+            "cavuno marketing-permissions list --status granted",
+            "cavuno marketing-permissions list --email person@example.com"
+          ],
+          "mapsTo": "GET /v1/marketing-permissions"
+        },
+        {
+          "name": "withdraw",
+          "description": "Withdraw a board user's marketing consent (reason: operator_request) — the right move when someone asks you directly to be removed. Idempotent. Cannot grant or restore.",
+          "synopsis": "cavuno marketing-permissions withdraw <boardUserId> [options]",
+          "arguments": [
+            {
+              "name": "boardUserId",
+              "description": "The board user ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno marketing-permissions withdraw boardUsers_01EXAMPLE --yes"
+          ],
+          "mapsTo": "POST /v1/marketing-permissions/{id}/withdraw"
         }
       ]
     }
