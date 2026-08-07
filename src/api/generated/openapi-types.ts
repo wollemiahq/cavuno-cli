@@ -435,7 +435,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog author
-         * @description Permanently deletes a blog author. Posts referencing this author keep the stale ID in their `authorIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog author and schedules removal of its ID from every post `authorIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogAuthor"];
         options?: never;
@@ -673,7 +673,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog tag
-         * @description Permanently deletes a blog tag. Posts referencing this tag keep the stale ID in their `tagIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog tag and schedules removal of its ID from every post `tagIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogTag"];
         options?: never;
@@ -1488,7 +1488,7 @@ export interface paths {
         put?: never;
         /**
          * Connect a reporting integration
-         * @description Starts the connection flow. Some providers return a hosted authorization URL, some connect immediately, and payment reporting returns the Board monetization-settings URL. Provider credentials and configuration are never returned.
+         * @description Starts the connection flow. Some providers return a hosted authorization URL, some connect immediately, and payment reporting returns the Board payments-settings URL. Provider credentials and configuration are never returned.
          */
         post: operations["connectIntegrationsReporting"];
         delete?: never;
@@ -3566,12 +3566,16 @@ export interface components {
             bio: string | null;
             /** @description The author's email address, or `null` if not set. */
             email: string | null;
+            /** @description The author's free-text location label, or `null` if not set. */
+            location: string | null;
             /** @description Author visibility status, or `null` if not set. */
             status: string | null;
             /** @description URL of the author avatar, or `null` if no avatar is set. */
             avatarUrl: string | null;
             /** @description The author's website URL, or `null` if not set. */
             websiteUrl: string | null;
+            /** @description The author's Facebook URL, or `null` if not set. */
+            facebookUrl: string | null;
             /** @description The author's X (Twitter) URL, or `null` if not set. */
             twitterUrl: string | null;
             /** @description The author's LinkedIn URL, or `null` if not set. */
@@ -3971,6 +3975,8 @@ export interface components {
              * @description The author's email address.
              */
             email?: string;
+            /** @description Free-text location label for the author (e.g. `Sydney, Australia`). */
+            location?: string;
             /**
              * @description Author visibility status. One of `active` or `inactive`.
              * @enum {string}
@@ -3980,6 +3986,8 @@ export interface components {
             avatarMediaId?: string | null;
             /** @description The author's personal website URL. Normalized to a canonical URL when stored. */
             websiteUrl?: string;
+            /** @description The author's Facebook profile URL. */
+            facebookUrl?: string;
             /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. */
             twitterUrl?: string;
             /** @description The author's LinkedIn profile URL. */
@@ -5555,6 +5563,8 @@ export interface components {
              * @description The author's email address.
              */
             email?: string;
+            /** @description Free-text location label for the author (e.g. `Sydney, Australia`). */
+            location?: string;
             /**
              * @description Author visibility status. One of `active` or `inactive`.
              * @enum {string}
@@ -5564,6 +5574,8 @@ export interface components {
             avatarMediaId?: string | null;
             /** @description The author's personal website URL. Normalized to a canonical URL when stored. */
             websiteUrl?: string;
+            /** @description The author's Facebook profile URL. */
+            facebookUrl?: string;
             /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. */
             twitterUrl?: string;
             /** @description The author's LinkedIn profile URL. */
