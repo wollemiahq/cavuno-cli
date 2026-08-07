@@ -65,7 +65,7 @@
     "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {
-    "@types/node": "24.9.1",
+    "@types/node": "26.1.2",
     "tsup": "^8.4.0",
     "tsx": "^4.19.2",
     "vitest": "^3.2.6",
