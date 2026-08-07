@@ -403,7 +403,7 @@ export function registerBlogCommand(root: Command): void {
     withYesOption(
       authors
         .command('delete')
-        .description('Delete an author (posts keep the stale ID).')
+        .description('Delete an author (also clears the ID from posts).')
         .argument('<id>', 'Author ID'),
     ).action(async function (this: Command, id: string) {
       const opts = this.opts<ConfirmOptions>();
@@ -511,7 +511,7 @@ export function registerBlogCommand(root: Command): void {
     withYesOption(
       tags
         .command('delete')
-        .description('Delete a tag (posts keep the stale ID).')
+        .description('Delete a tag (also clears the ID from posts).')
         .argument('<id>', 'Tag ID'),
     ).action(async function (this: Command, id: string) {
       const opts = this.opts<ConfirmOptions>();
