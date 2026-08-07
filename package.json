@@ -61,7 +61,7 @@
     "prepublishOnly": "pnpm run assert-publish-target && pnpm run build && pnpm run generate-manifest"
   },
   "dependencies": {
-    "commander": "^12.1.0",
+    "commander": "^15.0.0",
     "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {
