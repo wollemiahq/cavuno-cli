@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
-  "generatedAt": "2026-08-05T09:30:42.555Z",
+  "version": "1.5.1",
+  "generatedAt": "2026-08-20T02:53:23.417Z",
   "groups": [
     {
       "name": "jobs",
@@ -839,6 +839,60 @@
           "mapsTo": "POST /v1/companies/search"
         },
         {
+          "name": "block",
+          "description": "Block a company: archive live jobs and stop automated re-import (backfill, import, API bulk).",
+          "synopsis": "cavuno companies block <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--reason <text>",
+              "description": "Optional free-text reason",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies block k18acme... --yes",
+            "cavuno companies block k18acme... --reason \"legal request\" --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/block"
+        },
+        {
+          "name": "unblock",
+          "description": "Unblock a company so automated sourcing can add jobs again. Does not republish archived jobs.",
+          "synopsis": "cavuno companies unblock <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies unblock k18acme... --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/unblock"
+        },
+        {
           "name": "list-jobs",
           "description": "List jobs at a company (any status, optional filter).",
           "synopsis": "cavuno companies list-jobs <id> [options]",
@@ -1363,7 +1417,7 @@
         },
         {
           "name": "authors delete",
-          "description": "Delete an author (posts keep the stale ID).",
+          "description": "Delete an author (also clears the ID from posts).",
           "synopsis": "cavuno blog authors delete <id> [options]",
           "arguments": [
             {
@@ -1498,7 +1552,7 @@
         },
         {
           "name": "tags delete",
-          "description": "Delete a tag (posts keep the stale ID).",
+          "description": "Delete a tag (also clears the ID from posts).",
           "synopsis": "cavuno blog tags delete <id> [options]",
           "arguments": [
             {
@@ -4223,7 +4277,7 @@
     },
     {
       "name": "analytics",
-      "description": "Typed Board homepage analytics (overview metrics and traffic tables).",
+      "description": "Typed Board analytics (overview, traffic, apply-clicks, job-visitors).",
       "commands": [
         {
           "name": "overview",
@@ -4275,6 +4329,72 @@
             "cavuno analytics traffic --start 2026-01-01 --end 2026-01-30 --limit 5"
           ],
           "mapsTo": "GET /v1/analytics/traffic"
+        },
+        {
+          "name": "apply-clicks",
+          "description": "List apply clicks by job and first-touch channel (join jobs export on id).",
+          "synopsis": "cavuno analytics apply-clicks [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--start <date>",
+              "description": "Inclusive range start (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--end <date>",
+              "description": "Inclusive range end (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size (1–1000, default 100)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor from a previous response",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno analytics apply-clicks",
+            "cavuno analytics apply-clicks --start 2026-01-01 --end 2026-01-30 --limit 100"
+          ],
+          "mapsTo": "GET /v1/analytics/apply-clicks"
+        },
+        {
+          "name": "job-visitors",
+          "description": "List unique job-detail visitors by first-touch channel (join export on company_slug + slug).",
+          "synopsis": "cavuno analytics job-visitors [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--start <date>",
+              "description": "Inclusive range start (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--end <date>",
+              "description": "Inclusive range end (YYYY-MM-DD, UTC)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size (1–1000, default 100)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor from a previous response",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno analytics job-visitors",
+            "cavuno analytics job-visitors --start 2026-01-01 --end 2026-01-30"
+          ],
+          "mapsTo": "GET /v1/analytics/job-visitors"
         }
       ]
     },

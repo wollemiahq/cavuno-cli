@@ -433,7 +433,67 @@ export function registerCompaniesCommand(root: Command): void {
     },
   );
 
+  
   annotate(
+    withYesOption(
+      companies
+        .command('block')
+        .description(
+          'Block a company: archive live jobs and stop automated re-import (backfill, import, API bulk).',
+        )
+        .argument('<id>', 'Company ID')
+        .option('--reason <text>', 'Optional free-text reason')
+        .action(async function (this: Command, id: string) {
+          await confirmOrAbort(this.optsWithGlobals<ConfirmOptions>(), {
+            message: `Block company ${id}? Live jobs will be archived; automated sourcing will reject this employer until unblocked.`,
+          });
+          const client = getClient(this);
+          const format = getFormat(this);
+          const opts = this.opts<{ reason?: string }>();
+          const r = unwrap(
+            await client.block(id, {
+              ...(opts.reason !== undefined && { reason: opts.reason }),
+            }),
+          );
+          if (r.error) throw fromApiError(r.error, r.response);
+          print(r.data, format);
+        }),
+    ),
+    {
+      mapsTo: 'POST /v1/companies/:id/block',
+      examples: [
+        'cavuno companies block k18acme... --yes',
+        'cavuno companies block k18acme... --reason "legal request" --yes',
+      ],
+    },
+  );
+
+  annotate(
+    withYesOption(
+      companies
+        .command('unblock')
+        .description(
+          'Unblock a company so automated sourcing can add jobs again. Does not republish archived jobs.',
+        )
+        .argument('<id>', 'Company ID')
+        .action(async function (this: Command, id: string) {
+          await confirmOrAbort(this.optsWithGlobals<ConfirmOptions>(), {
+            message: `Unblock company ${id}? Archived jobs will not be republished automatically.`,
+          });
+          const client = getClient(this);
+          const format = getFormat(this);
+          const r = unwrap(await client.unblock(id));
+          if (r.error) throw fromApiError(r.error, r.response);
+          print(r.data, format);
+        }),
+    ),
+    {
+      mapsTo: 'POST /v1/companies/:id/unblock',
+      examples: ['cavuno companies unblock k18acme... --yes'],
+    },
+  );
+
+annotate(
     companies
       .command('list-jobs')
       .description('List jobs at a company (any status, optional filter).')
