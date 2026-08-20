@@ -26,7 +26,7 @@ export function registerAnalyticsCommand(root: Command): void {
   const analytics = root
     .command('analytics')
     .description(
-      'Typed Board homepage analytics (overview metrics and traffic tables).',
+      'Typed Board analytics (overview, traffic, apply-clicks, job-visitors).',
     );
 
   annotate(
@@ -83,6 +83,80 @@ export function registerAnalyticsCommand(root: Command): void {
       examples: [
         'cavuno analytics traffic',
         'cavuno analytics traffic --start 2026-01-01 --end 2026-01-30 --limit 5',
+      ],
+    },
+  );
+
+  annotate(
+    analytics
+      .command('apply-clicks')
+      .description(
+        'List apply clicks by job and first-touch channel (join jobs export on id).',
+      )
+      .option('--start <date>', 'Inclusive range start (YYYY-MM-DD, UTC)')
+      .option('--end <date>', 'Inclusive range end (YYYY-MM-DD, UTC)')
+      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) => Number(v))
+      .option('--cursor <cursor>', 'Pagination cursor from a previous response')
+      .action(async function (this: Command) {
+        const opts = this.opts<{
+          start?: string;
+          end?: string;
+          limit?: number;
+          cursor?: string;
+        }>();
+        const { data, error, response } = await getClient(
+          this,
+        ).getApplyClicks({
+          start: opts.start,
+          end: opts.end,
+          limit: opts.limit,
+          cursor: opts.cursor,
+        });
+        if (error) throw fromApiError(error, response);
+        print(data, getFormat(this));
+      }),
+    {
+      mapsTo: 'GET /v1/analytics/apply-clicks',
+      examples: [
+        'cavuno analytics apply-clicks',
+        'cavuno analytics apply-clicks --start 2026-01-01 --end 2026-01-30 --limit 100',
+      ],
+    },
+  );
+
+  annotate(
+    analytics
+      .command('job-visitors')
+      .description(
+        'List unique job-detail visitors by first-touch channel (join export on company_slug + slug).',
+      )
+      .option('--start <date>', 'Inclusive range start (YYYY-MM-DD, UTC)')
+      .option('--end <date>', 'Inclusive range end (YYYY-MM-DD, UTC)')
+      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) => Number(v))
+      .option('--cursor <cursor>', 'Pagination cursor from a previous response')
+      .action(async function (this: Command) {
+        const opts = this.opts<{
+          start?: string;
+          end?: string;
+          limit?: number;
+          cursor?: string;
+        }>();
+        const { data, error, response } = await getClient(
+          this,
+        ).getJobVisitors({
+          start: opts.start,
+          end: opts.end,
+          limit: opts.limit,
+          cursor: opts.cursor,
+        });
+        if (error) throw fromApiError(error, response);
+        print(data, getFormat(this));
+      }),
+    {
+      mapsTo: 'GET /v1/analytics/job-visitors',
+      examples: [
+        'cavuno analytics job-visitors',
+        'cavuno analytics job-visitors --start 2026-01-01 --end 2026-01-30',
       ],
     },
   );
