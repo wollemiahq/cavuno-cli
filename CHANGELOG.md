@@ -3,6 +3,21 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.6.0 — 2026-08-21
+
+- **Company blocklist**: block a company from automated sourcing take-downs so
+  imports, backfill, and aggregation cannot reintroduce its jobs; unblock to
+  reverse.
+- **Analytics**: apply-clicks and job-visitors support grouping by first-touch
+  channel, and apply-click rows include `jobSlug`.
+
+## 1.5.1 — 2026-08-07
+
+- **Blog authors**: `location` and `facebookUrl` fields are available on blog
+  author create/update/read (same contract as the Board API / dashboard).
+  Deleting an author or tag schedules stripping of its ID from posts on the
+  board (paginated drain) instead of leaving stale references.
+
 ## 1.5.0 — 2026-08-06
 
 - **Integrations surface**: official n8n node, Zapier app, and Make app
