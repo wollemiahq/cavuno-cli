@@ -58,6 +58,12 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
     update: (id: string, body: AnyBody) =>
       patch(`/companies/${encodeURIComponent(id)}`, body),
     remove: (id: string) => del(`/companies/${encodeURIComponent(id)}`),
+    /** Company blocklist — archive live jobs + stop automated re-import. */
+    block: (id: string, body?: { reason?: string }) =>
+      post(`/companies/${encodeURIComponent(id)}/block`, body ?? {}),
+    /** Remove from company blocklist. Does not republish archived jobs. */
+    unblock: (id: string) =>
+      post(`/companies/${encodeURIComponent(id)}/unblock`, {}),
     findOrCreate: (body: AnyBody) => post('/companies/find-or-create', body),
     search: (body: AnyBody) => post('/companies/search', body),
     batch: (body: AnyBody) => post('/companies/batch', body),
