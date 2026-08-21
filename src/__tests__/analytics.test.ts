@@ -5,11 +5,15 @@ import { registerAnalyticsCommand } from '../commands/analytics.js';
 
 const getOverview = vi.fn();
 const getTraffic = vi.fn();
+const getApplyClicks = vi.fn();
+const getJobVisitors = vi.fn();
 
 vi.mock('../api/analytics.js', () => ({
   createAnalyticsClient: () => ({
     getOverview,
     getTraffic,
+    getApplyClicks,
+    getJobVisitors,
   }),
 }));
 
@@ -50,6 +54,26 @@ beforeEach(() => {
     error: undefined,
     response: new Response(),
   });
+  getApplyClicks.mockResolvedValue({
+    data: {
+      object: 'list',
+      url: '/v1/analytics/apply-clicks',
+      data: [],
+      hasMore: false,
+    },
+    error: undefined,
+    response: new Response(),
+  });
+  getJobVisitors.mockResolvedValue({
+    data: {
+      object: 'list',
+      url: '/v1/analytics/job-visitors',
+      data: [],
+      hasMore: false,
+    },
+    error: undefined,
+    response: new Response(),
+  });
 });
 
 describe('cavuno analytics', () => {
@@ -84,6 +108,50 @@ describe('cavuno analytics', () => {
       start: '2026-01-01',
       end: '2026-01-07',
       limit: 5,
+    });
+  });
+
+  it('apply-clicks maps to getApplyClicks with date, limit, and cursor', async () => {
+    const program = buildProgram();
+    await program.parseAsync(
+      [
+        'analytics',
+        'apply-clicks',
+        '--start',
+        '2026-01-01',
+        '--end',
+        '2026-01-30',
+        '--limit',
+        '100',
+        '--cursor',
+        '100',
+      ],
+      { from: 'user' },
+    );
+    expect(getApplyClicks).toHaveBeenCalledWith({
+      start: '2026-01-01',
+      end: '2026-01-30',
+      limit: 100,
+      cursor: '100',
+    });
+  });
+
+  it('job-visitors maps to getJobVisitors with date flags', async () => {
+    const program = buildProgram();
+    await program.parseAsync(
+      [
+        'analytics',
+        'job-visitors',
+        '--start',
+        '2026-01-01',
+        '--end',
+        '2026-01-30',
+      ],
+      { from: 'user' },
+    );
+    expect(getJobVisitors).toHaveBeenCalledWith({
+      start: '2026-01-01',
+      end: '2026-01-30',
     });
   });
 });
