@@ -14,12 +14,17 @@ type Query<P> = P extends {
 
 export type AnalyticsOverviewQuery = Query<paths['/analytics/overview']['get']>;
 export type AnalyticsTrafficQuery = Query<paths['/analytics/traffic']['get']>;
+export type AnalyticsApplyClicksQuery =
+  Query<paths['/analytics/apply-clicks']['get']>;
+export type AnalyticsJobVisitorsQuery =
+  Query<paths['/analytics/job-visitors']['get']>;
 
 /**
- * Typed Board homepage analytics (Operator API).
+ * Typed Board analytics (Operator API).
  *
  * Never exposes raw report snapshots, collectors, or provider connection
- * state — only product metrics and traffic tables.
+ * state — only product metrics, traffic tables, and job-grain first-touch
+ * lists.
  */
 export function createAnalyticsClient(opts: CavunoClientOptions) {
   const c: CavunoClient = createCavunoClient(opts);
@@ -31,6 +36,12 @@ export function createAnalyticsClient(opts: CavunoClientOptions) {
     /** GET /v1/analytics/traffic */
     getTraffic: (query?: AnalyticsTrafficQuery) =>
       c.GET('/analytics/traffic', { params: { query } }),
+    /** GET /v1/analytics/apply-clicks */
+    getApplyClicks: (query?: AnalyticsApplyClicksQuery) =>
+      c.GET('/analytics/apply-clicks', { params: { query } }),
+    /** GET /v1/analytics/job-visitors */
+    getJobVisitors: (query?: AnalyticsJobVisitorsQuery) =>
+      c.GET('/analytics/job-visitors', { params: { query } }),
   };
 }
 

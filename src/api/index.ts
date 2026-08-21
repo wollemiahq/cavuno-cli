@@ -18,6 +18,8 @@ export {
   type AnalyticsClient,
   type AnalyticsOverviewQuery,
   type AnalyticsTrafficQuery,
+  type AnalyticsApplyClicksQuery,
+  type AnalyticsJobVisitorsQuery,
 } from './analytics.js';
 export {
   createPaywallClient,
