@@ -20,6 +20,8 @@ export const JOB_CHANGED_FIELDS = [
   'company_id',
   'company_name',
   'location',
+  'description',
+  'url',
   'employment_type',
   'workplace_type',
   'published_at',
@@ -52,6 +54,7 @@ export const COMPANY_CHANGED_FIELDS = [
   'name',
   'website',
   'logo_url',
+  'url',
 ] as const;
 export type CompanyChangedField = (typeof COMPANY_CHANGED_FIELDS)[number];
 
@@ -66,7 +69,11 @@ export type CompanyWebhookEvent =
   | CompanyDeletedWebhookEvent;
 
 /** Closed Candidate `changed_fields` vocabulary for `candidate.updated`. */
-export const CANDIDATE_CHANGED_FIELDS = ['email', 'display_name'] as const;
+export const CANDIDATE_CHANGED_FIELDS = [
+  'email',
+  'display_name',
+  'url',
+] as const;
 export type CandidateChangedField = (typeof CANDIDATE_CHANGED_FIELDS)[number];
 export type CandidateWebhookSnapshot = Schemas['WebhookCandidateSnapshot'];
 export type CandidateWebhookTombstone = Schemas['WebhookCandidateTombstone'];

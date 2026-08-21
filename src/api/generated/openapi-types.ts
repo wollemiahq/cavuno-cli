@@ -3,6 +3,46 @@
 // Source: the committed public Cavuno API contract.
 
 export interface paths {
+    "/analytics/apply-clicks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get apply clicks by job and first-touch channel
+         * @description Paginated apply-click counts grouped by job and first-touch channel. Each apply click is attributed to the session’s first pageview: UTM medium/source when present, otherwise the referrer. This is apply clicks, not confirmed applications, and not last-click. LinkedIn and other in-app browsers often bucket as `direct`. Inclusive UTC `start`/`end` (YYYY-MM-DD) so scheduled pulls can be incremental; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. Page with `limit` (1–1000, default 100) and `cursor`. Join `jobId` to `GET /v1/jobs/export` `id`, or `companySlug` + `jobSlug` to export `company_slug` + `slug`. Job-detail visitor counts use `GET /v1/analytics/job-visitors` (slug join). Requires `analytics.read`.
+         */
+        get: operations["getAnalyticsApplyClicks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/job-visitors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get job-detail visitors by first-touch channel
+         * @description Paginated unique visitors (sessions) that viewed a job-detail page, grouped by company slug, job slug, and first-touch channel. First-touch UTM campaign/source/medium are included when the landing href was tagged (empty otherwise). `visitors` counts unique sessions and will always be lower than `views` in the jobs export; the two are not expected to match. Join `companySlug` + `jobSlug` to jobs export `company_slug` + `slug` — unlike `GET /v1/analytics/apply-clicks`, which joins on `jobId` / export `id`. Inclusive UTC `start`/`end` (YYYY-MM-DD) so scheduled pulls can be incremental; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. Page with `limit` (1–1000, default 100) and `cursor`. Requires `analytics.read`.
+         */
+        get: operations["getAnalyticsJobVisitors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/overview": {
         parameters: {
             query?: never;
@@ -72,7 +112,7 @@ export interface paths {
         };
         /**
          * Get analytics traffic tables
-         * @description Typed Board homepage traffic breakdowns: top pages, sources, locations, and devices with apply-click attribution. Sources are normalized referrers (never full URLs). Inclusive UTC date-only range; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. `limit` caps each table (1–10, default 10).
+         * @description Typed Board homepage traffic breakdowns: top pages, sources, locations, devices, and first-touch UTM campaigns with apply-click attribution. Sources are normalized referrers (never full URLs). Campaigns are tagged inbound sessions only (utm_campaign / utm_source / utm_medium parsed from the first-touch href). Inclusive UTC date-only range; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. `limit` caps each table (1–10, default 10).
          */
         get: operations["getAnalyticsTraffic"];
         put?: never;
@@ -435,7 +475,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog author
-         * @description Permanently deletes a blog author. Posts referencing this author keep the stale ID in their `authorIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog author and schedules removal of its ID from every post `authorIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogAuthor"];
         options?: never;
@@ -673,7 +713,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a blog tag
-         * @description Permanently deletes a blog tag. Posts referencing this tag keep the stale ID in their `tagIds` array (no cascade). It cannot be undone.
+         * @description Permanently deletes a blog tag and schedules removal of its ID from every post `tagIds` array on the board (paginated drain). It cannot be undone.
          */
         delete: operations["deleteBlogTag"];
         options?: never;
@@ -901,6 +941,26 @@ export interface paths {
         patch: operations["updateCompany"];
         trace?: never;
     };
+    "/companies/{id}/block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Block a company
+         * @description Puts a company on the board-scoped blocklist. Archives currently published jobs, stops company-vertical backfill, and rejects automated sourcing writes that match this company. Non-automated human posts remain allowed. Idempotent: blocking an already-blocked company succeeds and reports `was_already_blocked: true`.
+         */
+        post: operations["createCompanyBlock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/companies/{id}/jobs": {
         parameters: {
             query?: never;
@@ -940,6 +1000,26 @@ export interface paths {
          * @description Removes the logo from the company and deletes the underlying file. Returns 404 if the company has no logo set.
          */
         delete: operations["deleteCompanyLogo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/{id}/unblock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unblock a company
+         * @description Removes a company from the board-scoped blocklist. Does not republish jobs archived when the company was blocked. Idempotent: unblocking a company that is not blocked succeeds and reports `was_blocked: false`.
+         */
+        post: operations["createCompanyUnblock"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1488,7 +1568,7 @@ export interface paths {
         put?: never;
         /**
          * Connect a reporting integration
-         * @description Starts the connection flow. Some providers return a hosted authorization URL, some connect immediately, and payment reporting returns the Board monetization-settings URL. Provider credentials and configuration are never returned.
+         * @description Starts the connection flow. Some providers return a hosted authorization URL, some connect immediately, and payment reporting returns the Board payments-settings URL. Provider credentials and configuration are never returned.
          */
         post: operations["connectIntegrationsReporting"];
         delete?: never;
@@ -1851,6 +1931,46 @@ export interface paths {
          * @description Uploads a file via the unified media dispatcher. Send a multipart form with `file` (binary) and `purpose` (one of `board_logo`, `board_hero`, `account_avatar`, `company_logo`, or `blog_image`). Optionally include `resourceType` and `resourceId` to bind the upload to an owning resource. The request is idempotent when an `Idempotency-Key` header is supplied.
          */
         post: operations["uploadMedia"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/upload-intents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a staged media upload intent
+         * @description Creates a short-lived direct-upload intent for media bytes that cannot travel through a JSON or code argument. POST the original file bytes to the returned uploadUrl, then complete the intent with the returned storageId.
+         */
+        post: operations["createMediaUploadIntent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/upload-intents/{intentId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete a staged media upload
+         * @description Verifies the staged object against the intent using storage-owned byte length and MIME metadata, processes it through the normal media pipeline, and returns the resulting media object.
+         */
+        post: operations["completeMediaUploadIntent"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3301,6 +3421,38 @@ export interface components {
             /** @description UTC date-only YYYY-MM-DD. */
             end: string;
         };
+        AnalyticsJobApplyClick: {
+            /** @enum {string} */
+            object: "analytics_job_apply_click";
+            /** @description Job document id (`job_apply_click.job_id`). Join to jobs export `id`. */
+            jobId: string;
+            /** @description Company slug from the apply-click payload. Empty if absent. */
+            companySlug: string;
+            /** @description Job slug at click time (`job_apply_click.job_slug`), or the current slug from the one-shot historical map. Empty when neither is known. Join to jobs export `slug` with `companySlug`. */
+            jobSlug: string;
+            /** @description First-touch channel for the session (same keys as Home Channel). */
+            channel: string;
+            /** @description Apply-click events for this job × channel in the range. */
+            applyClicks: number;
+        };
+        AnalyticsJobVisitor: {
+            /** @enum {string} */
+            object: "analytics_job_visitor";
+            /** @description Company slug from the job-detail path. */
+            companySlug: string;
+            /** @description Frozen job slug from `/companies/{companySlug}/jobs/{jobSlug}`. Join with jobs export `company_slug` + `slug` (not `id`). A deliberate slug rename splits history. */
+            jobSlug: string;
+            /** @description First-touch channel for the session (same keys as Home Channel). */
+            channel: string;
+            /** @description utm_campaign from the first-touch href. Empty when the landing URL was untagged. */
+            campaign: string;
+            /** @description utm_source from the first-touch href. Empty when untagged. */
+            utmSource: string;
+            /** @description utm_medium from the first-touch href. Empty when untagged. */
+            utmMedium: string;
+            /** @description Unique sessions that viewed this job-detail page, attributed to that first-touch. Always lower than jobs-export `views` (page hits); the two are not expected to match. */
+            visitors: number;
+        };
         AnalyticsMetric: {
             /** @enum {string} */
             key: "sessions" | "page_views" | "average_session_duration" | "job_apply_clicks" | "impressions" | "stripe_revenue" | "adsense_revenue";
@@ -3337,6 +3489,18 @@ export interface components {
             sources: components["schemas"]["AnalyticsTrafficSource"][];
             locations: components["schemas"]["AnalyticsTrafficLocation"][];
             devices: components["schemas"]["AnalyticsTrafficDevice"][];
+            campaigns: components["schemas"]["AnalyticsTrafficCampaign"][];
+        };
+        AnalyticsTrafficCampaign: {
+            /** @description utm_campaign from the session first-touch href. */
+            campaign: string;
+            /** @description utm_source from the session first-touch href. */
+            source: string;
+            /** @description utm_medium from the session first-touch href. */
+            medium: string;
+            visits: number;
+            visitsChangePercentage: number | null;
+            applyClicks: number;
         };
         AnalyticsTrafficDateRange: {
             /** @description UTC date-only YYYY-MM-DD. */
@@ -3550,6 +3714,20 @@ export interface components {
              */
             interval?: "monthly" | "annual";
         };
+        BlockCompanyBody: {
+            /** @description Optional free-text reason recorded on the blocklist audit. */
+            reason?: string;
+        };
+        BlockCompanyResult: {
+            /** @description The blocked company id. */
+            id: string;
+            /** @enum {boolean} */
+            blocked: true;
+            /** @description Whether a published-job archive pass was scheduled. */
+            jobs_archived_scheduled: boolean;
+            /** @description True when the company was already on the blocklist. */
+            was_already_blocked: boolean;
+        };
         BlogAuthor: {
             /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the author endpoints (e.g. `GET /v1/blog/authors/{id}`). */
             id: string;
@@ -3566,12 +3744,16 @@ export interface components {
             bio: string | null;
             /** @description The author's email address, or `null` if not set. */
             email: string | null;
+            /** @description The author's free-text location label, or `null` if not set. */
+            location: string | null;
             /** @description Author visibility status, or `null` if not set. */
             status: string | null;
             /** @description URL of the author avatar, or `null` if no avatar is set. */
             avatarUrl: string | null;
             /** @description The author's website URL, or `null` if not set. */
             websiteUrl: string | null;
+            /** @description The author's Facebook URL, or `null` if not set. */
+            facebookUrl: string | null;
             /** @description The author's X (Twitter) URL, or `null` if not set. */
             twitterUrl: string | null;
             /** @description The author's LinkedIn URL, or `null` if not set. */
@@ -3971,6 +4153,8 @@ export interface components {
              * @description The author's email address.
              */
             email?: string;
+            /** @description Free-text location label for the author (e.g. `Sydney, Australia`). */
+            location?: string;
             /**
              * @description Author visibility status. One of `active` or `inactive`.
              * @enum {string}
@@ -3980,6 +4164,8 @@ export interface components {
             avatarMediaId?: string | null;
             /** @description The author's personal website URL. Normalized to a canonical URL when stored. */
             websiteUrl?: string;
+            /** @description The author's Facebook profile URL. */
+            facebookUrl?: string;
             /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. */
             twitterUrl?: string;
             /** @description The author's LinkedIn profile URL. */
@@ -4857,6 +5043,32 @@ export interface components {
              */
             purpose: "board_logo" | "board_hero" | "account_avatar" | "company_logo" | "blog_image";
         };
+        MediaUploadIntent: {
+            /** @description Opaque staged media upload intent identifier. */
+            id: string;
+            /** @enum {string} */
+            object: "media_upload_intent";
+            /**
+             * Format: uri
+             * @description Short-lived URL that accepts the original raw file bytes.
+             */
+            uploadUrl: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        MediaUploadIntentComplete: {
+            /** @description The storageId returned after POSTing the raw file to the intent uploadUrl. */
+            stagingStorageId: string;
+        };
+        MediaUploadIntentCreate: {
+            filename: string;
+            mimeType: string;
+            sizeBytes: number;
+            /** @enum {string} */
+            purpose: "board_logo" | "board_hero" | "account_avatar" | "company_logo" | "blog_image";
+            resourceType?: string;
+            resourceId?: string;
+        };
         Member: {
             /** @description Unique identifier for the membership. */
             id: string;
@@ -5545,6 +5757,14 @@ export interface components {
             /** @description The user ID of the member who will become the primary owner. */
             newOwnerUserId: string;
         };
+        UnblockCompanyResult: {
+            /** @description The unblocked company id. */
+            id: string;
+            /** @enum {boolean} */
+            blocked: false;
+            /** @description True when the company was on the blocklist before this call. */
+            was_blocked: boolean;
+        };
         UpdateAuthorBody: {
             /** @description URL-friendly slug for the author. Auto-generated from `name` when omitted. */
             slug?: string;
@@ -5555,6 +5775,8 @@ export interface components {
              * @description The author's email address.
              */
             email?: string;
+            /** @description Free-text location label for the author (e.g. `Sydney, Australia`). */
+            location?: string;
             /**
              * @description Author visibility status. One of `active` or `inactive`.
              * @enum {string}
@@ -5564,6 +5786,8 @@ export interface components {
             avatarMediaId?: string | null;
             /** @description The author's personal website URL. Normalized to a canonical URL when stored. */
             websiteUrl?: string;
+            /** @description The author's Facebook profile URL. */
+            facebookUrl?: string;
             /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. */
             twitterUrl?: string;
             /** @description The author's LinkedIn profile URL. */
@@ -5841,7 +6065,7 @@ export interface components {
          * @example display_name
          * @enum {string}
          */
-        WebhookCandidateChangedField: "email" | "display_name";
+        WebhookCandidateChangedField: "email" | "display_name" | "url";
         /**
          * @description Common outbound webhook event envelope.
          * @example {
@@ -5857,6 +6081,7 @@ export interface components {
          *           "object": "candidate",
          *           "email": "candidate@example.test",
          *           "display_name": "Example Candidate",
+         *           "url": "https://example-board.cavuno.com/p/example-candidate",
          *           "created_at": "2026-08-03T12:00:00Z",
          *           "updated_at": "2026-08-03T12:00:00Z",
          *           "revision": 1
@@ -5879,13 +6104,15 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission. */
+                /** @description V1 Candidate snapshot. Explicit identity allowlist plus public talent profile URL when handle exists; never resumes, applications, or marketing permission. */
                 object: {
                     id: string;
                     /** @enum {string} */
                     object: "candidate";
                     email: string;
                     display_name: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
                     created_at: string;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -5949,12 +6176,13 @@ export interface components {
             };
         };
         /**
-         * @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission.
+         * @description V1 Candidate snapshot. Explicit identity allowlist plus public talent profile URL when handle exists; never resumes, applications, or marketing permission.
          * @example {
          *       "id": "boardUsers_01EXAMPLE",
          *       "object": "candidate",
          *       "email": "candidate@example.test",
          *       "display_name": "Example Candidate",
+         *       "url": "https://example-board.cavuno.com/p/example-candidate",
          *       "created_at": "2026-08-03T12:00:00Z",
          *       "updated_at": "2026-08-03T12:00:00Z",
          *       "revision": 1
@@ -5966,6 +6194,8 @@ export interface components {
             object: "candidate";
             email: string;
             display_name: string | null;
+            /** Format: uri */
+            url: string | null;
             /** @description ISO-8601 UTC timestamp with second precision (…Z). */
             created_at: string;
             /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -6009,6 +6239,7 @@ export interface components {
          *           "object": "candidate",
          *           "email": "candidate@example.test",
          *           "display_name": "Updated Candidate",
+         *           "url": "https://example-board.cavuno.com/p/example-candidate",
          *           "created_at": "2026-08-03T12:00:00Z",
          *           "updated_at": "2026-08-03T13:00:00Z",
          *           "revision": 2
@@ -6033,13 +6264,15 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Candidate snapshot. Explicit identity allowlist; never resumes, applications, private profile data, or marketing permission. */
+                /** @description V1 Candidate snapshot. Explicit identity allowlist plus public talent profile URL when handle exists; never resumes, applications, or marketing permission. */
                 object: {
                     id: string;
                     /** @enum {string} */
                     object: "candidate";
                     email: string;
                     display_name: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
                     created_at: string;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -6047,14 +6280,14 @@ export interface components {
                     revision: number;
                 };
                 /** @description Closed Candidate changed_fields vocabulary for candidate.updated. */
-                changed_fields: ("email" | "display_name")[];
+                changed_fields: ("email" | "display_name" | "url")[];
             };
         };
         /**
          * @example name
          * @enum {string}
          */
-        WebhookCompanyChangedField: "slug" | "name" | "website" | "logo_url";
+        WebhookCompanyChangedField: "slug" | "name" | "website" | "logo_url" | "url";
         /**
          * @description Common outbound webhook event envelope.
          * @example {
@@ -6072,6 +6305,7 @@ export interface components {
          *           "name": "Acme",
          *           "website": "https://acme.example",
          *           "logo_url": null,
+         *           "url": "https://example-board.cavuno.com/companies/acme",
          *           "updated_at": "2026-07-24T12:00:00Z",
          *           "revision": 1
          *         },
@@ -6093,7 +6327,7 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data. */
+                /** @description V1 Company snapshot. Explicit allowlist; includes public board URL for automation. */
                 object: {
                     id: string;
                     /** @enum {string} */
@@ -6102,6 +6336,8 @@ export interface components {
                     name: string;
                     website: string | null;
                     logo_url: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
                     updated_at: string | null;
                     revision: number;
@@ -6163,7 +6399,7 @@ export interface components {
             };
         };
         /**
-         * @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data.
+         * @description V1 Company snapshot. Explicit allowlist; includes public board URL for automation.
          * @example {
          *       "id": "companies_01EXAMPLE",
          *       "object": "company",
@@ -6171,6 +6407,7 @@ export interface components {
          *       "name": "Acme",
          *       "website": "https://acme.example",
          *       "logo_url": null,
+         *       "url": "https://example-board.cavuno.com/companies/acme",
          *       "updated_at": "2026-07-24T12:00:00Z",
          *       "revision": 1
          *     }
@@ -6183,6 +6420,8 @@ export interface components {
             name: string;
             website: string | null;
             logo_url: string | null;
+            /** Format: uri */
+            url: string | null;
             /** @description ISO-8601 UTC timestamp with second precision (…Z). */
             updated_at: string | null;
             revision: number;
@@ -6226,6 +6465,7 @@ export interface components {
          *           "name": "Acme Corporation",
          *           "website": "https://acme.example",
          *           "logo_url": null,
+         *           "url": "https://example-board.cavuno.com/companies/acme",
          *           "updated_at": "2026-07-24T13:00:00Z",
          *           "revision": 2
          *         },
@@ -6249,7 +6489,7 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Company snapshot. Explicit allowlist; no provider, enrichment, or location data. */
+                /** @description V1 Company snapshot. Explicit allowlist; includes public board URL for automation. */
                 object: {
                     id: string;
                     /** @enum {string} */
@@ -6258,12 +6498,14 @@ export interface components {
                     name: string;
                     website: string | null;
                     logo_url: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
                     updated_at: string | null;
                     revision: number;
                 };
                 /** @description Closed Company changed_fields vocabulary for company.updated. */
-                changed_fields: ("slug" | "name" | "website" | "logo_url")[];
+                changed_fields: ("slug" | "name" | "website" | "logo_url" | "url")[];
             };
         };
         WebhookDelivery: {
@@ -6343,6 +6585,8 @@ export interface components {
          *           "company_id": "companies_01EXAMPLE",
          *           "company_name": "Acme",
          *           "location": "Remote",
+         *           "description": "<p>Build the next generation of robotics platforms.</p>",
+         *           "url": "https://example-board.cavuno.com/companies/acme/jobs/senior-engineer",
          *           "employment_type": "full_time",
          *           "workplace_type": "remote",
          *           "published_at": "2026-07-24T12:00:00Z",
@@ -6381,7 +6625,7 @@ export interface components {
          * @example title
          * @enum {string}
          */
-        WebhookJobChangedField: "slug" | "title" | "status" | "company_id" | "company_name" | "location" | "employment_type" | "workplace_type" | "published_at" | "expires_at";
+        WebhookJobChangedField: "slug" | "title" | "status" | "company_id" | "company_name" | "location" | "description" | "url" | "employment_type" | "workplace_type" | "published_at" | "expires_at";
         /**
          * @description Common outbound webhook event envelope.
          * @example {
@@ -6401,6 +6645,8 @@ export interface components {
          *           "company_id": "companies_01EXAMPLE",
          *           "company_name": "Acme",
          *           "location": "Remote",
+         *           "description": "<p>Build the next generation of robotics platforms.</p>",
+         *           "url": "https://example-board.cavuno.com/companies/acme/jobs/senior-engineer",
          *           "employment_type": "full_time",
          *           "workplace_type": "remote",
          *           "published_at": "2026-07-24T12:00:00Z",
@@ -6426,7 +6672,7 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. */
+                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. Includes HTML description for automation consumers (Zapier, n8n). */
                 object: {
                     id: string;
                     /** @enum {string} */
@@ -6437,6 +6683,9 @@ export interface components {
                     company_id: string | null;
                     company_name: string | null;
                     location: string | null;
+                    description: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     employment_type: string | null;
                     workplace_type: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -6506,7 +6755,7 @@ export interface components {
             };
         };
         /**
-         * @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row.
+         * @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. Includes HTML description for automation consumers (Zapier, n8n).
          * @example {
          *       "id": "jobs_01EXAMPLEJOB",
          *       "object": "job",
@@ -6516,6 +6765,8 @@ export interface components {
          *       "company_id": "companies_01EXAMPLE",
          *       "company_name": "Acme",
          *       "location": "Remote",
+         *       "description": "<p>Build the next generation of robotics platforms.</p>",
+         *       "url": "https://example-board.cavuno.com/companies/acme/jobs/senior-engineer",
          *       "employment_type": "full_time",
          *       "workplace_type": "remote",
          *       "published_at": "2026-07-24T12:00:00Z",
@@ -6534,6 +6785,9 @@ export interface components {
             company_id: string | null;
             company_name: string | null;
             location: string | null;
+            description: string | null;
+            /** Format: uri */
+            url: string | null;
             employment_type: string | null;
             workplace_type: string | null;
             /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -6587,6 +6841,8 @@ export interface components {
          *           "company_id": "companies_01EXAMPLE",
          *           "company_name": "Acme",
          *           "location": "Remote",
+         *           "description": "<p>Build the next generation of robotics platforms.</p>",
+         *           "url": "https://example-board.cavuno.com/companies/acme/jobs/senior-engineer",
          *           "employment_type": "full_time",
          *           "workplace_type": "remote",
          *           "published_at": "2026-07-24T12:00:00Z",
@@ -6614,7 +6870,7 @@ export interface components {
             /** @description Board account id that owns the event. */
             board_id: string;
             data: {
-                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. */
+                /** @description V1 Job snapshot on job.created / job.updated. Explicit allowlist — never a raw row. Includes HTML description for automation consumers (Zapier, n8n). */
                 object: {
                     id: string;
                     /** @enum {string} */
@@ -6625,6 +6881,9 @@ export interface components {
                     company_id: string | null;
                     company_name: string | null;
                     location: string | null;
+                    description: string | null;
+                    /** Format: uri */
+                    url: string | null;
                     employment_type: string | null;
                     workplace_type: string | null;
                     /** @description ISO-8601 UTC timestamp with second precision (…Z). */
@@ -6636,7 +6895,7 @@ export interface components {
                     revision: number;
                 };
                 /** @description Closed Job changed_fields vocabulary for job.updated. */
-                changed_fields: ("slug" | "title" | "status" | "company_id" | "company_name" | "location" | "employment_type" | "workplace_type" | "published_at" | "expires_at")[];
+                changed_fields: ("slug" | "title" | "status" | "company_id" | "company_name" | "location" | "description" | "url" | "employment_type" | "workplace_type" | "published_at" | "expires_at")[];
             };
         };
         /**
@@ -6843,6 +7102,114 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getAnalyticsApplyClicks: {
+        parameters: {
+            query?: {
+                /** @description Inclusive range start (UTC date-only YYYY-MM-DD). */
+                start?: string;
+                /** @description Inclusive range end (UTC date-only YYYY-MM-DD). */
+                end?: string;
+                /** @description Page size (1–1000). Defaults to 100. Not a board-wide top-N cap. */
+                limit?: number;
+                /** @description Opaque page cursor from the previous `nextCursor`. */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Apply clicks by job and first-touch channel. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/analytics/apply-clicks */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["AnalyticsJobApplyClick"][];
+                        /** @description Total number of results matching the query. */
+                        count?: number;
+                        /** @description The page size used for this response. */
+                        limit?: number;
+                        /** @description The number of results skipped before this page. */
+                        offset?: number;
+                        /** @description Jobs hidden behind the candidate paywall for the current viewer; absent or 0 for an entitled viewer. */
+                        gatedCount?: number;
+                    };
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getAnalyticsJobVisitors: {
+        parameters: {
+            query?: {
+                /** @description Inclusive range start (UTC date-only YYYY-MM-DD). */
+                start?: string;
+                /** @description Inclusive range end (UTC date-only YYYY-MM-DD). */
+                end?: string;
+                /** @description Page size (1–1000). Defaults to 100. Not a board-wide top-N cap. */
+                limit?: number;
+                /** @description Opaque page cursor from the previous `nextCursor`. */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Job-detail visitors by first-touch channel and campaign. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        object: "list";
+                        /** @example /v1/analytics/job-visitors */
+                        url: string;
+                        hasMore: boolean;
+                        nextCursor: string | null;
+                        data: components["schemas"]["AnalyticsJobVisitor"][];
+                        /** @description Total number of results matching the query. */
+                        count?: number;
+                        /** @description The page size used for this response. */
+                        limit?: number;
+                        /** @description The number of results skipped before this page. */
+                        offset?: number;
+                        /** @description Jobs hidden behind the candidate paywall for the current viewer; absent or 0 for an entitled viewer. */
+                        gatedCount?: number;
+                    };
+                };
+            };
+            /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getAnalyticsOverview: {
         parameters: {
             query?: {
@@ -9194,6 +9561,45 @@ export interface operations {
             };
         };
     };
+    createCompanyBlock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+                 * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["BlockCompanyBody"];
+            };
+        };
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockCompanyResult"];
+                };
+            };
+            /** @description Company not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     listCompanyJobs: {
         parameters: {
             query?: {
@@ -9342,6 +9748,41 @@ export interface operations {
                 content?: never;
             };
             /** @description Company not found, or the company has no logo to remove. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createCompanyUnblock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+                 * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnblockCompanyResult"];
+                };
+            };
+            /** @description Company not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11736,6 +12177,165 @@ export interface operations {
                 };
             };
             /** @description Too many uploads. The limit is 30 per minute per account. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createMediaUploadIntent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MediaUploadIntentCreate"];
+            };
+        };
+        responses: {
+            /** @description Upload intent created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaUploadIntent"];
+                };
+            };
+            /** @description The upload metadata is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The caller lacks permission for this purpose. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The declared file size exceeds the purpose limit. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The declared MIME type is unsupported. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many uploads. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    completeMediaUploadIntent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example intent_01jxyz */
+                intentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MediaUploadIntentComplete"];
+            };
+        };
+        responses: {
+            /** @description Upload completed. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaUpload"];
+                };
+            };
+            /** @description The staged byte length or MIME type does not match the intent. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The caller lacks permission for this purpose. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The intent or staged object was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The intent is already being completed. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The staged file exceeds the purpose limit. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The staged MIME type is unsupported. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too many uploads. */
             429: {
                 headers: {
                     [name: string]: unknown;
