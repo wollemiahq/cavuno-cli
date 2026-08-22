@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createEmployerSubscriptionsClient } from '../api/employer-subscriptions.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';

@@ -164,11 +164,7 @@ describe('employers CLI command', () => {
   });
 
   it.each([
-    [
-      'delete',
-      mockRemove,
-      ['nh7abc', { idempotencyKey: 'idem-test' }],
-    ],
+    ['delete', mockRemove, ['nh7abc', { idempotencyKey: 'idem-test' }]],
     [
       'approve-claim',
       mockApproveClaim,
