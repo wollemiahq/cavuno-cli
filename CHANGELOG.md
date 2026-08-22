@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.6.1 — 2026-08-22
+
+- **Company blocklist commands**: `confirmOrAbort` now receives a single
+  options object, matching the current prompts helper. Block and unblock
+  confirmation prompts work again.
+
 ## 1.6.0 — 2026-08-21
 
 - **Company blocklist**: block a company from automated sourcing take-downs so
