@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createDomainsClient } from '../api/domains.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import {

@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createAnalyticsClient } from '../api/analytics.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';
@@ -95,7 +94,9 @@ export function registerAnalyticsCommand(root: Command): void {
       )
       .option('--start <date>', 'Inclusive range start (YYYY-MM-DD, UTC)')
       .option('--end <date>', 'Inclusive range end (YYYY-MM-DD, UTC)')
-      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) => Number(v))
+      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) =>
+        Number(v),
+      )
       .option('--cursor <cursor>', 'Pagination cursor from a previous response')
       .action(async function (this: Command) {
         const opts = this.opts<{
@@ -104,9 +105,7 @@ export function registerAnalyticsCommand(root: Command): void {
           limit?: number;
           cursor?: string;
         }>();
-        const { data, error, response } = await getClient(
-          this,
-        ).getApplyClicks({
+        const { data, error, response } = await getClient(this).getApplyClicks({
           start: opts.start,
           end: opts.end,
           limit: opts.limit,
@@ -132,7 +131,9 @@ export function registerAnalyticsCommand(root: Command): void {
       )
       .option('--start <date>', 'Inclusive range start (YYYY-MM-DD, UTC)')
       .option('--end <date>', 'Inclusive range end (YYYY-MM-DD, UTC)')
-      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) => Number(v))
+      .option('--limit <n>', 'Page size (1–1000, default 100)', (v) =>
+        Number(v),
+      )
       .option('--cursor <cursor>', 'Pagination cursor from a previous response')
       .action(async function (this: Command) {
         const opts = this.opts<{
@@ -141,9 +142,7 @@ export function registerAnalyticsCommand(root: Command): void {
           limit?: number;
           cursor?: string;
         }>();
-        const { data, error, response } = await getClient(
-          this,
-        ).getJobVisitors({
+        const { data, error, response } = await getClient(this).getJobVisitors({
           start: opts.start,
           end: opts.end,
           limit: opts.limit,
