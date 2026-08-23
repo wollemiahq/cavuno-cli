@@ -4,7 +4,6 @@ import {
   createTransactionsClient,
   type TransactionListQuery,
 } from '../api/transactions.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';
