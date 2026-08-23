@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createBlogClient } from '../api/blog.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { readBatchBody } from '../lib/batch-body.js';

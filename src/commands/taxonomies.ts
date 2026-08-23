@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createTaxonomiesClient } from '../api/taxonomies.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';
@@ -174,16 +173,9 @@ type AxisOpts = {
     body: Record<string, unknown>,
   ) => Promise<ApiR>;
   remove: (c: TaxClient, id: string) => Promise<ApiR>;
-  addAliases: (
-    c: TaxClient,
-    id: string,
-    aliases: string[],
-  ) => Promise<ApiR>;
+  addAliases: (c: TaxClient, id: string, aliases: string[]) => Promise<ApiR>;
   removeAlias: (c: TaxClient, id: string, alias: string) => Promise<ApiR>;
-  extra?: (
-    group: Command,
-    clientFn: (cmd: Command) => TaxClient,
-  ) => void;
+  extra?: (group: Command, clientFn: (cmd: Command) => TaxClient) => void;
   createOptions?: (cmd: Command) => Command;
   updateOptions?: (cmd: Command) => Command;
   buildCreateBody?: (opts: Record<string, unknown>) => Record<string, unknown>;
@@ -351,10 +343,7 @@ function registerAxisCommands(
       .command('add-alias')
       .description(`Add aliases to a ${name.slice(0, -1)} (dual-write).`)
       .argument('<id>', 'Opaque object id')
-      .requiredOption(
-        '--alias <aliases>',
-        'Alias slug or comma-separated list',
-      )
+      .requiredOption('--alias <aliases>', 'Alias slug or comma-separated list')
       .action(async function (this: Command, id: string) {
         const client = clientFn(this);
         const format = getFormat(this);

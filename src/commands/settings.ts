@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createSettingsClient } from '../api/settings.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import {
@@ -59,6 +58,10 @@ export function registerSettingsCommand(root: Command): void {
       'Toggle candidate-area flag (true/false)',
     )
     .option(
+      '--country-gating-mode <mode>',
+      'Apply country gating: sponsored_only | all_jobs',
+    )
+    .option(
       '--require-cookie-consent <bool>',
       'Toggle cookie consent banner (true/false)',
     )
@@ -95,6 +98,16 @@ export function registerSettingsCommand(root: Command): void {
         body.blogEnabled = opts.blogEnabled === 'true';
       if (opts.candidatesEnabled !== undefined)
         body.candidatesEnabled = opts.candidatesEnabled === 'true';
+      if (opts.countryGatingMode !== undefined) {
+        const mode = opts.countryGatingMode;
+        if (mode !== 'sponsored_only' && mode !== 'all_jobs') {
+          console.error(
+            '--country-gating-mode must be sponsored_only or all_jobs.',
+          );
+          process.exit(2);
+        }
+        body.countryGatingMode = mode;
+      }
       if (opts.requireCookieConsent !== undefined)
         body.requireCookieConsent = opts.requireCookieConsent === 'true';
       if (opts.talentDirectoryVisibility !== undefined) {

@@ -1,5 +1,4 @@
 import { createOperationsClient } from '../api/operations.js';
-
 import { CliError, resolveAuth } from './auth.js';
 import { fromApiError } from './error.js';
 import { print, type OutputFormat } from './output.js';

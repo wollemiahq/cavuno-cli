@@ -3,6 +3,14 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.7.0 — 2026-08-23
+
+- **Apply country gating**: board settings now expose
+  `countryGatingMode` through `settings get`, and `settings update` accepts
+  `--country-gating-mode sponsored_only|all_jobs`. Sponsored-only is the safe
+  default when sponsored jobs are enabled; all-jobs also covers ordinary
+  external and native Apply flows in compatible starters.
+
 ## 1.6.1 — 2026-08-22
 
 - **Company blocklist commands**: `confirmOrAbort` now receives a single
