@@ -52,18 +52,12 @@ export function createEmployersClient(opts: CavunoClientOptions) {
       }),
     listClaims: (query?: ClaimListQuery) =>
       c.GET('/employers/claims', { params: { query: query ?? {} } }),
-    approveClaim: (
-      claimId: string,
-      idempotency: IdempotencyOptions,
-    ) =>
+    approveClaim: (claimId: string, idempotency: IdempotencyOptions) =>
       c.POST('/employers/claims/{id}/approve', {
         params: { path: { id: claimId } },
         headers: headers(idempotency),
       }),
-    rejectClaim: (
-      claimId: string,
-      idempotency: IdempotencyOptions,
-    ) =>
+    rejectClaim: (claimId: string, idempotency: IdempotencyOptions) =>
       c.POST('/employers/claims/{id}/reject', {
         params: { path: { id: claimId } },
         headers: headers(idempotency),
