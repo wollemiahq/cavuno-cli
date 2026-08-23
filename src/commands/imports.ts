@@ -1,17 +1,8 @@
 import { Command } from 'commander';
 
-import {
-  type ConfirmImportBody,
-  createImportsClient,
-} from '../api/imports.js';
-
+import { type ConfirmImportBody, createImportsClient } from '../api/imports.js';
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
-import {
-  confirmOrAbort,
-  type ConfirmOptions,
-  withYesOption,
-} from '../lib/confirm.js';
 import { fromApiError } from '../lib/error.js';
 import {
   resolveIdempotency,

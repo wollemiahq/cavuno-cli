@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createEmployersClient } from '../api/employers.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import {
@@ -252,9 +251,7 @@ export function registerEmployersCommand(root: Command): void {
       const client = getClient(this);
       const format = getFormat(this);
       const opts = this.opts<IdempotencyOptions>();
-      const r = unwrap(
-        await client.approveClaim(id, resolveIdempotency(opts)),
-      );
+      const r = unwrap(await client.approveClaim(id, resolveIdempotency(opts)));
       if (r.error) throw fromApiError(r.error, r.response);
       print(r.data, format);
     }),
@@ -274,9 +271,7 @@ export function registerEmployersCommand(root: Command): void {
       const client = getClient(this);
       const format = getFormat(this);
       const opts = this.opts<IdempotencyOptions>();
-      const r = unwrap(
-        await client.rejectClaim(id, resolveIdempotency(opts)),
-      );
+      const r = unwrap(await client.rejectClaim(id, resolveIdempotency(opts)));
       if (r.error) throw fromApiError(r.error, r.response);
       print(r.data, format);
     }),

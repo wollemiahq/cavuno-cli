@@ -14,10 +14,12 @@ type Query<P> = P extends {
 
 export type AnalyticsOverviewQuery = Query<paths['/analytics/overview']['get']>;
 export type AnalyticsTrafficQuery = Query<paths['/analytics/traffic']['get']>;
-export type AnalyticsApplyClicksQuery =
-  Query<paths['/analytics/apply-clicks']['get']>;
-export type AnalyticsJobVisitorsQuery =
-  Query<paths['/analytics/job-visitors']['get']>;
+export type AnalyticsApplyClicksQuery = Query<
+  paths['/analytics/apply-clicks']['get']
+>;
+export type AnalyticsJobVisitorsQuery = Query<
+  paths['/analytics/job-visitors']['get']
+>;
 
 /**
  * Typed Board analytics (Operator API).
