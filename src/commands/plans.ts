@@ -1,10 +1,6 @@
 import { Command } from 'commander';
 
-import {
-  createPlansClient,
-  type SetPlanFeaturesBody,
-} from '../api/plans.js';
-
+import { createPlansClient, type SetPlanFeaturesBody } from '../api/plans.js';
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';

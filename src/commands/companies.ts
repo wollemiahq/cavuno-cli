@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createCompaniesClient } from '../api/companies.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { readBatchBody } from '../lib/batch-body.js';
@@ -433,7 +432,6 @@ export function registerCompaniesCommand(root: Command): void {
     },
   );
 
-  
   annotate(
     withYesOption(
       companies
@@ -495,7 +493,7 @@ export function registerCompaniesCommand(root: Command): void {
     },
   );
 
-annotate(
+  annotate(
     companies
       .command('list-jobs')
       .description('List jobs at a company (any status, optional filter).')

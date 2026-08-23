@@ -399,9 +399,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno jobs pause k17abc..."
-          ],
+          "examples": ["cavuno jobs pause k17abc..."],
           "mapsTo": "POST /v1/jobs/:id/pause"
         },
         {
@@ -417,9 +415,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno jobs expire k17abc..."
-          ],
+          "examples": ["cavuno jobs expire k17abc..."],
           "mapsTo": "POST /v1/jobs/:id/expire"
         },
         {
@@ -460,9 +456,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno jobs delete k17abc... --yes"
-          ],
+          "examples": ["cavuno jobs delete k17abc... --yes"],
           "mapsTo": "DELETE /v1/jobs/:id"
         },
         {
@@ -495,9 +489,7 @@
           "synopsis": "cavuno usage get",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno usage get"
-          ],
+          "examples": ["cavuno usage get"],
           "mapsTo": "GET /v1/usage"
         }
       ]
@@ -512,9 +504,7 @@
           "synopsis": "cavuno me get",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno me get"
-          ],
+          "examples": ["cavuno me get"],
           "mapsTo": "GET /v1/me"
         }
       ]
@@ -569,9 +559,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno companies get k18acme..."
-          ],
+          "examples": ["cavuno companies get k18acme..."],
           "mapsTo": "GET /v1/companies/:id"
         },
         {
@@ -716,9 +704,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno companies delete k18acme... --yes"
-          ],
+          "examples": ["cavuno companies delete k18acme... --yes"],
           "mapsTo": "DELETE /v1/companies/:id"
         },
         {
@@ -764,9 +750,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno companies delete-logo k18acme... --yes"
-          ],
+          "examples": ["cavuno companies delete-logo k18acme... --yes"],
           "mapsTo": "DELETE /v1/companies/:id/logo"
         },
         {
@@ -782,9 +766,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno companies find-by-domain acme.com"
-          ],
+          "examples": ["cavuno companies find-by-domain acme.com"],
           "mapsTo": "POST /v1/companies/search"
         },
         {
@@ -833,9 +815,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno companies search \"acme\" --limit 10"
-          ],
+          "examples": ["cavuno companies search \"acme\" --limit 10"],
           "mapsTo": "POST /v1/companies/search"
         },
         {
@@ -887,9 +867,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno companies unblock k18acme... --yes"
-          ],
+          "examples": ["cavuno companies unblock k18acme... --yes"],
           "mapsTo": "POST /v1/companies/:id/unblock"
         },
         {
@@ -933,9 +911,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno companies batch --file ops.json"
-          ],
+          "examples": ["cavuno companies batch --file ops.json"],
           "mapsTo": "POST /v1/companies/batch"
         }
       ]
@@ -966,9 +942,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts list --status draft"
-          ],
+          "examples": ["cavuno blog posts list --status draft"],
           "mapsTo": "GET /v1/blog/posts"
         },
         {
@@ -984,9 +958,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog posts get k97..."
-          ],
+          "examples": ["cavuno blog posts get k97..."],
           "mapsTo": "GET /v1/blog/posts/:id"
         },
         {
@@ -1076,9 +1048,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts create --title \"Hiring trends\""
-          ],
+          "examples": ["cavuno blog posts create --title \"Hiring trends\""],
           "mapsTo": "POST /v1/blog/posts"
         },
         {
@@ -1155,9 +1125,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts update k97... --title \"New\""
-          ],
+          "examples": ["cavuno blog posts update k97... --title \"New\""],
           "mapsTo": "PATCH /v1/blog/posts/:id"
         },
         {
@@ -1173,9 +1141,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog posts publish k97..."
-          ],
+          "examples": ["cavuno blog posts publish k97..."],
           "mapsTo": "POST /v1/blog/posts/:id/publish"
         },
         {
@@ -1191,9 +1157,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog posts unpublish k97..."
-          ],
+          "examples": ["cavuno blog posts unpublish k97..."],
           "mapsTo": "POST /v1/blog/posts/:id/unpublish"
         },
         {
@@ -1209,9 +1173,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog posts toggle-featured k97..."
-          ],
+          "examples": ["cavuno blog posts toggle-featured k97..."],
           "mapsTo": "POST /v1/blog/posts/:id/toggle-featured"
         },
         {
@@ -1238,9 +1200,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts search \"hiring\""
-          ],
+          "examples": ["cavuno blog posts search \"hiring\""],
           "mapsTo": "POST /v1/blog/posts/search"
         },
         {
@@ -1255,9 +1215,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts batch --file ops.json"
-          ],
+          "examples": ["cavuno blog posts batch --file ops.json"],
           "mapsTo": "POST /v1/blog/posts/batch"
         },
         {
@@ -1279,9 +1237,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog posts delete k97... --yes"
-          ],
+          "examples": ["cavuno blog posts delete k97... --yes"],
           "mapsTo": "DELETE /v1/blog/posts/:id"
         },
         {
@@ -1301,9 +1257,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog authors list"
-          ],
+          "examples": ["cavuno blog authors list"],
           "mapsTo": "GET /v1/blog/authors"
         },
         {
@@ -1319,9 +1273,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog authors get k57..."
-          ],
+          "examples": ["cavuno blog authors get k57..."],
           "mapsTo": "GET /v1/blog/authors/:id"
         },
         {
@@ -1371,9 +1323,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog authors create --name \"Alex Chen\""
-          ],
+          "examples": ["cavuno blog authors create --name \"Alex Chen\""],
           "mapsTo": "POST /v1/blog/authors"
         },
         {
@@ -1410,9 +1360,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog authors update k57... --bio \"…\""
-          ],
+          "examples": ["cavuno blog authors update k57... --bio \"…\""],
           "mapsTo": "PATCH /v1/blog/authors/:id"
         },
         {
@@ -1434,9 +1382,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog authors delete k57... --yes"
-          ],
+          "examples": ["cavuno blog authors delete k57... --yes"],
           "mapsTo": "DELETE /v1/blog/authors/:id"
         },
         {
@@ -1456,9 +1402,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog tags list"
-          ],
+          "examples": ["cavuno blog tags list"],
           "mapsTo": "GET /v1/blog/tags"
         },
         {
@@ -1474,9 +1418,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno blog tags get kn7..."
-          ],
+          "examples": ["cavuno blog tags get kn7..."],
           "mapsTo": "GET /v1/blog/tags/:id"
         },
         {
@@ -1506,9 +1448,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog tags create --name \"Hiring\""
-          ],
+          "examples": ["cavuno blog tags create --name \"Hiring\""],
           "mapsTo": "POST /v1/blog/tags"
         },
         {
@@ -1545,9 +1485,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog tags update kn7... --name \"X\""
-          ],
+          "examples": ["cavuno blog tags update kn7... --name \"X\""],
           "mapsTo": "PATCH /v1/blog/tags/:id"
         },
         {
@@ -1569,9 +1507,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno blog tags delete kn7... --yes"
-          ],
+          "examples": ["cavuno blog tags delete kn7... --yes"],
           "mapsTo": "DELETE /v1/blog/tags/:id"
         }
       ]
@@ -1677,9 +1613,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno settings delete-hero --yes"
-          ],
+          "examples": ["cavuno settings delete-hero --yes"],
           "mapsTo": "DELETE /v1/settings/hero"
         },
         {
@@ -1731,9 +1665,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno settings delete-password-protection --yes"
-          ],
+          "examples": ["cavuno settings delete-password-protection --yes"],
           "mapsTo": "DELETE /v1/settings/password-protection"
         },
         {
@@ -1834,9 +1766,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno domains list"
-          ],
+          "examples": ["cavuno domains list"],
           "mapsTo": "GET /v1/domains"
         },
         {
@@ -1852,9 +1782,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno domains get domain_123"
-          ],
+          "examples": ["cavuno domains get domain_123"],
           "mapsTo": "GET /v1/domains/:id"
         },
         {
@@ -1870,9 +1798,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno domains add jobs.example.com"
-          ],
+          "examples": ["cavuno domains add jobs.example.com"],
           "mapsTo": "POST /v1/domains"
         },
         {
@@ -1929,9 +1855,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno domains remove domain_123 --yes"
-          ],
+          "examples": ["cavuno domains remove domain_123 --yes"],
           "mapsTo": "DELETE /v1/domains/:id"
         }
       ]
@@ -1953,9 +1877,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno operations get op_123"
-          ],
+          "examples": ["cavuno operations get op_123"],
           "mapsTo": "GET /v1/operations/:id"
         },
         {
@@ -1971,9 +1893,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno operations cancel op_123"
-          ],
+          "examples": ["cavuno operations cancel op_123"],
           "mapsTo": "POST /v1/operations/:id/cancel"
         },
         {
@@ -2018,9 +1938,7 @@
           "synopsis": "cavuno taxonomies remote-permits",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno taxonomies remote-permits"
-          ],
+          "examples": ["cavuno taxonomies remote-permits"],
           "mapsTo": "GET /v1/taxonomies/remote-permits"
         },
         {
@@ -2029,9 +1947,7 @@
           "synopsis": "cavuno taxonomies remote-timezones",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno taxonomies remote-timezones"
-          ],
+          "examples": ["cavuno taxonomies remote-timezones"],
           "mapsTo": "GET /v1/taxonomies/remote-timezones"
         },
         {
@@ -2056,9 +1972,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno taxonomies skills list"
-          ],
+          "examples": ["cavuno taxonomies skills list"],
           "mapsTo": "GET /v1/taxonomies/skills"
         },
         {
@@ -2074,9 +1988,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies skills get <id>"
-          ],
+          "examples": ["cavuno taxonomies skills get <id>"],
           "mapsTo": "GET /v1/taxonomies/skills/:id"
         },
         {
@@ -2158,9 +2070,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies skills delete <id>"
-          ],
+          "examples": ["cavuno taxonomies skills delete <id>"],
           "mapsTo": "DELETE /v1/taxonomies/skills/:id"
         },
         {
@@ -2206,9 +2116,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies skills remove-alias <id> other-slug"
-          ],
+          "examples": ["cavuno taxonomies skills remove-alias <id> other-slug"],
           "mapsTo": "DELETE /v1/taxonomies/skills/:id/aliases/:alias"
         },
         {
@@ -2217,9 +2125,7 @@
           "synopsis": "cavuno taxonomies categories tree",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno taxonomies categories tree"
-          ],
+          "examples": ["cavuno taxonomies categories tree"],
           "mapsTo": "GET /v1/taxonomies/categories/tree"
         },
         {
@@ -2244,9 +2150,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno taxonomies categories list"
-          ],
+          "examples": ["cavuno taxonomies categories list"],
           "mapsTo": "GET /v1/taxonomies/categories"
         },
         {
@@ -2262,9 +2166,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies categories get <id>"
-          ],
+          "examples": ["cavuno taxonomies categories get <id>"],
           "mapsTo": "GET /v1/taxonomies/categories/:id"
         },
         {
@@ -2361,9 +2263,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies categories delete <id>"
-          ],
+          "examples": ["cavuno taxonomies categories delete <id>"],
           "mapsTo": "DELETE /v1/taxonomies/categories/:id"
         },
         {
@@ -2436,9 +2336,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno taxonomies markets list"
-          ],
+          "examples": ["cavuno taxonomies markets list"],
           "mapsTo": "GET /v1/taxonomies/markets"
         },
         {
@@ -2454,9 +2352,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies markets get <id>"
-          ],
+          "examples": ["cavuno taxonomies markets get <id>"],
           "mapsTo": "GET /v1/taxonomies/markets/:id"
         },
         {
@@ -2538,9 +2434,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno taxonomies markets delete <id>"
-          ],
+          "examples": ["cavuno taxonomies markets delete <id>"],
           "mapsTo": "DELETE /v1/taxonomies/markets/:id"
         },
         {
@@ -2682,9 +2576,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno candidates get nh7abc..."
-          ],
+          "examples": ["cavuno candidates get nh7abc..."],
           "mapsTo": "GET /v1/candidates/:id"
         },
         {
@@ -2779,9 +2671,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno employers get nh7abc..."
-          ],
+          "examples": ["cavuno employers get nh7abc..."],
           "mapsTo": "GET /v1/employers/:id"
         },
         {
@@ -2856,9 +2746,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno employers memberships --status approved"
-          ],
+          "examples": ["cavuno employers memberships --status approved"],
           "mapsTo": "GET /v1/employers/memberships"
         },
         {
@@ -2874,9 +2762,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno employers membership pd7abc..."
-          ],
+          "examples": ["cavuno employers membership pd7abc..."],
           "mapsTo": "GET /v1/employers/memberships/:id"
         },
         {
@@ -2931,9 +2817,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno employers approve-claim pd7abc..."
-          ],
+          "examples": ["cavuno employers approve-claim pd7abc..."],
           "mapsTo": "POST /v1/employers/claims/:id/approve"
         },
         {
@@ -2955,9 +2839,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno employers reject-claim pd7abc..."
-          ],
+          "examples": ["cavuno employers reject-claim pd7abc..."],
           "mapsTo": "POST /v1/employers/claims/:id/reject"
         }
       ]
@@ -3012,9 +2894,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno employer-subscriptions get es_…"
-          ],
+          "examples": ["cavuno employer-subscriptions get es_…"],
           "mapsTo": "GET /v1/employer-subscriptions/:id"
         }
       ]
@@ -3029,9 +2909,7 @@
           "synopsis": "cavuno coupons list",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno coupons list"
-          ],
+          "examples": ["cavuno coupons list"],
           "mapsTo": "GET /v1/coupons"
         },
         {
@@ -3047,9 +2925,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno coupons get coupon_xxx"
-          ],
+          "examples": ["cavuno coupons get coupon_xxx"],
           "mapsTo": "GET /v1/coupons/:id"
         },
         {
@@ -3118,9 +2994,7 @@
               "required": true
             }
           ],
-          "examples": [
-            "cavuno coupons rename coupon_xxx --name \"Fall sale\""
-          ],
+          "examples": ["cavuno coupons rename coupon_xxx --name \"Fall sale\""],
           "mapsTo": "PATCH /v1/coupons/:id"
         },
         {
@@ -3142,9 +3016,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno coupons delete coupon_xxx --yes"
-          ],
+          "examples": ["cavuno coupons delete coupon_xxx --yes"],
           "mapsTo": "DELETE /v1/coupons/:id"
         },
         {
@@ -3194,9 +3066,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno coupons promotion-code-archive promotion_xxx"
-          ],
+          "examples": ["cavuno coupons promotion-code-archive promotion_xxx"],
           "mapsTo": "POST /v1/coupons/promotion-codes/:id/archive"
         }
       ]
@@ -3211,9 +3081,7 @@
           "synopsis": "cavuno reporting integrations",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno reporting integrations"
-          ],
+          "examples": ["cavuno reporting integrations"],
           "mapsTo": "GET /v1/integrations/reporting"
         },
         {
@@ -3229,9 +3097,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno reporting get search_console"
-          ],
+          "examples": ["cavuno reporting get search_console"],
           "mapsTo": "GET /v1/integrations/reporting/:provider"
         },
         {
@@ -3253,9 +3119,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno reporting connect search_console"
-          ],
+          "examples": ["cavuno reporting connect search_console"],
           "mapsTo": "POST /v1/integrations/reporting/:provider/connect"
         },
         {
@@ -3277,9 +3141,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno reporting enable adsense"
-          ],
+          "examples": ["cavuno reporting enable adsense"],
           "mapsTo": "PATCH /v1/integrations/reporting/:provider"
         },
         {
@@ -3301,9 +3163,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno reporting disable adsense"
-          ],
+          "examples": ["cavuno reporting disable adsense"],
           "mapsTo": "PATCH /v1/integrations/reporting/:provider"
         },
         {
@@ -3330,9 +3190,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno reporting disconnect adsense --yes"
-          ],
+          "examples": ["cavuno reporting disconnect adsense --yes"],
           "mapsTo": "DELETE /v1/integrations/reporting/:provider"
         }
       ]
@@ -3347,9 +3205,7 @@
           "synopsis": "cavuno billing subscription",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno billing subscription"
-          ],
+          "examples": ["cavuno billing subscription"],
           "mapsTo": "GET /v1/billing/subscription"
         },
         {
@@ -3358,9 +3214,7 @@
           "synopsis": "cavuno billing connect",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno billing connect"
-          ],
+          "examples": ["cavuno billing connect"],
           "mapsTo": "GET /v1/billing/connect"
         },
         {
@@ -3426,9 +3280,7 @@
           "synopsis": "cavuno plans list",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno plans list"
-          ],
+          "examples": ["cavuno plans list"],
           "mapsTo": "GET /v1/plans"
         },
         {
@@ -3444,9 +3296,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno plans get plans_xxx"
-          ],
+          "examples": ["cavuno plans get plans_xxx"],
           "mapsTo": "GET /v1/plans/:id"
         },
         {
@@ -3608,9 +3458,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno plans get-features plans_xxx"
-          ],
+          "examples": ["cavuno plans get-features plans_xxx"],
           "mapsTo": "GET /v1/plans/:id/features"
         },
         {
@@ -3705,9 +3553,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno transactions get tx_…"
-          ],
+          "examples": ["cavuno transactions get tx_…"],
           "mapsTo": "GET /v1/transactions/:id"
         }
       ]
@@ -3722,9 +3568,7 @@
           "synopsis": "cavuno indexing config",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno indexing config"
-          ],
+          "examples": ["cavuno indexing config"],
           "mapsTo": "GET /v1/integrations/indexing"
         },
         {
@@ -3739,9 +3583,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno indexing enable-indexnow"
-          ],
+          "examples": ["cavuno indexing enable-indexnow"],
           "mapsTo": "POST /v1/integrations/indexing/toggle-indexnow"
         },
         {
@@ -3756,9 +3598,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno indexing disable-indexnow"
-          ],
+          "examples": ["cavuno indexing disable-indexnow"],
           "mapsTo": "POST /v1/integrations/indexing/toggle-indexnow"
         }
       ]
@@ -3818,9 +3658,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno imports get imports_k25abc"
-          ],
+          "examples": ["cavuno imports get imports_k25abc"],
           "mapsTo": "GET /v1/imports/:id"
         },
         {
@@ -3927,9 +3765,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno imports cancel imports_k25abc"
-          ],
+          "examples": ["cavuno imports cancel imports_k25abc"],
           "mapsTo": "POST /v1/imports/:id/cancel"
         },
         {
@@ -3938,9 +3774,7 @@
           "synopsis": "cavuno imports quota",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno imports quota"
-          ],
+          "examples": ["cavuno imports quota"],
           "mapsTo": "GET /v1/imports/quota"
         }
       ]
@@ -3955,9 +3789,7 @@
           "synopsis": "cavuno backfill progress",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno backfill progress"
-          ],
+          "examples": ["cavuno backfill progress"],
           "mapsTo": "GET /v1/backfill/progress"
         },
         {
@@ -3966,9 +3798,7 @@
           "synopsis": "cavuno backfill rules list",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno backfill rules list"
-          ],
+          "examples": ["cavuno backfill rules list"],
           "mapsTo": "GET /v1/backfill/rules"
         },
         {
@@ -3984,9 +3814,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno backfill rules get <id>"
-          ],
+          "examples": ["cavuno backfill rules get <id>"],
           "mapsTo": "GET /v1/backfill/rules/{id}"
         },
         {
@@ -4084,9 +3912,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno backfill rules remove <id> --yes"
-          ],
+          "examples": ["cavuno backfill rules remove <id> --yes"],
           "mapsTo": "DELETE /v1/backfill/rules/{id}"
         },
         {
@@ -4141,9 +3967,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno backfill companies start <companyId>"
-          ],
+          "examples": ["cavuno backfill companies start <companyId>"],
           "mapsTo": "POST /v1/backfill/companies/{companyId}/start"
         },
         {
@@ -4165,9 +3989,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno backfill companies stop <companyId>"
-          ],
+          "examples": ["cavuno backfill companies stop <companyId>"],
           "mapsTo": "POST /v1/backfill/companies/{companyId}/stop"
         },
         {
@@ -4268,9 +4090,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno backfill companies mark-no-match <companyId>"
-          ],
+          "examples": ["cavuno backfill companies mark-no-match <companyId>"],
           "mapsTo": "POST /v1/backfill/companies/{companyId}/mark-no-match"
         }
       ]
@@ -4408,9 +4228,7 @@
           "synopsis": "cavuno paywall get",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno paywall get"
-          ],
+          "examples": ["cavuno paywall get"],
           "mapsTo": "GET /v1/paywall"
         },
         {
@@ -4480,9 +4298,7 @@
           "synopsis": "cavuno sales-led-plans list",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno sales-led-plans list"
-          ],
+          "examples": ["cavuno sales-led-plans list"],
           "mapsTo": "GET /v1/sales-led-plans"
         },
         {
@@ -4498,9 +4314,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno sales-led-plans get <id>"
-          ],
+          "examples": ["cavuno sales-led-plans get <id>"],
           "mapsTo": "GET /v1/sales-led-plans/{id}"
         },
         {
@@ -4690,9 +4504,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno members get users_k800abc"
-          ],
+          "examples": ["cavuno members get users_k800abc"],
           "mapsTo": "GET /v1/members/:userId"
         },
         {
@@ -4719,9 +4531,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno members update users_k800abc --role admin"
-          ],
+          "examples": ["cavuno members update users_k800abc --role admin"],
           "mapsTo": "PATCH /v1/members/:userId"
         },
         {
@@ -4748,9 +4558,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno members remove users_k800abc --yes"
-          ],
+          "examples": ["cavuno members remove users_k800abc --yes"],
           "mapsTo": "DELETE /v1/members/:userId"
         },
         {
@@ -4772,9 +4580,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno members suspend users_k800abc"
-          ],
+          "examples": ["cavuno members suspend users_k800abc"],
           "mapsTo": "POST /v1/members/:userId/suspend"
         },
         {
@@ -4796,9 +4602,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno members unsuspend users_k800abc"
-          ],
+          "examples": ["cavuno members unsuspend users_k800abc"],
           "mapsTo": "POST /v1/members/:userId/unsuspend"
         },
         {
@@ -4825,9 +4629,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno members transfer-ownership users_k900abc --yes"
-          ],
+          "examples": ["cavuno members transfer-ownership users_k900abc --yes"],
           "mapsTo": "POST /v1/members/transfer-ownership"
         }
       ]
@@ -4939,9 +4741,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno invitations renew invitations_k900abc"
-          ],
+          "examples": ["cavuno invitations renew invitations_k900abc"],
           "mapsTo": "POST /v1/invitations/:id/renew"
         },
         {
@@ -4968,9 +4768,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno invitations revoke invitations_k900abc --yes"
-          ],
+          "examples": ["cavuno invitations revoke invitations_k900abc --yes"],
           "mapsTo": "DELETE /v1/invitations/:id"
         }
       ]
@@ -5025,9 +4823,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno subscribers get sub_123"
-          ],
+          "examples": ["cavuno subscribers get sub_123"],
           "mapsTo": "GET /v1/subscribers/:id"
         },
         {
@@ -5036,9 +4832,7 @@
           "synopsis": "cavuno subscribers count",
           "arguments": [],
           "options": [],
-          "examples": [
-            "cavuno subscribers count"
-          ],
+          "examples": ["cavuno subscribers count"],
           "mapsTo": "GET /v1/subscribers/count"
         },
         {
@@ -5054,9 +4848,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno subscribers alerts sub_123"
-          ],
+          "examples": ["cavuno subscribers alerts sub_123"],
           "mapsTo": "GET /v1/subscribers/:id/alerts"
         },
         {
@@ -5078,9 +4870,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno subscribers unsubscribe sub_123"
-          ],
+          "examples": ["cavuno subscribers unsubscribe sub_123"],
           "mapsTo": "POST /v1/subscribers/:id/unsubscribe"
         },
         {
@@ -5102,9 +4892,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno subscribers resubscribe sub_123"
-          ],
+          "examples": ["cavuno subscribers resubscribe sub_123"],
           "mapsTo": "POST /v1/subscribers/:id/resubscribe"
         },
         {
@@ -5305,9 +5093,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno redirects remove k200abc --yes"
-          ],
+          "examples": ["cavuno redirects remove k200abc --yes"],
           "mapsTo": "DELETE /v1/redirects/:id"
         },
         {
@@ -5322,9 +5108,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno redirects batch --file ops.json"
-          ],
+          "examples": ["cavuno redirects batch --file ops.json"],
           "mapsTo": "POST /v1/redirects/batch"
         }
       ]
@@ -5350,9 +5134,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno webhooks endpoints list"
-          ],
+          "examples": ["cavuno webhooks endpoints list"],
           "mapsTo": "GET /v1/webhook-endpoints"
         },
         {
@@ -5368,9 +5150,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno webhooks endpoints get whe_123"
-          ],
+          "examples": ["cavuno webhooks endpoints get whe_123"],
           "mapsTo": "GET /v1/webhook-endpoints/:id"
         },
         {
@@ -5464,9 +5244,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno webhooks endpoints delete whe_123 --yes"
-          ],
+          "examples": ["cavuno webhooks endpoints delete whe_123 --yes"],
           "mapsTo": "DELETE /v1/webhook-endpoints/:id"
         },
         {
@@ -5493,9 +5271,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno webhooks endpoints rotate-secret whe_123 --yes"
-          ],
+          "examples": ["cavuno webhooks endpoints rotate-secret whe_123 --yes"],
           "mapsTo": "POST /v1/webhook-endpoints/:id/rotate-secret"
         },
         {
@@ -5522,9 +5298,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno webhooks endpoints test whe_123 --yes"
-          ],
+          "examples": ["cavuno webhooks endpoints test whe_123 --yes"],
           "mapsTo": "POST /v1/webhook-endpoints/:id/test"
         },
         {
@@ -5573,9 +5347,7 @@
             }
           ],
           "options": [],
-          "examples": [
-            "cavuno webhooks deliveries get wdl_123"
-          ],
+          "examples": ["cavuno webhooks deliveries get wdl_123"],
           "mapsTo": "GET /v1/webhook-deliveries/:id"
         },
         {
@@ -5602,9 +5374,7 @@
               "required": false
             }
           ],
-          "examples": [
-            "cavuno webhooks deliveries replay wdl_123 --yes"
-          ],
+          "examples": ["cavuno webhooks deliveries replay wdl_123 --yes"],
           "mapsTo": "POST /v1/webhook-deliveries/:id/replay"
         }
       ]
