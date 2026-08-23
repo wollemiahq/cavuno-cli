@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createMembersClient, type MemberRole } from '../api/members.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import {

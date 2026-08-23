@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createSubscribersClient } from '../api/subscribers.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';
@@ -184,9 +183,7 @@ export function registerSubscribersCommand(root: Command): void {
       const client = getClient(this);
       const format = getFormat(this);
       const opts = this.opts<IdempotencyOptions>();
-      const r = unwrap(
-        await client.unsubscribe(id, resolveIdempotency(opts)),
-      );
+      const r = unwrap(await client.unsubscribe(id, resolveIdempotency(opts)));
       if (r.error) throw fromApiError(r.error, r.response);
       print(r.data, format);
     }),

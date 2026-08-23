@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createIndexingClient } from '../api/indexing.js';
-
 import { annotate } from '../lib/annotate.js';
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';

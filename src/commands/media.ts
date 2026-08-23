@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 
 import { createMediaClient, type MediaPurpose } from '../api/media.js';
-
 import { resolveAuth } from '../lib/auth.js';
 import { fromApiError } from '../lib/error.js';
 import { print, type OutputFormat } from '../lib/output.js';
