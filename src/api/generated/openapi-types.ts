@@ -5347,6 +5347,8 @@ export interface components {
     OperatorSettingsConfig: {
       passwordProtectionEnabled?: boolean;
       jobAlertsEnabled?: boolean;
+      jobRecommendationsEnabled: boolean;
+      recommendedTalentEnabled: boolean;
       candidatesEnabled?: boolean;
       employersEnabled?: boolean;
       blogEnabled?: boolean;
@@ -5405,6 +5407,10 @@ export interface components {
       passwordProtectionEnabled?: boolean;
       /** @description Whether candidates can subscribe to email alerts for new jobs. */
       jobAlertsEnabled?: boolean;
+      /** @description Whether signed-in candidates can see personalized job recommendations. Absent board config defaults to `true`. */
+      jobRecommendationsEnabled?: boolean;
+      /** @description Whether employers can see recommended talent matches for their jobs. Absent board config defaults to `false`. */
+      recommendedTalentEnabled?: boolean;
       /** @description Whether candidate profiles are enabled on the board. */
       candidatesEnabled?: boolean;
       /** @description Whether employer self-serve flows are enabled. */
