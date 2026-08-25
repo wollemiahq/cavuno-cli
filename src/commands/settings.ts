@@ -54,6 +54,14 @@ export function registerSettingsCommand(root: Command): void {
     .option('--slug <slug>', 'Board slug (cascades to account slug)')
     .option('--blog-enabled <bool>', 'Toggle blog feature flag (true/false)')
     .option(
+      '--job-recommendations-enabled <bool>',
+      'Toggle candidate job recommendations (true/false)',
+    )
+    .option(
+      '--recommended-talent-enabled <bool>',
+      'Toggle employer recommended talent (true/false)',
+    )
+    .option(
       '--candidates-enabled <bool>',
       'Toggle candidate-area flag (true/false)',
     )
@@ -96,6 +104,12 @@ export function registerSettingsCommand(root: Command): void {
       if (opts.slug) body.slug = opts.slug;
       if (opts.blogEnabled !== undefined)
         body.blogEnabled = opts.blogEnabled === 'true';
+      if (opts.jobRecommendationsEnabled !== undefined)
+        body.jobRecommendationsEnabled =
+          opts.jobRecommendationsEnabled === 'true';
+      if (opts.recommendedTalentEnabled !== undefined)
+        body.recommendedTalentEnabled =
+          opts.recommendedTalentEnabled === 'true';
       if (opts.candidatesEnabled !== undefined)
         body.candidatesEnabled = opts.candidatesEnabled === 'true';
       if (opts.countryGatingMode !== undefined) {
