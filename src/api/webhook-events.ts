@@ -83,10 +83,29 @@ export type CandidateUpdatedWebhookEvent =
   Schemas['WebhookCandidateUpdatedEvent'];
 export type CandidateDeletedWebhookEvent =
   Schemas['WebhookCandidateDeletedEvent'];
+
+/** Closed Candidate profile `changed_fields` vocabulary for `candidate.profile.updated`. */
+export const CANDIDATE_PROFILE_CHANGED_FIELDS = [
+  'profile.headline',
+  'profile.bio',
+  'profile.location',
+  'profile.country_code',
+  'skills',
+  'languages',
+  'experience',
+  'education',
+] as const;
+export type CandidateProfileChangedField =
+  (typeof CANDIDATE_PROFILE_CHANGED_FIELDS)[number];
+export type CandidateProfileWebhookPointer =
+  Schemas['WebhookCandidateProfilePointer'];
+export type CandidateProfileUpdatedWebhookEvent =
+  Schemas['WebhookCandidateProfileUpdatedEvent'];
 export type CandidateWebhookEvent =
   | CandidateCreatedWebhookEvent
   | CandidateUpdatedWebhookEvent
-  | CandidateDeletedWebhookEvent;
+  | CandidateDeletedWebhookEvent
+  | CandidateProfileUpdatedWebhookEvent;
 
 /** Closed marketing-permission `changed_fields` vocabulary. */
 export const MARKETING_PERMISSION_CHANGED_FIELDS = [
