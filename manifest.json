@@ -1,6 +1,6 @@
 {
   "version": "1.7.0",
-  "generatedAt": "2026-08-23T06:43:01.596Z",
+  "generatedAt": "2026-08-25T03:34:20.935Z",
   "groups": [
     {
       "name": "jobs",
@@ -1543,6 +1543,16 @@
             {
               "flags": "--blog-enabled <bool>",
               "description": "Toggle blog feature flag (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--job-recommendations-enabled <bool>",
+              "description": "Toggle candidate job recommendations (true/false)",
+              "required": false
+            },
+            {
+              "flags": "--recommended-talent-enabled <bool>",
+              "description": "Toggle employer recommended talent (true/false)",
               "required": false
             },
             {
