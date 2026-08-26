@@ -101,6 +101,28 @@ describe('settings update CLI options', () => {
     });
   });
 
+  it('forwards recommendation feature flags', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'update',
+        '--job-recommendations-enabled',
+        'false',
+        '--recommended-talent-enabled',
+        'true',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate.mock.calls[0]![0]).toEqual({
+      jobRecommendationsEnabled: false,
+      recommendedTalentEnabled: true,
+    });
+  });
+
   it('forwards cookie banner label flags', async () => {
     await createProgram().parseAsync(
       [
