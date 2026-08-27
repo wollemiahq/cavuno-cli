@@ -738,7 +738,11 @@ export interface paths {
      */
     get: operations['listCandidates'];
     put?: never;
-    post?: never;
+    /**
+     * Create a candidate
+     * @description Creates a passwordless candidate. Magic link is the default activation. An optional initial profile is seeded once. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['createCandidate'];
     delete?: never;
     options?: never;
     head?: never;
@@ -765,6 +769,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/candidates/reconcile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reconcile a candidate from a membership source
+     * @description Body-keyed membership sync. `sourceKey` + `externalMemberId` identify the member; they stay in the body because request paths land in logs. `sourceRevision` orders writes: equal is a no-op, lower is rejected. Creates, links, or updates the Candidate and optionally applies a profile projection. Pair this push with the `candidate.profile.updated` webhook and `GET /candidates/{id}/profile` pull. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied; equal source revisions are also idempotent without the header.
+     */
+    post: operations['reconcileCandidate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/candidates/{id}': {
     parameters: {
       query?: never;
@@ -784,6 +808,74 @@ export interface paths {
      * @description Permanently erases a candidate and all associated data (GDPR cascade). Always asynchronous: returns `202` with a `candidates.remove` operation to poll. Requires `candidates.manage`.
      */
     delete: operations['deleteCandidate'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a candidate
+     * @description Updates the candidate email and/or display name. Omitted fields are left unchanged. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    patch: operations['updateCandidate'];
+    trace?: never;
+  };
+  '/candidates/{id}/deactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Deactivate a candidate
+     * @description Disables sign-in, revokes all sessions, and hides the profile from talent surfaces. Profile and application history are preserved for a later reactivate. Idempotent: an already-deactivated candidate returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['deactivateCandidate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a candidate profile snapshot
+     * @description Returns the canonical candidate sync snapshot: identity, profile scalars, and collections. Excludes credentials, resume storage internals, applications, messages, saved jobs, and consent state. Requires `candidates.read`.
+     */
+    get: operations['getCandidateProfile'];
+    /**
+     * Replace a candidate profile
+     * @description Replaces the selected profile projection. The write body is a desired-state projection, not the GET response shape: scalars are top-level, and read-only fields are rejected. Absent keys are left unchanged; `null` on a scalar clears it; providing a collection array replaces that collection wholesale (empty array clears). Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    put: operations['updateCandidateProfile'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/reactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reactivate a candidate
+     * @description Restores sign-in, session access, and talent-surface visibility for a previously deactivated candidate. Profile and application history were preserved by deactivate. Idempotent: an already-active candidate returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['reactivateCandidate'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -3900,6 +3992,11 @@ export interface components {
       lastActiveAt: string | null;
     };
     CandidateDetail: components['schemas']['Candidate'] & {
+      /**
+       * Format: date-time
+       * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Reactivate restores sign-in and talent-surface visibility; the candidate signs in again to establish a new session.
+       */
+      deactivatedAt: string | null;
       profile: components['schemas']['CandidateProfile'] &
         ({
           headline: string | null;
@@ -3913,9 +4010,9 @@ export interface components {
           workingPermits: string[];
           interestedRoles: string[];
         } | null);
-      /** @description Number of jobs the candidate has saved. */
+      /** @description Number of jobs the candidate has saved. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
       savedJobCount: number;
-      /** @description Number of job alerts the candidate has. */
+      /** @description Number of job alerts the candidate has. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
       alertCount: number;
       resume: components['schemas']['CandidateResumeFile'];
     };
@@ -4031,6 +4128,88 @@ export interface components {
       jobSearchStatusVisibleTo: 'everyone' | 'employers_only';
       openToRelocate: boolean;
     };
+    CandidateProfileEducationProjection: {
+      /** @description Institution name. */
+      institutionName: string;
+      /** @description Institution URL. */
+      institutionUrl?: string | null;
+      /** @description Degree awarded. */
+      degree?: string | null;
+      /** @description Field of study. */
+      fieldOfStudy?: string | null;
+      /** @description Grade or GPA. */
+      grade?: string | null;
+      /** @description Activities and societies. */
+      activitiesAndSocieties?: string | null;
+      /** @description Start date. */
+      startDate?: string | null;
+      /** @description End date. */
+      endDate?: string | null;
+      /** @description Education description. */
+      description?: string | null;
+      /** @description Display order, lower first. */
+      sortOrder: number;
+    };
+    CandidateProfileExperienceProjection: {
+      /** @description Job title. */
+      title: string;
+      /** @description Employer name. */
+      companyName: string;
+      /** @description Employer URL. */
+      companyUrl?: string | null;
+      /** @description Role location. */
+      location?: string | null;
+      /** @description Employment type. */
+      employmentType?: string | null;
+      /** @description Location type. */
+      locationType?: string | null;
+      /** @description How the role was found. */
+      foundVia?: string | null;
+      /** @description Start date. */
+      startDate: string;
+      /** @description End date. */
+      endDate?: string | null;
+      /** @description Role description. */
+      description?: string | null;
+      /** @description Per-role skills; replaced with the row. */
+      experienceSkills?: string[] | null;
+      /** @description Display order, lower first. */
+      sortOrder: number;
+    };
+    CandidateProfileLanguageProjection: {
+      /** @description Language name. */
+      name: string;
+      /** @description Proficiency label. */
+      proficiency: string;
+      /** @description Display order, lower first. */
+      sortOrder: number;
+    };
+    CandidateProfileProjection: {
+      /** @description Absent key leaves the stored headline unchanged; `null` clears it. */
+      headline?: string | null;
+      /** @description Absent key leaves the stored bio unchanged; `null` clears it. */
+      bio?: string | null;
+      /** @description Absent key leaves the stored location unchanged; `null` clears it. */
+      location?: string | null;
+      /** @description Absent key leaves the stored country code unchanged; `null` clears it. */
+      countryCode?: string | null;
+      /** @description Absent key leaves the stored skills unchanged. Providing an array replaces the collection wholesale (empty array clears). Maximum 200 rows. */
+      skills?: string[];
+      /** @description Absent key leaves the stored languages unchanged. Providing an array replaces the collection wholesale (empty array clears). Maximum 50 rows. */
+      languages?: components['schemas']['CandidateProfileLanguageProjection'][];
+      /** @description Absent key leaves the stored experience unchanged. Providing an array replaces the collection wholesale (empty array clears). Maximum 50 rows. */
+      experience?: components['schemas']['CandidateProfileExperienceProjection'][];
+      /** @description Absent key leaves the stored education unchanged. Providing an array replaces the collection wholesale (empty array clears). Maximum 50 rows. */
+      education?: components['schemas']['CandidateProfileEducationProjection'][];
+    };
+    CandidateReconcileResult: {
+      /**
+       * @description `created` when a new Candidate is provisioned, `updated` when identity or profile changed, `unchanged` when the source revision was already applied, `upgraded` when an existing non-candidate Board user became a Candidate.
+       * @enum {string}
+       */
+      status: 'created' | 'updated' | 'unchanged' | 'upgraded';
+      candidate: components['schemas']['CandidateDetail'] & unknown;
+    };
     /** @description Protected download path and metadata for the uploaded resume, or `null` when no resume is on file (or the storage blob is missing). */
     CandidateResumeFile: {
       /** @description Stable, permission-protected Cavuno API path for downloading the candidate resume. */
@@ -4040,6 +4219,64 @@ export interface components {
       /** @description Size of the resume file in bytes. */
       sizeBytes: number;
     } | null;
+    CandidateSyncSnapshot: {
+      /** @description Unique identifier for the candidate. */
+      id: string;
+      /** @description The candidate's email address. */
+      email: string;
+      /** @description The candidate's display name. */
+      displayName: string | null;
+      /** @description Monotonic Candidate lifecycle revision. */
+      revision: number;
+      /** @description Monotonic profile-projection revision. */
+      profileRevision: number;
+      /**
+       * Format: date-time
+       * @description ISO 8601 timestamp when sign-in was disabled, or `null` when active.
+       */
+      deactivatedAt: string | null;
+      profile: {
+        headline: string | null;
+        bio: string | null;
+        location: string | null;
+        countryCode: string | null;
+      };
+      skills: string[];
+      languages: components['schemas']['CandidateSyncSnapshotLanguage'][];
+      experience: components['schemas']['CandidateSyncSnapshotExperience'][];
+      education: components['schemas']['CandidateSyncSnapshotEducation'][];
+    };
+    CandidateSyncSnapshotEducation: {
+      institutionName: string;
+      institutionUrl: string | null;
+      degree: string | null;
+      fieldOfStudy: string | null;
+      grade: string | null;
+      activitiesAndSocieties: string | null;
+      startDate: string | null;
+      endDate: string | null;
+      description: string | null;
+      sortOrder: number;
+    };
+    CandidateSyncSnapshotExperience: {
+      title: string;
+      companyName: string;
+      companyUrl: string | null;
+      location: string | null;
+      employmentType: string | null;
+      locationType: string | null;
+      foundVia: string | null;
+      startDate: string;
+      endDate: string | null;
+      description: string | null;
+      experienceSkills: string[] | null;
+      sortOrder: number;
+    };
+    CandidateSyncSnapshotLanguage: {
+      name: string;
+      proficiency: string;
+      sortOrder: number;
+    };
     Category: {
       id: string;
       /** @enum {string} */
@@ -4280,6 +4517,16 @@ export interface components {
       title: string;
       /** @enum {string} */
       status?: 'draft' | 'scheduled' | 'published';
+    };
+    CreateCandidateBody: {
+      /**
+       * Format: email
+       * @description The candidate's email address. Must be unique on the account.
+       */
+      email: string;
+      /** @description The candidate's display name. */
+      displayName: string;
+      profile?: components['schemas']['CandidateProfileProjection'] & unknown;
     };
     CreateCategoryBody: {
       name: string;
@@ -4583,6 +4830,7 @@ export interface components {
         | 'candidate.created'
         | 'candidate.updated'
         | 'candidate.deleted'
+        | 'candidate.profile.updated'
         | 'marketing_permission.granted'
         | 'marketing_permission.withdrawn'
       )[];
@@ -5347,6 +5595,8 @@ export interface components {
     OperatorSettingsConfig: {
       passwordProtectionEnabled?: boolean;
       jobAlertsEnabled?: boolean;
+      jobRecommendationsEnabled: boolean;
+      recommendedTalentEnabled: boolean;
       candidatesEnabled?: boolean;
       employersEnabled?: boolean;
       blogEnabled?: boolean;
@@ -5405,6 +5655,10 @@ export interface components {
       passwordProtectionEnabled?: boolean;
       /** @description Whether candidates can subscribe to email alerts for new jobs. */
       jobAlertsEnabled?: boolean;
+      /** @description Whether signed-in candidates can see personalized job recommendations. Absent board config defaults to `true`. */
+      jobRecommendationsEnabled?: boolean;
+      /** @description Whether employers can see recommended talent matches for their jobs. Absent board config defaults to `false`. */
+      recommendedTalentEnabled?: boolean;
       /** @description Whether candidate profiles are enabled on the board. */
       candidatesEnabled?: boolean;
       /** @description Whether employer self-serve flows are enabled. */
@@ -5552,6 +5806,24 @@ export interface components {
         intervalUnit?: 'day' | 'week' | 'month' | 'year' | null;
         intervalCount?: number | null;
       }[];
+    };
+    ReconcileCandidateBody: {
+      /** @description Opaque caller-chosen identifier for the membership system this write comes from (1–64 characters, `[a-z0-9._-]`). Identifies the source, not the person, and must stay stable: changing it treats the caller as a new source and cannot update an existing link. */
+      sourceKey: string;
+      /** @description The member id in the caller's system (1–256 characters). Sent in the body, never the URL: request paths land in logs and traces. Together with `sourceKey` this is the idempotent membership-sync key. */
+      externalMemberId: string;
+      /** @description Monotonically increasing revision per member, typically the source system's change timestamp in milliseconds. An equal revision is an idempotent no-op (`unchanged`); a lower revision is rejected as stale so a delayed write can never resurrect stale profile data or reactivate a deactivated account. Revisions above 2^53-1 are rejected. */
+      sourceRevision: number;
+      /**
+       * Format: email
+       * @description The candidate's email address. Used to create or link the Board user for this membership source.
+       */
+      email: string;
+      /** @description The candidate's display name. */
+      displayName: string;
+      profile?: components['schemas']['CandidateProfileProjection'] & unknown;
+      /** @description When `false`, deactivates the candidate (sign-in disabled, sessions revoked, profile hidden from talent surfaces). When `true`, restores sign-in and talent-surface visibility; the candidate signs in again to establish a new session. Profile and application history are preserved either way. */
+      active: boolean;
     };
     Redirect: {
       /** @description Unique identifier for the redirect. */
@@ -6100,6 +6372,15 @@ export interface components {
       /** @enum {string} */
       status?: 'draft' | 'scheduled' | 'published';
     };
+    UpdateCandidateBody: {
+      /**
+       * Format: email
+       * @description Absent key leaves the stored email unchanged. The new address must be unique on the account.
+       */
+      email?: string;
+      /** @description Absent key leaves the stored display name unchanged. */
+      displayName?: string;
+    };
     UpdateCategoryBody: {
       name?: string;
       slug?: string;
@@ -6342,6 +6623,7 @@ export interface components {
         | 'candidate.created'
         | 'candidate.updated'
         | 'candidate.deleted'
+        | 'candidate.profile.updated'
         | 'marketing_permission.granted'
         | 'marketing_permission.withdrawn'
       )[];
@@ -6482,6 +6764,89 @@ export interface components {
         };
         /** @description Empty for create/delete events. */
         changed_fields: string[];
+      };
+    };
+    /**
+     * @example profile.headline
+     * @enum {string}
+     */
+    WebhookCandidateProfileChangedField:
+      | 'profile.headline'
+      | 'profile.bio'
+      | 'profile.location'
+      | 'profile.country_code'
+      | 'skills'
+      | 'languages'
+      | 'experience'
+      | 'education';
+    /**
+     * @description Thin pointer for candidate.profile.updated. No profile values; pull GET /v1/candidates/{id}/profile and reject a stale profile_revision.
+     * @example {
+     *       "id": "boardUsers_01EXAMPLE",
+     *       "object": "candidate.profile",
+     *       "profile_revision": 1
+     *     }
+     */
+    WebhookCandidateProfilePointer: {
+      id: string;
+      /** @enum {string} */
+      object: 'candidate.profile';
+      profile_revision: number;
+    };
+    /**
+     * @description Common outbound webhook event envelope.
+     * @example {
+     *       "id": "evt_01EXAMPLECANDIDATEPROFILE",
+     *       "object": "event",
+     *       "type": "candidate.profile.updated",
+     *       "schema_version": "1",
+     *       "occurred_at": "2026-08-03T13:30:00Z",
+     *       "board_id": "acc_01EXAMPLEBOARD",
+     *       "data": {
+     *         "object": {
+     *           "id": "boardUsers_01EXAMPLE",
+     *           "object": "candidate.profile",
+     *           "profile_revision": 1
+     *         },
+     *         "changed_fields": [
+     *           "profile.headline",
+     *           "skills"
+     *         ]
+     *       }
+     *     }
+     */
+    WebhookCandidateProfileUpdatedEvent: {
+      /** @description Stable public event id (evt_…). */
+      id: string;
+      /** @enum {string} */
+      object: 'event';
+      /** @enum {string} */
+      type: 'candidate.profile.updated';
+      /** @enum {string} */
+      schema_version: '1';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      occurred_at: string;
+      /** @description Board account id that owns the event. */
+      board_id: string;
+      data: {
+        /** @description Thin pointer for candidate.profile.updated. No profile values; pull GET /v1/candidates/{id}/profile and reject a stale profile_revision. */
+        object: {
+          id: string;
+          /** @enum {string} */
+          object: 'candidate.profile';
+          profile_revision: number;
+        };
+        /** @description Closed Candidate profile changed_fields vocabulary for candidate.profile.updated. */
+        changed_fields: (
+          | 'profile.headline'
+          | 'profile.bio'
+          | 'profile.location'
+          | 'profile.country_code'
+          | 'skills'
+          | 'languages'
+          | 'experience'
+          | 'education'
+        )[];
       };
     };
     /**
@@ -9431,6 +9796,48 @@ export interface operations {
       };
     };
   };
+  createCandidate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCandidateBody'];
+      };
+    };
+    responses: {
+      /** @description Candidate created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateDetail'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email is already registered to another board user on this account. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   exportCandidates: {
     parameters: {
       query?: {
@@ -9471,6 +9878,48 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  reconcileCandidate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReconcileCandidateBody'];
+      };
+    };
+    responses: {
+      /** @description Candidate reconciled. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateReconcileResult'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email is taken, a newer source revision has already been applied, this candidate is already linked to a different member id for this source, or `sandbox_persona_protected` when a reconcile changes a persona's email or deactivates a persona on a sandbox board. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -9531,6 +9980,228 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['OperationResource'];
+        };
+      };
+      /** @description Candidate not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCandidate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCandidateBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateDetail'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Candidate not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email is already registered to another board user on this account. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deactivateCandidate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Candidate deactivated. `deactivatedAt` is set. Sign-in is blocked, sessions are revoked, and the profile is hidden from talent surfaces. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateDetail'];
+        };
+      };
+      /** @description Candidate not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Sandbox persona accounts cannot have their lifecycle changed. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCandidateProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateSyncSnapshot'];
+        };
+      };
+      /** @description Candidate not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Candidate has more related records than this endpoint supports. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCandidateProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CandidateProfileProjection'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateSyncSnapshot'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Candidate not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Candidate has more related records than this endpoint supports. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  reactivateCandidate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Candidate reactivated. `deactivatedAt` is `null`. Sign-in, session access, and talent-surface visibility are restored. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CandidateDetail'];
         };
       };
       /** @description Candidate not found. */
