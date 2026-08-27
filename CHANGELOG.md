@@ -3,6 +3,19 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.8.0 — 2026-08-27
+
+- **`settings update`** accepts `--job-recommendations-enabled` and
+  `--recommended-talent-enabled` to toggle candidate job recommendations and
+  employer recommended talent.
+- **Webhooks**: `candidate.profile.updated` is a recognized event with a
+  closed `changed_fields` vocabulary (`profile.headline`, `profile.bio`,
+  `profile.location`, `profile.country_code`, `skills`, `languages`,
+  `experience`, `education`).
+- **Generated API types** cover operator candidate create, update, and
+  reconcile routes plus the membership sync results. Candidate skills are
+  capped at 200 entries.
+
 ## 1.7.0 — 2026-08-23
 
 - **Apply country gating**: board settings now expose
