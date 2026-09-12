@@ -58,8 +58,13 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
     update: (id: string, body: AnyBody) =>
       patch(`/companies/${encodeURIComponent(id)}`, body),
     remove: (id: string) => del(`/companies/${encodeURIComponent(id)}`),
-    /** Company blocklist — archive live jobs + stop automated re-import. */
-    block: (id: string, body?: { reason?: string }) =>
+    /**
+     * Company blocklist. Without `remove`, archives live jobs and stops
+     * automated re-import while keeping the profile. With `remove: true`,
+     * also removes the profile and its jobs from the board and keeps the
+     * company blocked so nothing can add it back.
+     */
+    block: (id: string, body?: { reason?: string; remove?: boolean }) =>
       post(`/companies/${encodeURIComponent(id)}/block`, body ?? {}),
     /** Remove from company blocklist. Does not republish archived jobs. */
     unblock: (id: string) =>
