@@ -437,21 +437,28 @@ export function registerCompaniesCommand(root: Command): void {
       companies
         .command('block')
         .description(
-          'Block a company: archive live jobs and stop automated re-import (backfill, import, API bulk).',
+          'Block a company: stop automated re-import (backfill, import, API bulk). By default live jobs are archived and the profile stays; pass --remove to also remove the profile and its jobs from the board.',
         )
         .argument('<id>', 'Company ID')
         .option('--reason <text>', 'Optional free-text reason')
+        .option(
+          '--remove',
+          'Also remove the company profile and its jobs from the board. The company stays blocked so nothing can add it back.',
+        )
         .action(async function (this: Command, id: string) {
+          const opts = this.opts<{ reason?: string; remove?: boolean }>();
           await confirmOrAbort({
-            message: `Block company ${id}? Live jobs will be archived; automated sourcing will reject this employer until unblocked.`,
+            message: opts.remove
+              ? `Block company ${id} and remove it from the board? Its jobs and profile will be removed; automated sourcing will reject this employer until unblocked.`
+              : `Block company ${id}? Live jobs will be archived; automated sourcing will reject this employer until unblocked.`,
             yes: this.optsWithGlobals<ConfirmOptions>().yes,
           });
           const client = getClient(this);
           const format = getFormat(this);
-          const opts = this.opts<{ reason?: string }>();
           const r = unwrap(
             await client.block(id, {
               ...(opts.reason !== undefined && { reason: opts.reason }),
+              ...(opts.remove ? { remove: true } : {}),
             }),
           );
           if (r.error) throw fromApiError(r.error, r.response);
@@ -463,6 +470,7 @@ export function registerCompaniesCommand(root: Command): void {
       examples: [
         'cavuno companies block k18acme... --yes',
         'cavuno companies block k18acme... --reason "legal request" --yes',
+        'cavuno companies block k18acme... --remove --yes',
       ],
     },
   );
