@@ -3,6 +3,15 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.9.0 — 2026-09-23
+
+- **`companies block --remove`** also takes the company's profile and jobs
+  off the board, while keeping it on the blocklist so automated sourcing
+  cannot bring it back. Without `--remove`, blocking behaves as before: live
+  jobs are archived and the profile stays.
+- **Deleting a blocked company no longer unblocks it.** `companies delete` on
+  a blocked company keeps the block and removes the company from the board.
+
 ## 1.8.0 — 2026-08-27
 
 - **`settings update`** accepts `--job-recommendations-enabled` and
