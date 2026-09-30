@@ -3,6 +3,10 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.9.1 — 2026-09-25
+
+- Refresh package metadata and public release notes. Command behavior is unchanged.
+
 ## 1.9.0 — 2026-09-23
 
 - **`companies block --remove`** also takes the company's profile and jobs
