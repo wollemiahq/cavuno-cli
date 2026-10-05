@@ -1,6 +1,6 @@
 {
-  "version": "1.9.1",
-  "generatedAt": "2026-09-23T23:59:25.963Z",
+  "version": "1.10.0",
+  "generatedAt": "2026-10-05T00:50:43.972Z",
   "groups": [
     {
       "name": "jobs",
@@ -14,7 +14,7 @@
           "options": [
             {
               "flags": "--status <status>",
-              "description": "Filter by status (draft|published|expired|archived)",
+              "description": "Filter by status (draft|pending_approval|published|expired|archived)",
               "required": false
             },
             {
@@ -51,7 +51,8 @@
           "examples": [
             "# All jobs (first page)\ncavuno jobs list",
             "# Published only\ncavuno jobs list --status published --limit 100",
-            "# Published jobs at a single company\ncavuno jobs list --status published --company-id k17abc..."
+            "# Published jobs at a single company\ncavuno jobs list --status published --company-id k17abc...",
+            "# Jobs awaiting your approval (approve with `jobs publish`, reject with `jobs delete`)\ncavuno jobs list --status pending_approval"
           ],
           "mapsTo": "GET /v1/jobs (POST /v1/jobs/search when --search, --skills, or --categories is set)"
         },
@@ -363,7 +364,7 @@
         },
         {
           "name": "publish",
-          "description": "Publish a job (draft or expired → published).",
+          "description": "Publish a job (draft, pending_approval or expired → published). Publishing a pending_approval job approves it.",
           "synopsis": "cavuno jobs publish <id> [options]",
           "arguments": [
             {
@@ -382,7 +383,8 @@
           ],
           "examples": [
             "cavuno jobs publish k17abc...",
-            "cavuno jobs publish k17abc... --expires-at 2026-12-31T23:59:59Z"
+            "cavuno jobs publish k17abc... --expires-at 2026-12-31T23:59:59Z",
+            "# Approve a job awaiting approval\ncavuno jobs publish k17abc..."
           ],
           "mapsTo": "POST /v1/jobs/:id/publish"
         },
@@ -443,7 +445,7 @@
         },
         {
           "name": "delete",
-          "description": "Hard-delete a job. Irreversible.",
+          "description": "Hard-delete a job. Irreversible. Deleting a pending_approval job rejects it.",
           "synopsis": "cavuno jobs delete <id> [options]",
           "arguments": [
             {
@@ -461,7 +463,8 @@
             }
           ],
           "examples": [
-            "cavuno jobs delete k17abc... --yes"
+            "cavuno jobs delete k17abc... --yes",
+            "# Reject a job awaiting approval\ncavuno jobs delete k17abc... --yes"
           ],
           "mapsTo": "DELETE /v1/jobs/:id"
         },
@@ -913,7 +916,7 @@
           "options": [
             {
               "flags": "--status <status>",
-              "description": "Filter by status (draft|published|expired|archived)",
+              "description": "Filter by status (draft|pending_approval|published|expired|archived)",
               "required": false
             },
             {
