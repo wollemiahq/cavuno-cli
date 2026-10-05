@@ -298,7 +298,7 @@ export interface paths {
     put?: never;
     /**
      * Create a Backfill rule
-     * @description Create a named Backfill rule using the same typed rule-card conditions and filters as the dashboard form. Requires an `Idempotency-Key` header.
+     * @description Create a named Backfill rule using the same typed rule-card conditions and filters as the dashboard form. An empty rules array requires at least one nonempty structured filter. Requires an `Idempotency-Key` header.
      */
     post: operations['createBackfillRule'];
     delete?: never;
@@ -330,7 +330,7 @@ export interface paths {
     head?: never;
     /**
      * Update a Backfill rule
-     * @description Partially update a Backfill rule. Omitted fields keep their current values, matching the dashboard edit form. Requires an `Idempotency-Key` header.
+     * @description Partially update a Backfill rule. Omitted fields keep their current values, matching the dashboard edit form. The resulting rule must retain at least one card or nonempty structured filter. Requires an `Idempotency-Key` header.
      */
     patch: operations['updateBackfillRule'];
     trace?: never;
@@ -817,6 +817,30 @@ export interface paths {
     patch: operations['updateCandidate'];
     trace?: never;
   };
+  '/candidates/{id}/custom-fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get candidate custom-field values
+     * @description Returns all candidate profile values, including private fields. Requires `candidates.read`.
+     */
+    get: operations['getCandidateCustomFieldValues'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update candidate custom-field values
+     * @description Additive update of candidate profile values. Omitted keys are preserved; null, blank strings, and empty arrays clear a value; false and 0 are preserved. Requires `candidates.manage`.
+     */
+    patch: operations['updateCandidateCustomFieldValues'];
+    trace?: never;
+  };
   '/candidates/{id}/deactivate': {
     parameters: {
       query?: never;
@@ -831,6 +855,24 @@ export interface paths {
      * @description Disables sign-in, revokes all sessions, and hides the profile from talent surfaces. Profile and application history are preserved for a later reactivate. Idempotent: an already-deactivated candidate returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     post: operations['deactivateCandidate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/object-references': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get candidate object references */
+    get: operations['getCandidateObjectReferences'];
+    /** Replace candidate object references */
+    put: operations['replaceCandidateObjectReferences'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1021,7 +1063,7 @@ export interface paths {
     post?: never;
     /**
      * Delete a company
-     * @description Permanently deletes a company and cascades to delete every job attached to it (along with each job’s child records). It cannot be undone.
+     * @description Permanently deletes a company and cascades to delete every job attached to it (along with each job’s child records). It cannot be undone. Deleting a company that is on the blocklist never takes it off the blocklist: the company stays blocked and is removed from the board instead of being purged, so automated sourcing cannot recreate it. To purge a blocked company completely, unblock it first and then delete it.
      */
     delete: operations['deleteCompany'];
     options?: never;
@@ -1044,13 +1086,37 @@ export interface paths {
     put?: never;
     /**
      * Block a company
-     * @description Puts a company on the board-scoped blocklist. Archives currently published jobs, stops company-vertical backfill, and rejects automated sourcing writes that match this company. Non-automated human posts remain allowed. Idempotent: blocking an already-blocked company succeeds and reports `was_already_blocked: true`.
+     * @description Puts a company on the board-scoped blocklist. Blocking always stops company-vertical backfill and rejects automated sourcing writes that match this company. Two outcomes are available. The default (`remove` omitted or false) keeps the public profile, archives currently published jobs, and still allows non-automated human posts. With `remove: true` the profile, its jobs, and its directory, sitemap, and search entries are removed from the board while the company stays on the blocklist, and every write that resolves to it is rejected. Idempotent: blocking an already-blocked company succeeds and reports `was_already_blocked: true`, and `remove: true` upgrades an already-blocked company to the removed outcome. The response reports `removed` (the resulting state) and `removal_scheduled` (whether this call started the removal).
      */
     post: operations['createCompanyBlock'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/custom-fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get company custom-field values
+     * @description Returns all company profile values, including private fields. Requires `companies.read`.
+     */
+    get: operations['getCompanyCustomFieldValues'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update company custom-field values
+     * @description Additive update of company profile values. Omitted keys are preserved; null, blank strings, and empty arrays clear a value; false and 0 are preserved. Requires `companies.manage`.
+     */
+    patch: operations['updateCompanyCustomFieldValues'];
     trace?: never;
   };
   '/companies/{id}/jobs': {
@@ -1097,6 +1163,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/companies/{id}/object-references': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get company object references */
+    get: operations['getCompanyObjectReferences'];
+    /** Replace company object references */
+    put: operations['replaceCompanyObjectReferences'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/companies/{id}/unblock': {
     parameters: {
       query?: never;
@@ -1108,7 +1192,7 @@ export interface paths {
     put?: never;
     /**
      * Unblock a company
-     * @description Removes a company from the board-scoped blocklist. Does not republish jobs archived when the company was blocked. Idempotent: unblocking a company that is not blocked succeeds and reports `was_blocked: false`.
+     * @description Removes a company from the board-scoped blocklist. Does not republish jobs archived when the company was blocked. A company that had also been removed from the board comes back as an empty profile — it is visible again but its jobs are not restored, and the response reports `was_removed: true`. Idempotent: unblocking a company that is not blocked succeeds and reports `was_blocked: false`.
      */
     post: operations['createCompanyUnblock'];
     delete?: never;
@@ -1186,6 +1270,186 @@ export interface paths {
     /** Create a promotion code */
     post: operations['createCouponPromotionCode'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/custom-object-records/{recordId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a custom object record
+     * @description Gets one catalog record, including archived records. Requires `settings.read`.
+     */
+    get: operations['getCustomObjectRecord'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a custom object record
+     * @description Updates a record. Omitted fields are preserved; null clears logoUrl or externalId; supplied values replace all stored values; archived toggles archive or restore. Requires `settings.manage`.
+     */
+    patch: operations['updateCustomObjectRecord'];
+    trace?: never;
+  };
+  '/custom-object-types': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List custom object types
+     * @description Lists active custom object types. Pass includeArchived to include archived types. Requires `settings.read`.
+     */
+    get: operations['listCustomObjectTypes'];
+    put?: never;
+    /**
+     * Create a custom object type
+     * @description Creates a catalog type with an immutable key. Requires `settings.manage`.
+     */
+    post: operations['createCustomObjectType'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/custom-object-types/{typeId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a custom object type
+     * @description Gets one catalog type, including archived types. Requires `settings.read`.
+     */
+    get: operations['getCustomObjectType'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update a custom object type
+     * @description Updates its name, field definitions, or archived state. Omitted fields are preserved. Existing field types are immutable. Requires `settings.manage`.
+     */
+    patch: operations['updateCustomObjectType'];
+    trace?: never;
+  };
+  '/custom-object-types/{typeId}/records': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List custom object records
+     * @description Lists records for a catalog type. Requires `settings.read`.
+     */
+    get: operations['listCustomObjectRecords'];
+    put?: never;
+    /**
+     * Create a custom object record
+     * @description Creates a record. externalId is unique within the account and catalog type. Requires `settings.manage`.
+     */
+    post: operations['createCustomObjectRecord'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/custom-object-types/{typeId}/records/import': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import custom object records
+     * @description Atomically imports up to 500 records. Rows with an existing externalId are replaced and restored; rows without a matching externalId are created. Requires `settings.manage`.
+     */
+    post: operations['importCustomObjectRecords'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/custom-object-types/{typeId}/records/import-operations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a custom object record import
+     * @description Starts a bounded background import from a JSON records payload up to 10MB. Existing externalId values are updated and restored; other rows are created. Returns an operation whose terminal result includes totalRows, created, updated, failed, and capped row errors. Requires `settings.manage`.
+     */
+    post: operations['startCustomObjectRecordsImport'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/development-origins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List development origins
+     * @description Returns the development origins where board sign-in (OAuth completion and auth-email links) may land while a self-hosted frontend is tested. A development origin is never the board’s public or canonical address.
+     */
+    get: operations['listDevelopmentOrigins'];
+    put?: never;
+    /**
+     * Add a development origin
+     * @description Registers a local or preview origin for board sign-in, for example from a deploy pipeline as each preview is created. Adding an origin that is already registered returns it with 200.
+     */
+    post: operations['createDevelopmentOrigin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/development-origins/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a development origin
+     * @description Removes a development origin. A sign-in already in progress through it fails instead of completing anywhere else.
+     */
+    delete: operations['deleteDevelopmentOrigin'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1457,6 +1721,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/employers/{id}/deactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Deactivate an employer
+     * @description Disables sign-in and revokes all sessions. Company memberships, claims, and jobs are preserved for a later reactivate. Idempotent: an already-deactivated employer returns 200 with the unchanged employer. Requires `employers.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['deactivateEmployer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/{id}/reactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reactivate an employer
+     * @description Restores sign-in for a previously deactivated employer. Company memberships, claims, and jobs were preserved by deactivate. Sessions revoked by deactivate stay revoked; the employer signs in again. Idempotent: an already-active employer returns 200 with the unchanged employer. Requires `employers.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['reactivateEmployer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/imports': {
     parameters: {
       query?: never;
@@ -1570,11 +1874,31 @@ export interface paths {
     };
     /**
      * Retrieve the indexing configuration
-     * @description Returns the account's Google Indexing + IndexNow configuration. Always returns a config (indexing reads as disabled when never provisioned).
+     * @description Returns the account's Google Indexing API and IndexNow configuration. The Google Indexing API notifies Google immediately when jobs are published or removed; your site is indexed by Google either way. Always returns a config (the Google Indexing API reads as disabled when never provisioned). Toggle it with `POST /v1/integrations/indexing/toggle-google-indexing-api`.
      */
     get: operations['getIntegrationsIndexing'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/integrations/indexing/toggle-google-indexing-api': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Toggle the Google Indexing API
+     * @description Enables or disables the Google Indexing API, which notifies Google immediately when jobs are published or removed. Your site is indexed by Google either way; this only speeds up how quickly Google learns about job changes. Enabling runs the same checks as Settings → Indexing in the dashboard, in this order: the board has a primary custom domain; the board is not password protected; the board's Google Cloud project is provisioned (this starts automatically when a custom domain becomes primary); and the board's service account is an Owner of the site in Google Search Console. When Search Console is connected, the service account is added as an Owner automatically. Disabling always succeeds.
+     */
+    post: operations['toggleGoogleIndexingApi'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1772,7 +2096,7 @@ export interface paths {
     put?: never;
     /**
      * Create a job
-     * @description Creates a new job in `draft` status. The request is idempotent when an `Idempotency-Key` header is supplied. Reposts of existing jobs return 409 `jobs_already_exists` with the matching job ID.
+     * @description Creates a new job in `draft` status. The request is idempotent when an `Idempotency-Key` header is supplied. Reposts of existing jobs return 409 `jobs_already_exists` with the matching job ID. `remoteOption` is required, and a `salaryMin` or `salaryMax` requires both `salaryCurrency` and `salaryTimeframe`; a missing one returns `400 validation_bad_request` naming the field.
      */
     post: operations['createJob'];
     delete?: never;
@@ -1864,7 +2188,7 @@ export interface paths {
     head?: never;
     /**
      * Update a job
-     * @description Updates the specified job by setting the values of the parameters passed. Any parameters not provided will be left unchanged. Pass `expiresAt: null` to clear the expiry.
+     * @description Updates the specified job by setting the values of the parameters passed. Any parameters not provided will be left unchanged. Pass `expiresAt: null` to clear the explicit expiry. An ordinary published job then receives the board's `defaultJobDurationDays` from its publication time (30 days when unset); drafts and sponsored jobs may remain without an expiry.
      */
     patch: operations['updateJob'];
     trace?: never;
@@ -1940,7 +2264,7 @@ export interface paths {
     put?: never;
     /**
      * Publish a job
-     * @description Publishes a draft or expired job, making it visible on the public board. Plan and quota limits are enforced. `expiresAt` accepts an ISO 8601 string to set a new expiry, `null` to clear, or may be omitted. When omitted, a stored future expiry is preserved; a stored past expiry (e.g. set by a prior `expire` call) is cleared automatically so a republished job is never published with a stale past timestamp.
+     * @description Publishes a draft or expired job, making it visible on the public board. Plan and quota limits are enforced. `expiresAt` accepts an ISO 8601 string to set an explicit expiry, `null` to clear the explicit expiry, or may be omitted to preserve an existing expiry. An ordinary published job without an explicit expiry receives the board's `defaultJobDurationDays` from its publication time (30 days when unset). Sponsored jobs may have no expiry.
      */
     post: operations['publishJob'];
     delete?: never;
@@ -2490,13 +2814,15 @@ export interface paths {
     };
     /**
      * List sales-led plans
-     * @description List active (non-archived) contact-led pricing cards for the Board, ordered by `displayOrder`. Requires `plans.read`.
+     * @deprecated
+     * @description Deprecated. Use plans with `purpose: employer_service` and `pricingMode: contact`. List active (non-archived) contact-led pricing cards for the Board, ordered by `displayOrder`. Requires `plans.read`.
      */
     get: operations['listSalesLedPlans'];
     put?: never;
     /**
      * Create a sales-led plan
-     * @description Create a contact-led pricing card. Destination is normalized (email → mailto:, bare domain → https://). Max five featured bullets; max 50 active plans. Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Create an employer-service contact plan instead. This operation remains available for compatibility. Destination is normalized (email → mailto:, bare domain → https://). Max five featured bullets; max 50 active plans. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     post: operations['createSalesLedPlan'];
     delete?: never;
@@ -2516,7 +2842,8 @@ export interface paths {
     put?: never;
     /**
      * Reorder sales-led plans
-     * @description Atomically set `displayOrder` for the complete active set. Rejects missing, foreign, archived, or duplicate IDs and duplicate orders. Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Reorder employer-service contact plans instead. This compatibility operation atomically sets `displayOrder` for the complete active sales-led set. Rejects missing, foreign, archived, or duplicate IDs and duplicate orders. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     post: operations['reorderSalesLedPlans'];
     delete?: never;
@@ -2534,7 +2861,8 @@ export interface paths {
     };
     /**
      * Retrieve a sales-led plan
-     * @description Retrieve one active sales-led plan. Foreign and archived IDs return opaque 404. Requires `plans.read`.
+     * @deprecated
+     * @description Deprecated. Use the corresponding employer-service contact plan. Retrieve one active sales-led plan. Foreign and archived IDs return opaque 404. Requires `plans.read`.
      */
     get: operations['getSalesLedPlan'];
     put?: never;
@@ -2544,7 +2872,8 @@ export interface paths {
     head?: never;
     /**
      * Update a sales-led plan
-     * @description Replace the editable fields of an active sales-led plan (matches the dashboard form). Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Update the corresponding employer-service contact plan. This compatibility operation replaces the editable fields of an active sales-led plan. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     patch: operations['updateSalesLedPlan'];
     trace?: never;
@@ -2560,7 +2889,8 @@ export interface paths {
     put?: never;
     /**
      * Archive a sales-led plan
-     * @description Irreversibly archive the plan (soft-delete). Sets `isArchived: true` and `isPublic: false`. Archived IDs become opaque 404. Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Archive the corresponding employer-service contact plan. This compatibility operation soft-deletes the sales-led row by setting `isArchived: true` and `isPublic: false`. Archived IDs become opaque 404. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     post: operations['archiveSalesLedPlan'];
     delete?: never;
@@ -2580,7 +2910,8 @@ export interface paths {
     put?: never;
     /**
      * Hide a sales-led plan
-     * @description Hide the plan from the public employer pricing page (`isPublic: false`) without archiving it. Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Hide the corresponding employer-service contact plan. This compatibility operation sets `isPublic: false` without archiving the sales-led row. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     post: operations['hideSalesLedPlan'];
     delete?: never;
@@ -2600,7 +2931,8 @@ export interface paths {
     put?: never;
     /**
      * Publish a sales-led plan
-     * @description Make the plan public on the employer pricing page (`isPublic: true`). Requires `plans.manage` and an `Idempotency-Key` header.
+     * @deprecated
+     * @description Deprecated. Publish the corresponding employer-service contact plan. This compatibility operation sets `isPublic: true`. Requires `plans.manage` and an `Idempotency-Key` header.
      */
     post: operations['publishSalesLedPlan'];
     delete?: never;
@@ -2650,6 +2982,30 @@ export interface paths {
      * @description Replaces the AdSense configuration for your board with the supplied values.
      */
     put: operations['updateAdsenseSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/form-layouts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve form layouts
+     * @description Retrieves the field order, visibility and required state of the job, company and talent forms. Requires `settings.read`. The public board context serves the same lists (public fields only) as `forms` for headless renderers.
+     */
+    get: operations['getFormLayouts'];
+    /**
+     * Replace form layouts
+     * @description Replaces one or more of the job, company and talent form layouts. Each supplied list is the full ordered form; any field it leaves out is appended in the default order. The job form also updates the matching job form settings (salary and seniority visible and required, location visible). Rejected with 400 `validation_bad_request` for unknown or duplicate keys, a hidden or optional locked built-in, required on a hidden or non-requirable built-in, a hidden field whose definition is required, and any Google for Jobs rule; `error.details.issues` lists each problem as `{ form, code, key, message }`. Nothing is written unless every supplied list is valid. Requires `settings.manage`.
+     */
+    put: operations['replaceFormLayouts'];
     post?: never;
     delete?: never;
     options?: never;
@@ -2736,6 +3092,182 @@ export interface paths {
      * @description Disables password protection on your board. Free-plan accounts cannot disable password protection and will receive a 403.
      */
     delete: operations['disablePasswordProtection'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/profile-fields/{entity}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List profile custom-field definitions
+     * @description Lists candidate or company profile field definitions in display order. Includes private definitions. Requires `settings.read`.
+     */
+    get: operations['listProfileFieldDefinitions'];
+    /**
+     * Replace profile custom-field definitions
+     * @description Replaces candidate or company definitions wholesale. Array order is display order. Existing field types are immutable. Requires `settings.manage`.
+     */
+    put: operations['replaceProfileFieldDefinitions'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/profile-object-references/{entity}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List profile object reference definitions */
+    get: operations['listProfileObjectReferenceDefinitions'];
+    /** Replace profile object reference definitions */
+    put: operations['replaceProfileObjectReferenceDefinitions'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sso-connections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List SSO connections
+     * @description Returns the board’s SSO connections, oldest first. A board has at most five.
+     */
+    get: operations['listSsoConnections'];
+    put?: never;
+    /**
+     * Create an SSO connection
+     * @description Creates a connection, switched off for both roles. Register its `callbackUrl` at the provider, run a test from the dashboard, then switch it on for candidates or employers with `PATCH`. Leave out `issuer` and `clientId` to create a draft and get its `callbackUrl` first; set them with `PATCH` before testing. The request is idempotent when an `Idempotency-Key` header is supplied.
+     */
+    post: operations['createSsoConnection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sso-connections/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an SSO connection
+     * @description Retrieves one SSO connection.
+     */
+    get: operations['getSsoConnection'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an SSO connection
+     * @description Deletes the connection and the identities linked through it. Board accounts stay. It cannot be undone. Refused while the connection is the only way a role can sign in.
+     */
+    delete: operations['deleteSsoConnection'];
+    options?: never;
+    head?: never;
+    /**
+     * Update an SSO connection
+     * @description Updates the fields sent; `null` clears an optional field. On a connection that has passed a test, changes to provider settings wait in `pendingChanges` until a test passes on them and they are saved in the dashboard. Label, role switches, provisioning and trusted email apply at once.
+     */
+    patch: operations['updateSsoConnection'];
+    trace?: never;
+  };
+  '/sso-connections/{id}/disable': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disable an SSO connection
+     * @deprecated
+     * @description Deprecated: use PATCH with offeredToCandidates and offeredToEmployers. Keeps legacy role modes; disabling releases a legacy required-mode restriction. Modern last-method safeguards still apply.
+     */
+    post: operations['disableSsoConnection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sso-connections/{id}/discard-pending': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Discard pending SSO connection changes
+     * @description Drops `pendingChanges`. The live settings are untouched.
+     */
+    post: operations['discardSsoConnectionPendingChanges'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sso-connections/{id}/enable': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Enable an SSO connection
+     * @deprecated
+     * @description Deprecated: use PATCH with offeredToCandidates and offeredToEmployers. Keeps legacy role modes; disabling releases a legacy required-mode restriction. Modern last-method safeguards still apply.
+     */
+    post: operations['enableSsoConnection'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/sso-connections/{id}/test-result': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve the latest SSO connection test result
+     * @description The result of the latest connection test, kept for 30 minutes. Tests run in the operator’s browser from the dashboard.
+     */
+    get: operations['getSsoConnectionTestResult'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -3429,6 +3961,19 @@ export interface components {
     AddSkillAliasesBody: {
       aliases: string[];
     };
+    /** @description Admin-visible profile detail, or `null` when no profile exists. */
+    AdminCandidateProfile: {
+      headline: string | null;
+      location: string | null;
+      bio: string | null;
+      jobSearchStatus: string | null;
+      profileVisibility: string | null;
+      openToRelocate: boolean | null;
+      seniority: string[];
+      skills: string[];
+      workingPermits: string[];
+      interestedRoles: string[];
+    } | null;
     /** @description Links related to this resource. List responses carry the operator URL; detail responses may also carry the public URL. */
     AdminOnlyResourceLinks: {
       /**
@@ -3446,22 +3991,42 @@ export interface components {
       description: string | null;
       kind: string;
       /**
-       * @description Subscription billing interval. Required for kind=subscription.
+       * @description Subscription billing interval. Required for kind=subscription. Pair with billingIntervalCount for non-1 counts (quarterly = month × 3).
        * @enum {string|null}
        */
-      billingInterval: 'month' | 'year' | null;
+      billingInterval: 'day' | 'week' | 'month' | 'year' | null;
+      /** @description Stripe recurring.interval_count. Null/omitted means 1. Quarterly is month × 3. */
+      billingIntervalCount: number | null;
       /**
-       * @description Whether the plan grants job-posting or talent-access entitlement.
+       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), or contact-led employer_service / job_seeker_service catalogue rows.
        * @enum {string}
        */
-      purpose: 'job_posting' | 'talent_access';
+      purpose:
+        | 'job_posting'
+        | 'talent_access'
+        | 'membership'
+        | 'job_seeker'
+        | 'employer_service'
+        | 'job_seeker_service';
       isPublic: boolean;
       isRecommended: boolean;
       isArchived: boolean;
       displayOrder: number | null;
+      /**
+       * @description How the plan is sold. Plans created before this field existed report `priced`.
+       * @enum {string}
+       */
+      pricingMode: 'priced' | 'contact';
+      /** @description Operator-authored display price text for a contact plan, e.g. "From $2,000". Null when unset. */
+      priceText: string | null;
+      /** @description Operator-authored CTA label for a contact plan. */
+      ctaText: string | null;
+      /** @description The CTA target: an https, mailto:, or tel: URL. Null when unset, in which case no CTA is rendered. */
+      ctaDestination: string | null;
       price: components['schemas']['PlanPrice'];
       features: components['schemas']['PlanFeature'][];
     };
+    /** @description Deprecated. Prefer plans with purpose employer_service and pricingMode contact. */
     AdminSalesLedPlan: {
       /** @description Cavuno salesLedEmployerPlans ID. */
       id: string;
@@ -3477,30 +4042,6 @@ export interface components {
       displayOrder: number;
       /** @description ISO-8601 creation timestamp. */
       createdAt: string;
-    };
-    Alert: {
-      /** @description Job-alert preference ID. Also the path key. */
-      id: string;
-      /** @enum {string} */
-      object: 'alert';
-      label: string | null;
-      /** @enum {string} */
-      frequency: 'weekly';
-      isActive: boolean;
-      filters: {
-        jobFunctions: string[];
-        seniorityLevels: string[];
-        remoteOptions: string[];
-        placeIds: string[];
-        salaryMin: number | null;
-        salaryMax: number | null;
-        salaryCurrency: string | null;
-      };
-      /**
-       * Format: date-time
-       * @description When this alert last dispatched a digest, or null.
-       */
-      lastSentAt: string | null;
     };
     AnalyticsChange: {
       absolute: number;
@@ -3637,6 +4178,21 @@ export interface components {
       /** @description Metric value for the day, or null when a lagging provider has not reported yet. */
       value: number | null;
     };
+    /** @description Query parameters appended to outbound apply URLs. Absent means the default `ref={{boardHost}}`. */
+    ApplyUrlAttribution:
+      | {
+          /** @enum {string} */
+          mode: 'off';
+        }
+      | {
+          /** @enum {string} */
+          mode: 'append';
+          params: components['schemas']['ApplyUrlParamTemplate'][];
+        };
+    ApplyUrlParamTemplate: {
+      key: string;
+      valueTemplate: string;
+    };
     BackfillBulkItemResult: {
       companyId: string;
       /** @enum {string} */
@@ -3750,7 +4306,13 @@ export interface components {
        * @description Self-serve plan key. enterprise is not self-serve and returns plan_not_self_serve.
        * @enum {string}
        */
-      planKey: 'starter' | 'basic' | 'grow' | 'advanced' | 'enterprise';
+      planKey:
+        | 'starter'
+        | 'basic'
+        | 'grow'
+        | 'advanced'
+        | 'scale'
+        | 'enterprise';
       /** @enum {string} */
       interval: 'monthly' | 'annual';
     };
@@ -3759,7 +4321,13 @@ export interface components {
        * @description Self-serve plan key. enterprise is not self-serve and returns plan_not_self_serve.
        * @enum {string}
        */
-      planKey: 'starter' | 'basic' | 'grow' | 'advanced' | 'enterprise';
+      planKey:
+        | 'starter'
+        | 'basic'
+        | 'grow'
+        | 'advanced'
+        | 'scale'
+        | 'enterprise';
       /**
        * @description Billing interval. Defaults to monthly when omitted.
        * @enum {string}
@@ -3809,14 +4377,26 @@ export interface components {
        * @description Self-serve plan key. enterprise is not self-serve and returns plan_not_self_serve.
        * @enum {string}
        */
-      planKey: 'starter' | 'basic' | 'grow' | 'advanced' | 'enterprise';
+      planKey:
+        | 'starter'
+        | 'basic'
+        | 'grow'
+        | 'advanced'
+        | 'scale'
+        | 'enterprise';
     };
     BillingUpgradeBody: {
       /**
        * @description Self-serve plan key. enterprise is not self-serve and returns plan_not_self_serve.
        * @enum {string}
        */
-      planKey: 'starter' | 'basic' | 'grow' | 'advanced' | 'enterprise';
+      planKey:
+        | 'starter'
+        | 'basic'
+        | 'grow'
+        | 'advanced'
+        | 'scale'
+        | 'enterprise';
       /**
        * @description Billing interval. Defaults to monthly when omitted.
        * @enum {string}
@@ -3826,6 +4406,8 @@ export interface components {
     BlockCompanyBody: {
       /** @description Optional free-text reason recorded on the blocklist audit. */
       reason?: string;
+      /** @description When true, also removes the company profile and its jobs from the board while keeping it on the blocklist; default false keeps the profile and archives published jobs. */
+      remove?: boolean;
     };
     BlockCompanyResult: {
       /** @description The blocked company id. */
@@ -3836,6 +4418,10 @@ export interface components {
       jobs_archived_scheduled: boolean;
       /** @description True when the company was already on the blocklist. */
       was_already_blocked: boolean;
+      /** @description True when the company is removed from the board as well as blocked. */
+      removed: boolean;
+      /** @description Whether this call scheduled the removal of the profile and its jobs. */
+      removal_scheduled: boolean;
     };
     BlogAuthor: {
       /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the author endpoints (e.g. `GET /v1/blog/authors/{id}`). */
@@ -3958,6 +4544,16 @@ export interface components {
       /** @description Time at which the tag was last updated, or `null` if it has never been updated. ISO 8601 datetime. */
       updatedAt: string | null;
     };
+    BuiltInSignInMethods: {
+      /** @description Email and password. */
+      password: boolean;
+      /** @description Emailed one-time sign-in link. */
+      magicLink: boolean;
+      /** @description Sign in with Google. */
+      google: boolean;
+      /** @description Sign in with LinkedIn. */
+      linkedin: boolean;
+    };
     BulkBackfillCompaniesBody: {
       /** @description Ordered Cavuno company IDs (max 100). Partial success is returned per item. */
       companyIds: string[];
@@ -3997,19 +4593,7 @@ export interface components {
        * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Reactivate restores sign-in and talent-surface visibility; the candidate signs in again to establish a new session.
        */
       deactivatedAt: string | null;
-      profile: components['schemas']['CandidateProfile'] &
-        ({
-          headline: string | null;
-          location: string | null;
-          bio: string | null;
-          jobSearchStatus: string | null;
-          profileVisibility: string | null;
-          openToRelocate: boolean | null;
-          seniority: string[];
-          skills: string[];
-          workingPermits: string[];
-          interestedRoles: string[];
-        } | null);
+      profile: components['schemas']['AdminCandidateProfile'];
       /** @description Number of jobs the candidate has saved. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
       savedJobCount: number;
       /** @description Number of job alerts the candidate has. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
@@ -4108,25 +4692,6 @@ export interface components {
        * @description ISO-8601 creation time.
        */
       createdAt: string;
-    };
-    CandidateProfile: {
-      id: string;
-      /** @enum {string} */
-      object: 'candidate_profile';
-      displayName: string | null;
-      bio: string | null;
-      avatarUrl: string | null;
-      handle: string | null;
-      headline: string | null;
-      location: string | null;
-      countryCode: string | null;
-      /** @enum {string} */
-      profileVisibility: 'hidden' | 'logged_in_only' | 'public';
-      /** @enum {string} */
-      jobSearchStatus: 'actively_looking' | 'open_to_offers' | 'not_looking';
-      /** @enum {string} */
-      jobSearchStatusVisibleTo: 'everyone' | 'employers_only';
-      openToRelocate: boolean;
     };
     CandidateProfileEducationProjection: {
       /** @description Institution name. */
@@ -4289,6 +4854,18 @@ export interface components {
       createdAt: string;
       children?: unknown[];
     };
+    CollectionMediaFieldDefinition: {
+      key: string;
+      label: string;
+      /** @enum {string} */
+      type: 'image' | 'image_gallery' | 'file';
+      required: boolean;
+      /** @enum {string} */
+      visibility: 'private' | 'public';
+      /** @enum {boolean} */
+      editableByOwner: false;
+      helpText?: string;
+    };
     CompaniesBatchRequest: {
       /** @description Array of sub-operations to execute. Each entry runs independently and reports its result on the corresponding entry of the response `data` array. Sub-operation `id` values must be unique within the batch. Up to 100 entries. */
       operations: (
@@ -4316,7 +4893,7 @@ export interface components {
       )[];
     };
     Company: components['schemas']['CompanySummary'] & {
-      /** @description Long-form description of the company, or `null` if not set. */
+      /** @description Long-form description of the company (HTML), or `null` if not set. */
       description: string | null;
       /** @description Whether automated backfill of jobs from this company is supported, or `null` if not yet evaluated. */
       canBackfill: boolean | null;
@@ -4365,6 +4942,8 @@ export interface components {
       linkedinUrl: string | null;
       /** @description Facebook page URL, or `null` if not set. */
       facebookUrl: string | null;
+      /** @description Instagram profile URL, or `null` if not set. */
+      instagramUrl: string | null;
       /** @description Time at which the company was created. ISO 8601 datetime. */
       createdAt: string;
       /** @description Time at which the company was last updated, or `null` if it has never been updated. ISO 8601 datetime. */
@@ -4536,18 +5115,20 @@ export interface components {
       sourceLocale?: string;
     };
     CreateCompanyBody: {
-      /** @description Public company website URL. Normalized to a canonical apex domain when stored. */
-      website?: string;
-      /** @description One-line summary of the company. Up to 280 characters. */
-      summary?: string;
-      /** @description Long-form description of the company. Up to 25,000 characters. */
-      description?: string;
-      /** @description X (Twitter) profile URL or handle. Stored as the canonical handle. */
-      xUrl?: string;
-      /** @description LinkedIn company page URL. */
-      linkedinUrl?: string;
-      /** @description Facebook company page URL. */
-      facebookUrl?: string;
+      /** @description Public company website URL. Normalized to a canonical apex domain when stored. `null` or `""` means not set. */
+      website?: string | null;
+      /** @description One-line summary of the company. Up to 280 characters. `null` or `""` means not set. */
+      summary?: string | null;
+      /** @description Long-form description of the company, as HTML. Up to 25,000 characters. The HTML is sanitized on write: tags and attributes outside the supported formatting set (paragraphs, headings, lists, links, inline emphasis) are removed. Plain text without HTML tags is converted to paragraphs. `null` or `""` means not set. */
+      description?: string | null;
+      /** @description X (Twitter) profile URL or handle. Stored as the canonical handle. `null` or `""` means not set. */
+      xUrl?: string | null;
+      /** @description LinkedIn company page URL. `null` or `""` means not set. */
+      linkedinUrl?: string | null;
+      /** @description Facebook company page URL. `null` or `""` means not set. */
+      facebookUrl?: string | null;
+      /** @description Instagram profile URL or handle. `null` or `""` means not set. */
+      instagramUrl?: string | null;
       /** @description Canonical market slugs assigned to the company. Pass an empty array to clear all markets. */
       markets?: string[];
       /** @description The company's display name. */
@@ -4568,6 +5149,32 @@ export interface components {
       /** @description Unix ms deadline after which the coupon cannot be redeemed. */
       redeemBy?: number;
       appliesToPlanIds?: string[];
+    };
+    CreateCustomObjectRecordBody: {
+      name: string;
+      /**
+       * Format: uri
+       * @description Deprecated: use the collection's logo image field (`logoFieldKey` on the type). A legacy logo URL stored on older records.
+       */
+      logoUrl?: string;
+      externalId?: string;
+      values: {
+        [key: string]: string | number | boolean | string[];
+      };
+    };
+    CreateCustomObjectTypeBody: {
+      name: string;
+      key: string;
+      definitions: (
+        | components['schemas']['ScalarProfileCustomFieldDefinition']
+        | components['schemas']['CollectionMediaFieldDefinition']
+      )[];
+      /** @description Key of one of the `image` definitions to use as the logo. */
+      logoFieldKey?: string;
+    };
+    CreateDevelopmentOriginBody: {
+      /** @description Where sign-in may complete while you test a self-hosted frontend: `http://localhost:<port>` (or `127.0.0.1` / `[::1]`), one exact `https://` origin such as a preview deployment, or `https://*.<domain>` under a domain verified on this board. Wildcards on shared hosting suffixes such as `vercel.app` are refused; register each preview URL instead. */
+      origin: string;
     };
     CreateDomainBody: {
       /** @description Hostname to bind to this board, for example jobs.acme.com. Labels may contain letters, numbers, and hyphens, and may not start or end with a hyphen. The API normalizes accepted hostnames to lowercase before writing. */
@@ -4590,7 +5197,7 @@ export interface components {
     CreateJobBody: {
       /** @description The ID of an existing company. **Required unless you supply `company`** — exactly one of the two must be present, and supplying both is an error. */
       companyId?: string;
-      /** @description Long-form description of the role. Up to 25,000 characters. */
+      /** @description Long-form description of the role, as HTML. Up to 25,000 characters. The HTML is sanitized on write: tags and attributes outside the supported formatting set (paragraphs, headings, lists, links, inline emphasis) are removed. Plain text without HTML tags is converted to paragraphs. */
       description: string;
       /** @description URL-friendly slug for the job. Auto-generated from `title` when omitted. */
       slug?: string;
@@ -4607,10 +5214,10 @@ export interface components {
         | 'volunteer'
         | 'other';
       /**
-       * @description Whether the role is on-site, hybrid, or fully remote. **Never valid on its own:** `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST). Sending it alone returns `400`.
+       * @description **Required.** Whether the role is on-site, hybrid, or fully remote: one of `on_site`, `hybrid`, `remote`. Omitting it or sending `null` returns `400`. It is not valid on its own either: `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST).
        * @enum {string}
        */
-      remoteOption?: 'on_site' | 'hybrid' | 'remote';
+      remoteOption: 'on_site' | 'hybrid' | 'remote';
       /** @description Where remote candidates must hold work authorization. Each entry is the smallest relevant scope: `worldwide`, a `world_region` (EMEA / LATAM / NA / APAC), a `continent`, a `region`, a `subregion`, a `custom` group (e.g. `EU`), a `country` (ISO 3166-1 alpha-2), or a `subdivision` (ISO 3166-2). Subdivisions auto-imply their parent country in the derived `remoteWorkPermitCountryCodes` output. Worldwide is mutually exclusive with all other entries. The canonical `{type, value}` set is published at `GET /v1/taxonomies/remote-permits`. Pass `[]` to clear an existing constraint. */
       remotePermits?: {
         /** @enum {string} */
@@ -4659,30 +5266,31 @@ export interface components {
         | 'executive';
       /** @description Where candidates apply. Accepts an HTTPS URL, a `mailto:` URI, or a bare email address (which is normalized to `mailto:` form). */
       applicationUrl: string;
-      /** @description Minimum salary, in `salaryCurrency` units. */
-      salaryMin?: number;
-      /** @description Maximum salary, in `salaryCurrency` units. */
-      salaryMax?: number;
-      /** @description Three-letter ISO 4217 currency code for `salaryMin` and `salaryMax`. */
-      salaryCurrency?: string;
+      /** @description Minimum salary, in `salaryCurrency` units. `null` means not set. When `salaryMin` or `salaryMax` is set, `salaryCurrency` and `salaryTimeframe` are both required; otherwise `400`. */
+      salaryMin?: number | null;
+      /** @description Maximum salary, in `salaryCurrency` units. `null` means not set. When `salaryMin` or `salaryMax` is set, `salaryCurrency` and `salaryTimeframe` are both required; otherwise `400`. */
+      salaryMax?: number | null;
+      /** @description Three-letter ISO 4217 currency code for `salaryMin` and `salaryMax`. `null` means not set. Required when `salaryMin` or `salaryMax` is set; optional otherwise. */
+      salaryCurrency?: string | null;
       /**
-       * @description Period the `salaryMin` and `salaryMax` figures are quoted against.
-       * @enum {string}
+       * @description Period the `salaryMin` and `salaryMax` figures are quoted against. `null` means not set. Required when `salaryMin` or `salaryMax` is set; optional otherwise.
+       * @enum {string|null}
        */
       salaryTimeframe?:
         | 'per_year'
         | 'per_month'
         | 'per_week'
         | 'per_day'
-        | 'per_hour';
+        | 'per_hour'
+        | null;
       /** @description Up to 100 canonical skill slugs from `GET /v1/taxonomies/skills`. Every slug must exist in this account. */
       skills?: string[];
       /** @description Up to 100 canonical category slugs from `GET /v1/taxonomies/categories`. Every slug must exist in this account. */
       categories?: string[];
       /** @description Whether the job appears in featured slots on the public board. */
       isFeatured?: boolean;
-      /** @description Job expiry as a Unix epoch in milliseconds. On create, omitted or `null` defaults to 30 days from creation. On PATCH, pass `null` to clear an existing expiry. Past timestamps remove the job from the public board. */
-      expiresAt?: number | unknown | unknown;
+      /** @description Job expiry as a Unix epoch in milliseconds. On create, omitted or `null` defaults to 30 days from creation. On PATCH, `null` clears the explicit expiry; an ordinary published job then receives the board's `defaultJobDurationDays` from its publication time (30 days when unset). Draft and sponsored jobs may have no expiry. Past timestamps remove the job from the public board. */
+      expiresAt?: number | unknown;
       /** @description Time at which the job was first published, as a Unix epoch in milliseconds. When omitted on create with `status: "published"`, the server stamps the current time. Useful for bulk-importing historical jobs while preserving original publication dates. PATCH may overwrite an existing value but cannot clear it. */
       publishedAt?: number;
       /** @description Required education credentials. Each value is one of `high_school`, `associate_degree`, `bachelor_degree`, `professional_certificate`, `postgraduate_degree`, or `no_requirements`. */
@@ -4705,19 +5313,25 @@ export interface components {
       inOfficePeriod?: 'per_week' | 'per_month' | 'per_year';
       /** @description How often the candidate must be in-office over `inOfficePeriod`. */
       inOfficeFrequency?: number;
-      /** @description Physical office locations associated with the job. Each entry is forward-geocoded server-side; a country mismatch returns `400 jobs_unresolvable_location`. */
+      /** @description Physical office locations associated with the job. Prefer `{query: "City, Country"}` for free-form input; `{city, country, region?, locality?}` is also accepted when you already have structured fields. Each entry is resolved server-side; a country mismatch returns `400 jobs_unresolvable_location`. */
       officeLocations?: components['schemas']['JobOfficeLocationInput'][];
-      /** @description An external identifier for the job from your own system, such as an ATS requisition ID. Use this value to look up the job later via `GET /v1/jobs?externalId=...` for deduplication. Scoped per-account: two different accounts may reuse the same `externalId` without collision. Up to 255 characters. */
-      externalId?: string;
+      /** @description An external identifier for the job from your own system, such as an ATS requisition ID. Use this value to look up the job later via `GET /v1/jobs?externalId=...` for deduplication. Scoped per-account: two different accounts may reuse the same `externalId` without collision. Up to 255 characters. `null` means not set. */
+      externalId?: string | null;
       /** @description Board-defined custom-field values, keyed by the field `key` (definitions, including type and option keys, are published at `GET /v1/settings/job-form`). Writes are **additive**: on `PATCH` a key you send is set/overwritten and a key you omit is preserved (unsent keys are never cleared); on `POST` this initializes the bag. Send a key with an intentional-empty value (`null`, `""`, or `[]`) to **clear** it (`""`/`null` clear any type; `[]` clears a `multi_select`); `false` and `0` are kept as real values. Values must match the field type and `single_select`/`multi_select` must use defined option **keys** (not labels); a wrong-typed value is rejected (`custom_field_wrong_type`), never silently cleared. Unknown keys are ignored. The stored bag never contains `null`/empty values. */
       customFieldValues?: {
-        [key: string]: string | string[] | boolean | number | unknown | unknown;
+        [key: string]: string | string[] | boolean | number | unknown;
       };
+      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. */
+      collectionValues?: {
+        [key: string]: string[] | unknown;
+      };
+      /** @description Per-job wording for selected collection entries, only on fields whose definition has `allowOverrides`. At most one item per selected entry; an item for an entry that is not selected on the job is rejected with `400 jobs_constraint_violation`. The list replaces the job's stored overrides: on PATCH omit it to keep them and send `[]` to clear them all. Deselecting an entry through `collectionValues` drops its override. */
+      collectionOverrides?: components['schemas']['JobCollectionOverride'][];
       /** @description The job title. */
       title: string;
       company?: components['schemas']['InlineCompanyInput'];
       /**
-       * @description Initial status of the job. Defaults to `draft`. Only `draft` and `published` are writable here. The system-set values `expired` and `archived` are not. Use the dedicated transitions (`POST /v1/jobs/:id/publish`, `/pause`, `/expire`) for status changes after create.
+       * @description Initial status of the job. Defaults to `draft`. Only `draft` and `published` are writable here. The system-set values `expired`, `archived`, and `pending_approval` are not. Use the dedicated transitions (`POST /v1/jobs/:id/publish`, `/pause`, `/expire`) for status changes after create.
        * @enum {string}
        */
       status?: 'draft' | 'published';
@@ -4739,19 +5353,37 @@ export interface components {
        */
       kind: 'free' | 'one_time' | 'bundle' | 'subscription';
       /**
-       * @description Subscription billing interval. Required for kind=subscription.
+       * @description Subscription billing interval. Required for kind=subscription. Pair with billingIntervalCount for non-1 counts (quarterly = month × 3).
        * @enum {string}
        */
-      billingInterval?: 'month' | 'year';
+      billingInterval?: 'day' | 'week' | 'month' | 'year';
+      billingIntervalCount?: number;
       /**
-       * @description Whether the plan grants job-posting or talent-access entitlement.
+       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), or contact-led employer_service / job_seeker_service catalogue rows.
        * @enum {string}
        */
-      purpose?: 'job_posting' | 'talent_access';
+      purpose?:
+        | 'job_posting'
+        | 'talent_access'
+        | 'membership'
+        | 'job_seeker'
+        | 'employer_service'
+        | 'job_seeker_service';
       /** @description Whether the plan is publicly listed. Defaults to false. */
       isPublic?: boolean;
       isRecommended?: boolean;
       displayOrder?: number;
+      /**
+       * @description How the plan is sold. `priced` takes a price and syncs it to Stripe; `contact` renders a contact CTA and creates no Stripe objects — setting a price on a contact plan is rejected. Omitted on create means `priced`.
+       * @enum {string}
+       */
+      pricingMode?: 'priced' | 'contact';
+      /** @description Display price text for a contact plan, e.g. "Contact us". */
+      priceText?: string;
+      /** @description CTA label for a contact plan, e.g. "Talk to sales". */
+      ctaText?: string;
+      /** @description CTA target for a contact plan. Must be an https, mailto:, or tel: URL. */
+      ctaDestination?: string;
     };
     CreatePromotionCodeBody: {
       code: string;
@@ -4776,6 +5408,7 @@ export interface components {
        */
       statusCode: 301 | 302;
     };
+    /** @description Deprecated. Prefer creating a plan with purpose employer_service and pricingMode contact. */
     CreateSalesLedPlanBody: {
       name: string;
       description: string;
@@ -4795,6 +5428,66 @@ export interface components {
       slug?: string;
       aliasSlugs?: string[];
       sourceLocale?: string;
+    };
+    CreateSsoConnectionBody: {
+      /**
+       * @description `oidc` for OpenID Connect providers (discovery and ID tokens); `oauth2_userinfo` for OAuth 2.0 providers that expose a userinfo endpoint instead.
+       * @enum {string}
+       */
+      protocol: 'oidc' | 'oauth2_userinfo';
+      /** @description The provider issuer URL. Every sign-in must come from this issuer; it identifies linked identities. May be left out to create a draft, which cannot be tested until it is set. */
+      issuer?: string;
+      /** @description OpenID Connect discovery URL. Defaults to `{issuer}/.well-known/openid-configuration`. */
+      discoveryUrl?: string | null;
+      /** @description Authorization URL. Required for `oauth2_userinfo`. */
+      authorizationEndpoint?: string | null;
+      /** @description Token URL. Required for `oauth2_userinfo`. */
+      tokenEndpoint?: string | null;
+      /** @description Userinfo URL. Required for `oauth2_userinfo`. */
+      userinfoEndpoint?: string | null;
+      /** @description JWKS URL, when the discovery document does not name one. */
+      jwksUri?: string | null;
+      /** @description Scopes requested from the provider. */
+      scopes?: string[] | null;
+      /** @description The client ID registered at the provider. May be left out to create a draft, which cannot be tested until it is set. */
+      clientId?: string;
+      /** @description The client secret. Write-only: stored encrypted and never returned. On update, omit it to keep the stored secret or send `null` to remove it. */
+      clientSecret?: string | null;
+      /** @description Where to read identity from in the provider response. */
+      claimNames?: {
+        /** @description Claim holding the stable member ID. Defaults to `sub`. */
+        subject?: string | null;
+        /** @description Claim holding the email. Defaults to `email`. */
+        email?: string | null;
+        /** @description Claim saying whether the email is verified. Defaults to `email_verified`. */
+        emailVerified?: string | null;
+        /** @description Claim holding the display name. Defaults to `name`. */
+        displayName?: string | null;
+      } | null;
+      /** @description The text on the sign-in button. */
+      label: string;
+      /**
+       * @description The identity provider the connection is for: `okta`, or `generic_oidc` / `generic_oauth2` for any other provider that supports OpenID Connect or OAuth 2.0. Only used to name the provider in the dashboard’s setup steps; it does not change how sign-in works.
+       * @enum {string}
+       */
+      provider?: 'okta' | 'generic_oidc' | 'generic_oauth2';
+      /** @description Sign someone straight into the existing board account with the same verified email, without a confirmation email. Only enable when the provider alone controls who has each email. */
+      trustedProviderEmail?: boolean;
+      /**
+       * @description `auto_create` creates a board account on first sign-in; `pre_provisioned_only` signs in only people who already have one.
+       * @enum {string}
+       */
+      provisioning?: 'auto_create' | 'pre_provisioned_only';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      candidateSignInMode?: 'off' | 'available' | 'required';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      employerSignInMode?: 'off' | 'available' | 'required';
     };
     CreateTagBody: {
       /** @description URL-friendly slug for the tag. Auto-generated from `name` when omitted. */
@@ -4840,13 +5533,16 @@ export interface components {
       key: string;
       /** @description Authoring-default label; the localized public string lives in the board template. */
       label: string;
+      /** @description Optional guidance displayed beside the field. */
+      helpText?: string;
       /**
-       * @description Field type, which dictates the value: `short_text`/`long_text` → string; `single_select` → one option key; `multi_select` → array of option keys; `boolean` → boolean; `number` → number.
+       * @description Field type, which dictates the value: `short_text`/`long_text` → plain string; `rich_text` → sanitized basic HTML; `single_select` → one option key; `multi_select` → array of option keys; `boolean` → boolean; `number` → number.
        * @enum {string}
        */
       type:
         | 'short_text'
         | 'long_text'
+        | 'rich_text'
         | 'single_select'
         | 'multi_select'
         | 'boolean'
@@ -4865,6 +5561,60 @@ export interface components {
       key: string;
       /** @description Display label (authoring default; localized per board in the template). */
       label: string;
+    };
+    CustomObjectImportResult: {
+      created: number;
+      updated: number;
+    };
+    CustomObjectRecord: {
+      id: string;
+      /** @enum {string} */
+      object: 'custom_object_record';
+      typeId: string;
+      name: string;
+      /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. Generated from the name on create; renaming keeps it. Null only on records saved before slugs existed. */
+      slug: string | null;
+      /**
+       * Format: uri
+       * @description Deprecated: use the collection's logo image field (`logoFieldKey` on the type). A legacy logo URL stored on older records.
+       */
+      logoUrl: string | null;
+      externalId: string | null;
+      values: {
+        [key: string]: string | number | boolean | string[];
+      };
+      archived: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CustomObjectType: {
+      id: string;
+      /** @enum {string} */
+      object: 'custom_object_type';
+      name: string;
+      key: string;
+      definitions: (
+        | components['schemas']['ScalarProfileCustomFieldDefinition']
+        | components['schemas']['CollectionMediaFieldDefinition']
+      )[];
+      archived: boolean;
+      /** @description Key of the Image field whose image is each record's logo, or null when the type has no logo field. */
+      logoFieldKey: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    DevelopmentOrigin: {
+      id: string;
+      /** @enum {string} */
+      object: 'development_origin';
+      /** @description Normalized origin, or `https://*.<domain>` for a wildcard entry. */
+      origin: string;
+      /**
+       * @description `loopback` for localhost addresses, `https` for one exact origin, `wildcard` for one subdomain level under a verified domain.
+       * @enum {string}
+       */
+      kind: 'loopback' | 'https' | 'wildcard';
+      createdAt: string;
     };
     Domain: {
       id: string;
@@ -4908,33 +5658,25 @@ export interface components {
       emailVerifiedAt: string | null;
       createdAt: string;
       lastActiveAt: string | null;
+      /**
+       * Format: date-time
+       * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the employer can sign in. Deactivate revokes all sessions and blocks sign-in; company memberships, claims, and jobs are preserved. Reactivate restores sign-in; the employer signs in again to establish a new session.
+       */
+      deactivatedAt: string | null;
       /** @description Approved company memberships. */
-      companies: (components['schemas']['EmployerCompany'] & {
-        companyId: string;
-        companyName: string;
-        /** @description Membership status (e.g. `approved`). */
-        status: string;
-        /** @description How the membership was approved (`domain_match` | `work_email_verification` | `admin` | `owner_creation`), or `null`. */
-        approvalSource: string | null;
-        /** @description ISO-8601 timestamp the membership was created. */
-        joinedAt: string;
-      })[];
+      companies: components['schemas']['EmployerApprovedCompany'][];
       /** @description Pending company claims (memberships awaiting approval). */
       pendingClaims: components['schemas']['EmployerPendingClaim'][];
     };
-    EmployerCompany: {
-      id: string;
-      /** @enum {string} */
-      object: 'employer_company';
-      name: string;
-      slug: string;
-      website: string | null;
-      description: string | null;
-      summary: string | null;
-      xUrl: string | null;
-      linkedinUrl: string | null;
-      facebookUrl: string | null;
-      logoUrl: string | null;
+    EmployerApprovedCompany: {
+      companyId: string;
+      companyName: string;
+      /** @description Membership status (e.g. `approved`). */
+      status: string;
+      /** @description How the membership was approved (`domain_match` | `work_email_verification` | `admin` | `owner_creation`), or `null`. */
+      approvalSource: string | null;
+      /** @description ISO-8601 timestamp the membership was created. */
+      joinedAt: string;
     };
     EmployerMembership: {
       id: string;
@@ -4997,14 +5739,91 @@ export interface components {
     FindOrCreateCompanyBody: {
       /** @description The company's display name. */
       name: string;
-      /** @description Public company website URL. Used to resolve to an existing company by domain before falling back to creation. */
-      website?: string;
-      /** @description One-line summary of the company. Up to 280 characters. */
-      summary?: string;
+      /** @description Public company website URL. Used to resolve to an existing company by domain before falling back to creation. `null` or `""` means not set. */
+      website?: string | null;
+      /** @description One-line summary of the company. Up to 280 characters. `null` or `""` means not set. */
+      summary?: string | null;
       /** @description If `true` (default), falls back to matching by `name` when no website match is found. Set to `false` to match by website domain only. */
       matchByName?: boolean;
       /** @description If `true` (default), creates a new company when no match is found. Set to `false` to receive a `404 companies_not_found` response instead. */
       createIfMissing?: boolean;
+    };
+    /**
+     * @description Why the field is locked, or `null` when it is not.
+     * @enum {string|null}
+     */
+    FormFieldLockReason:
+      | 'google_required'
+      | 'google_hiring_organization'
+      | 'google_work_arrangement'
+      | 'google_job_location'
+      | 'google_remote_eligibility'
+      | 'posting'
+      | 'identity'
+      | null;
+    FormLayoutBuiltinFieldRef: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'builtin';
+      /** @description The built-in field key. Job: `employmentType`, `seniority`, `title`, `workArrangement`, `location`, `remoteEligibility`, `description`, `salary`, `applyMethod`, `company`. Company: `name`, `website`, `summary`, `xUrl`, `linkedinUrl`, `facebookUrl`, `logo`, `description`. Talent: `name`, `email`, `avatar`, `headline`, `location`, `jobSearchStatus`, `bio`, `experience`, `education`, `skills`, `languages`. New built-ins may be added; skip keys you do not recognise. */
+      key: string;
+      /** @description Whether the form shows the field. */
+      visible: boolean;
+      /** @description Whether a submission must fill the field. Only a shown, requirable built-in can be required; a locked built-in must stay shown and required. */
+      required: boolean;
+    };
+    FormLayoutCollectionFieldRef: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'collection';
+      /** @description An existing collection reference key on this form. */
+      key: string;
+      /** @description Set `false` to hide the field; absent means shown. A field whose definition is required cannot be hidden: unset its `required` flag first. */
+      visible?: boolean;
+    };
+    FormLayoutCustomFieldRef: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'custom';
+      /** @description An existing custom field key on this form. */
+      key: string;
+      /** @description Set `false` to hide the field; absent means shown. A field whose definition is required cannot be hidden: unset its `required` flag first. */
+      visible?: boolean;
+    };
+    FormLayoutField: {
+      /**
+       * @description A built-in field, a custom field, or a collection reference.
+       * @enum {string}
+       */
+      kind: 'builtin' | 'custom' | 'collection';
+      key: string;
+      /** @description The field label shown in Settings. */
+      label: string;
+      /** @description Whether the form shows the field. */
+      visible: boolean;
+      /** @description Whether a submission must fill the field. Always `false` for a hidden field. */
+      required: boolean;
+      /** @description A locked built-in can move but must stay shown and required. Always `false` for custom and collection fields. */
+      locked: boolean;
+      lockReason: components['schemas']['FormFieldLockReason'] & unknown;
+      /** @description Whether a layout write can switch `required` on. Custom and collection fields take `required` from their own definition (the job-form custom-fields and profile-field endpoints), so they are never requirable here. */
+      requirable: boolean;
+    };
+    FormLayoutFieldRef:
+      | components['schemas']['FormLayoutBuiltinFieldRef']
+      | components['schemas']['FormLayoutCustomFieldRef']
+      | components['schemas']['FormLayoutCollectionFieldRef'];
+    /** @description The job, company and talent forms as resolved, ordered field lists: every built-in, custom field and collection reference, including private profile fields. Fields never placed by an operator follow in the default order. */
+    FormLayouts: {
+      job: components['schemas']['FormLayoutField'][];
+      company: components['schemas']['FormLayoutField'][];
+      talent: components['schemas']['FormLayoutField'][];
     };
     Import: {
       id: string;
@@ -5028,6 +5847,9 @@ export interface components {
       rowIndex: number;
       code: string;
       message: string;
+    };
+    ImportCustomObjectRecordsBody: {
+      records: components['schemas']['CreateCustomObjectRecordBody'][];
     };
     ImportDetail: {
       id: string;
@@ -5087,15 +5909,15 @@ export interface components {
       id: 'indexing_config';
       /** @enum {string} */
       object: 'indexing_config';
-      /** @description Whether Google Indexing submission is active. */
+      /** @description Whether the Google Indexing API is enabled: Google is notified immediately when jobs are published or removed. Your site is indexed by Google either way. */
       enabled: boolean;
       /** @description Whether IndexNow (Bing/Yandex) instant indexing is enabled. */
       indexNowEnabled: boolean;
-      /** @description GCP provisioning state (`pending` | `provisioning` | `ready` | `error`), or null. */
+      /** @description Provisioning state of the board's Google Cloud project for the Google Indexing API (`pending` | `provisioning` | `ready` | `error`), or null when setup has not started. */
       provisioningStatus: string | null;
-      /** @description ISO-8601 timestamp of the last submission, or null. */
+      /** @description ISO-8601 timestamp of the last Google Indexing API submission, or null. */
       lastRunAt: string | null;
-      /** @description The last recorded error message, or null. */
+      /** @description The last recorded Google Indexing API error message, or null. */
       lastError: string | null;
     };
     IndexingToggleBody: {
@@ -5106,10 +5928,10 @@ export interface components {
     InlineCompanyInput: {
       /** @description The company's display name. */
       name: string;
-      /** @description Public company website URL. Used to resolve to an existing company by domain before falling back to creation. */
-      website?: string;
-      /** @description One-line summary of the company. Up to 280 characters. */
-      summary?: string;
+      /** @description Public company website URL. Used to resolve to an existing company by domain before falling back to creation. `null` or `""` means not set. */
+      website?: string | null;
+      /** @description One-line summary of the company. Up to 280 characters. `null` or `""` means not set. */
+      summary?: string | null;
       /** @description If `true` (default), falls back to matching by `name` when no website match is found. Set to `false` to match by website domain only. */
       matchByName?: boolean;
       /** @description If `true` (default), creates a new company when no match is found. Set to `false` to receive a `404 companies_not_found` response instead. */
@@ -5151,7 +5973,9 @@ export interface components {
          */
         public?: string | null;
       };
-      /** @description Long-form description of the role, or `null` if not specified. */
+      /** @description Collection selections resolved to current live names, logos, and public record details. */
+      resolvedCollectionFields: components['schemas']['ResolvedJobCollectionField'][];
+      /** @description Long-form description of the role (HTML), or `null` if not specified. */
       description: string | null;
       /** @description Where candidates apply, or `null` if not specified. An HTTPS URL or `mailto:` URI. */
       applicationUrl: string | null;
@@ -5203,6 +6027,29 @@ export interface components {
       /** @description Physical office locations associated with the job. */
       officeLocations: components['schemas']['JobOfficeLocation'][];
     };
+    JobCollectionFieldDefinition: {
+      key: string;
+      label: string;
+      typeId: string;
+      multiple: boolean;
+      required: boolean;
+      /** @description Operator-set maximum number of entries a poster can select. Only meaningful when `multiple` is true; absent means the system ceiling of 100. */
+      maxSelections?: number;
+      /** @description Whether each job can replace a selected entry's title and description through `collectionOverrides`. Absent means false. */
+      allowOverrides?: boolean;
+      /** @description Key of the collection's short, long or rich text field whose value is a selected entry's default description. When that field is rich text, an entry's `description` is sanitised HTML. Absent means entries have no default description. */
+      descriptionFieldKey?: string;
+    };
+    JobCollectionOverride: {
+      /** @description The collection field key used in `collectionValues`. */
+      fieldKey: string;
+      /** @description A record ID selected for that field on this job. */
+      recordId: string;
+      /** @description The entry's title on this job, up to 160 characters. Omit or send a blank string to use the entry name. */
+      title?: string;
+      /** @description The entry's description on this job, up to 2000 characters of plain text. When the default description field is rich text, the entry's `description` returns it escaped as HTML. Omit or send a blank string to use the default description. */
+      description?: string;
+    };
     /** @description Embedded company resource for the job, or `null` if no company is attached. */
     JobCompany: {
       /** @description Unique identifier for the company. */
@@ -5244,6 +6091,8 @@ export interface components {
       };
       /** @description Board-defined custom field definitions, in display order. Read these to learn which `customFieldValues` keys, types, and option keys a job accepts on POST/PATCH /v1/jobs. */
       customFields?: components['schemas']['CustomFieldDefinition'][];
+      /** @description Collection-reference job fields, in display order. Values are stored separately in each job collectionValues bag. */
+      collectionFields?: components['schemas']['JobCollectionFieldDefinition'][];
     };
     JobFormCustomFieldsBody: {
       /** @description Full replacement list of custom field definitions, in display order. Empty array removes all. Changing `type` on an existing `key` is rejected (422); delete + recreate instead. Renaming a key is delete+add and orphans per-job values under the old key. */
@@ -5269,6 +6118,10 @@ export interface components {
     };
     JobOfficeLocationInput:
       | {
+          /** @description Free-form location string (e.g. `"Berlin, Germany"`, `"Utrecht, Netherlands"`, `"Mountain View, California, USA"`). Resolved server-side; rejected when no high-confidence match is found. */
+          query: string;
+        }
+      | {
           /** @description Neighborhood or sub-locality. */
           locality?: string;
           /** @description City. */
@@ -5277,10 +6130,6 @@ export interface components {
           region?: string;
           /** @description ISO 3166-1 alpha-2 country code OR recognized country name/alias. Aliases are normalized to canonical alpha-2 server-side (e.g. `US`, `USA`, `United States` → `US`; `UK`, `GB`, `United Kingdom` → `GB`). */
           country: string;
-        }
-      | {
-          /** @description Free-form location string (e.g. `"Berlin, Germany"`, `"Mountain View, California, USA"`). Mapbox parses + ranks candidates server-side; rejects on low confidence. */
-          query: string;
         };
     JobSummary: {
       /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the job endpoints (e.g. `GET /v1/jobs/{id}`). */
@@ -5295,10 +6144,15 @@ export interface components {
       /** @description URL-friendly slug used in public board URLs, or `null` if no slug is set. */
       slug: string | null;
       /**
-       * @description Current status of the job. One of `draft`, `published`, `expired`, or `archived`.
+       * @description Current status of the job. One of `draft`, `published`, `expired`, `archived`, or `pending_approval`. A `pending_approval` job is waiting for an operator to approve it: approve with `POST /v1/jobs/:id/publish`, reject with `DELETE /v1/jobs/:id`. It is not public, like a draft.
        * @enum {string}
        */
-      status: 'draft' | 'published' | 'expired' | 'archived';
+      status:
+        | 'draft'
+        | 'published'
+        | 'expired'
+        | 'archived'
+        | 'pending_approval';
       /** @description Identifier of the company the job belongs to, or `null` if no company is attached. */
       companyId: string | null;
       /**
@@ -5315,7 +6169,7 @@ export interface components {
         | 'other'
         | null;
       /**
-       * @description Whether the role is on-site, hybrid, or fully remote, or `null` if not specified.
+       * @description Whether the role is on-site, hybrid, or fully remote. `null` only on older jobs saved without one; create requires it and `PATCH` cannot clear it.
        * @enum {string|null}
        */
       remoteOption: 'on_site' | 'hybrid' | 'remote' | null;
@@ -5354,7 +6208,7 @@ export interface components {
       isFeatured: boolean;
       /** @description Time at which the job was first published, or `null` if not yet published. ISO 8601 datetime. */
       publishedAt: string | null;
-      /** @description Time at which the job expires, or `null` if no expiry is set. ISO 8601 datetime. */
+      /** @description Time at which the job expires as an ISO 8601 datetime. `null` can appear when the expiry requirement does not apply, including for drafts and sponsored jobs; ordinary published jobs always have an expiry. */
       expiresAt: string | null;
       /** @description Time at which the job was created. ISO 8601 datetime. */
       createdAt: string;
@@ -5371,6 +6225,10 @@ export interface components {
       /** @description Board-defined custom-field values for this job, keyed by the field `key` (the definitions are published at `GET /v1/settings/job-form`). Each value is returned as stored: a string (`short_text` / `long_text` / a `single_select` option key), a string array (`multi_select` option keys), a boolean, or a number. Always an object: `{}` when the job has no custom-field values, never `null` or a missing field. Only real values are stored, so this never contains `null` or empty values. */
       customFieldValues: {
         [key: string]: string | string[] | boolean | number;
+      };
+      /** @description Operator-facing collection record IDs keyed by job collection field. Always an object; values are arrays even for single-select fields. */
+      collectionValues: {
+        [key: string]: string[];
       };
       links: components['schemas']['AdminOnlyResourceLinks'];
     };
@@ -5537,6 +6395,7 @@ export interface components {
         | 'imports.confirm'
         | 'subscribers.export'
         | 'subscribers.import'
+        | 'custom_objects.records_import'
         | 'exports.generate'
         | 'candidates.remove'
         | 'employers.remove';
@@ -5546,6 +6405,18 @@ export interface components {
        */
       state: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
       progress: components['schemas']['OperationProgress'];
+      /** @description A safe workflow result summary when the operation kind publishes one. */
+      result?: {
+        totalRows: number;
+        created: number;
+        updated: number;
+        failed: number;
+        errors: {
+          rowIndex: number;
+          code: string;
+          message: string;
+        }[];
+      } | null;
       error: components['schemas']['OperationErrorEnvelope'];
       /** @description Time at which the operation was created. ISO 8601 datetime. */
       createdAt: string;
@@ -5558,7 +6429,13 @@ export interface components {
       /** @description Stable product resource affected by the operation, or `null` when no public resource applies. */
       resource: {
         /** @enum {string} */
-        object: 'company' | 'domain' | 'import' | 'employer' | 'candidate';
+        object:
+          | 'company'
+          | 'domain'
+          | 'import'
+          | 'employer'
+          | 'candidate'
+          | 'custom_object_type';
         id: string;
       } | null;
     };
@@ -5602,6 +6479,7 @@ export interface components {
       blogEnabled?: boolean;
       impressumEnabled?: boolean;
       requireApprovalFreeJobs?: boolean;
+      postingRequiresMembership?: boolean;
       requireApprovalAggregatedJobs?: boolean;
       registrationWallEnabled?: boolean;
       nativeApplicationsEnabled?: boolean;
@@ -5611,6 +6489,7 @@ export interface components {
        */
       countryGatingMode?: 'sponsored_only' | 'all_jobs';
       applicantMessagingEnabled?: boolean;
+      applyUrlAttribution?: components['schemas']['ApplyUrlAttribution'];
       requireCookieConsent?: boolean;
       showCavunoBranding?: boolean;
       cookieBannerTitle?: string;
@@ -5626,10 +6505,17 @@ export interface components {
       companyXHandle?: string | null;
       companyFacebookUrl?: string | null;
       companyLinkedinUrl?: string | null;
+      companyInstagramUrl?: string | null;
       passwordProtectionMessage?: string | null;
       defaultJobDurationDays?: number;
       /** @enum {string} */
       talentDirectoryVisibility?: 'off' | 'public' | 'employers_only';
+      /** @enum {string} */
+      defaultCandidateProfileVisibility?:
+        | 'hidden'
+        | 'logged_in_only'
+        | 'public';
+      signInMethods: components['schemas']['SignInMethods'];
     };
     PatchReportingIntegrationBody: {
       /** @description Whether collection is enabled for this integration. */
@@ -5669,6 +6555,8 @@ export interface components {
       impressumEnabled?: boolean;
       /** @description Whether jobs posted by employers from the free tier require admin approval before they appear on the public board. */
       requireApprovalFreeJobs?: boolean;
+      /** @description When true, only companies with an active plan assignment can post jobs. Absent means anyone can post. */
+      postingRequiresMembership?: boolean;
       /** @description Whether aggregated jobs (e.g. those sourced or imported from upstream sources) require admin approval before they appear on the public board. */
       requireApprovalAggregatedJobs?: boolean;
       /** @description Whether visitors must sign in to view jobs. */
@@ -5682,6 +6570,8 @@ export interface components {
       countryGatingMode?: 'sponsored_only' | 'all_jobs';
       /** @description Whether applicant↔employer messaging is enabled. When `false`, the `me/conversations` route family rejects with `messaging_disabled` and new-message emails are suppressed. Absent means `true`. */
       applicantMessagingEnabled?: boolean;
+      applyUrlAttribution?: components['schemas']['ApplyUrlAttribution'] &
+        unknown;
       /** @description Legacy shorthand for the talent directory. `true` maps to `talentDirectoryVisibility: "public"`; `false` maps to `"off"`. Prefer the tri-state field. Providing both with conflicting values returns `settings_conflicting_fields`. */
       talentDirectoryEnabled?: boolean;
       /**
@@ -5689,6 +6579,14 @@ export interface components {
        * @enum {string}
        */
       talentDirectoryVisibility?: 'off' | 'public' | 'employers_only';
+      /**
+       * @description Visibility a candidate profile is created with at signup: `hidden` (not listed), `logged_in_only` (signed-in visitors), or `public`. Defaults to `hidden`, which matches what an unset value already means — the talent directory lists only `public` and `logged_in_only` profiles. Applies at signup ONLY: it never rewrites an existing profile, and a candidate can change their own afterwards. Composes with `talentDirectoryVisibility`, which controls who may browse the directory at all.
+       * @enum {string}
+       */
+      defaultCandidateProfileVisibility?:
+        | 'hidden'
+        | 'logged_in_only'
+        | 'public';
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
       /** @description Title shown on the cookie consent banner. 1–200 characters. */
@@ -5706,23 +6604,26 @@ export interface components {
       /** @description Default expiry, in days, applied to newly published jobs when no `expiresAt` is supplied. */
       defaultJobDurationDays?: number;
       /** @description Public contact email shown on the board. Pass `null` to clear. */
-      contactEmail?: string | '' | unknown | unknown;
+      contactEmail?: string | '' | unknown;
       /** @description Legal name of the entity operating the board. Pass `null` to clear. */
-      companyLegalName?: string | '' | unknown | unknown;
+      companyLegalName?: string | '' | unknown;
       /** @description Postal address of the entity operating the board. Pass `null` to clear. */
-      companyAddress?: string | '' | unknown | unknown;
+      companyAddress?: string | '' | unknown;
       /** @description Public company website URL. Pass `null` to clear. */
-      companyWebsiteUrl?: string | '' | unknown | unknown;
+      companyWebsiteUrl?: string | '' | unknown;
       /** @description Company X (Twitter) handle or profile URL. Pass `null` to clear. */
-      companyXHandle?: string | '' | unknown | unknown;
+      companyXHandle?: string | '' | unknown;
       /** @description Company Facebook page URL. Pass `null` to clear. */
-      companyFacebookUrl?: string | '' | unknown | unknown;
+      companyFacebookUrl?: string | '' | unknown;
       /** @description Company LinkedIn page URL. Pass `null` to clear. */
-      companyLinkedinUrl?: string | '' | unknown | unknown;
+      companyLinkedinUrl?: string | '' | unknown;
+      /** @description Company Instagram handle or profile URL. Pass `null` to clear. */
+      companyInstagramUrl?: string | '' | unknown;
       /** @description Label shown for the talent directory in the public navigation. 1–50 characters. */
       talentNavLabel?: string;
       /** @description Custom copy displayed on the password gate. Up to 500 characters. Pass `null` to clear. */
-      passwordProtectionMessage?: string | '' | unknown | unknown;
+      passwordProtectionMessage?: string | '' | unknown;
+      signInMethods?: components['schemas']['SignInMethodsPatch'];
     };
     PlanFeature: {
       /**
@@ -5731,9 +6632,12 @@ export interface components {
        */
       key:
         | 'jobs.max_active'
+        | 'jobs.included_posts'
         | 'jobs.duration_days'
         | 'jobs.featured_slots'
+        | 'jobs.included_featured'
         | 'jobs.feature_selection_mode'
+        | 'jobs.posting_discount_percent'
         | 'talent.profile_unlocks'
         | 'talent.messages_sent';
       name: string | null;
@@ -5743,9 +6647,12 @@ export interface components {
       /** @enum {string} */
       key:
         | 'jobs.max_active'
+        | 'jobs.included_posts'
         | 'jobs.duration_days'
         | 'jobs.featured_slots'
+        | 'jobs.included_featured'
         | 'jobs.feature_selection_mode'
+        | 'jobs.posting_discount_percent'
         | 'talent.profile_unlocks'
         | 'talent.messages_sent';
       value: string;
@@ -5757,6 +6664,83 @@ export interface components {
       /** @description Unit amount in the smallest currency unit. */
       amountCents: number;
     } | null;
+    ProfileCustomFieldDefinition: {
+      key: string;
+      label: string;
+      helpText?: string;
+      /** @enum {string} */
+      type:
+        | 'short_text'
+        | 'long_text'
+        | 'rich_text'
+        | 'single_select'
+        | 'multi_select'
+        | 'boolean'
+        | 'number'
+        | 'date'
+        | 'url'
+        | 'email'
+        | 'phone'
+        | 'image_gallery'
+        | 'file';
+      required: boolean;
+      /** @enum {string} */
+      visibility: 'private' | 'public';
+      editableByOwner: boolean;
+      options?: {
+        key: string;
+        label: string;
+      }[];
+      min?: number;
+      max?: number;
+    };
+    ProfileFieldValuesBody: {
+      values: {
+        [key: string]: string | number | boolean | string[] | unknown;
+      };
+    };
+    ProfileFieldValuesResponse: {
+      definitions: components['schemas']['ProfileCustomFieldDefinition'][];
+      values: {
+        [key: string]: string | number | boolean | string[];
+      };
+    };
+    ProfileObjectReferenceDefinition: {
+      key: string;
+      label: string;
+      typeId: string;
+      multiple: boolean;
+      /** @description Operator-set maximum number of entries a profile can select. Only meaningful when `multiple` is true; absent means the system ceiling of 100. */
+      maxSelections?: number;
+      /** @description Whether a profile must select at least one entry when this field is shown. */
+      required?: boolean;
+      /** @enum {string} */
+      visibility: 'private' | 'public';
+      editableByOwner: boolean;
+      allowOverrides: boolean;
+      descriptionFieldKey?: string;
+      valueDefinitions?: components['schemas']['ScalarProfileCustomFieldDefinition'][];
+      entryDefinitions?: components['schemas']['ScalarProfileCustomFieldDefinition'][];
+    };
+    ProfileObjectReferenceSelectionWrite: {
+      fieldKey: string;
+      recordId: string;
+      titleOverride?: string | null;
+      descriptionOverride?: string | null;
+      values?: {
+        [key: string]: string | number | boolean | string[];
+      };
+      entries?: {
+        key: string;
+        values: {
+          [key: string]: string | number | boolean | string[];
+        };
+      }[];
+    };
+    ProfileObjectReferencesResult: {
+      definitions: components['schemas']['ProfileObjectReferenceDefinition'][];
+      selections: components['schemas']['ResolvedProfileObjectReference'][];
+    };
     PromotionCode: {
       id: string;
       /** @enum {string} */
@@ -5769,7 +6753,7 @@ export interface components {
     PublishJobBody: {
       /**
        * Format: date-time
-       * @description New expiry as an ISO 8601 datetime. Pass `null` to clear the expiry. When omitted, the server preserves the existing expiry **if it is still in the future**; a stored expiry in the past (e.g. left over from a prior `expire` call) is cleared automatically so a republished job does not land in an immediately-invisible state.
+       * @description New explicit expiry as an ISO 8601 datetime. Pass `null` to clear the explicit expiry, or omit the field to preserve an existing expiry. An ordinary published job without an explicit expiry receives the board's `defaultJobDurationDays` from its publication time (30 days when unset). Sponsored jobs may have no expiry.
        */
       expiresAt?: string | null;
     };
@@ -5895,6 +6879,20 @@ export interface components {
         displayOrder: number;
       }[];
     };
+    ReplaceFormLayoutsBody: {
+      /** @description The job form, in display order. */
+      job?: components['schemas']['FormLayoutFieldRef'][];
+      /** @description The company profile form, in display order. */
+      company?: components['schemas']['FormLayoutFieldRef'][];
+      /** @description The talent (candidate) profile form, in display order. */
+      talent?: components['schemas']['FormLayoutFieldRef'][];
+    };
+    ReplaceProfileFieldDefinitionsBody: {
+      definitions: components['schemas']['ProfileCustomFieldDefinition'][];
+    };
+    ReplaceProfileObjectReferenceSelectionsBody: {
+      selections: components['schemas']['ProfileObjectReferenceSelectionWrite'][];
+    };
     ReportingConnect: {
       /**
        * @description String representing the object's type.
@@ -5937,6 +6935,257 @@ export interface components {
       /** @description ISO-8601 timestamp of when the integration was connected. */
       connectedAt: string | null;
     };
+    ResolvedJobCollectionField: {
+      key: string;
+      label: string;
+      entries: {
+        id: string;
+        name: string;
+        /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. */
+        slug?: string;
+        /** @description The entry's logo: the image in the collection's logo field, or a legacy logo URL on older entries. Absent when the entry has neither. */
+        logoUrl?: string;
+        /** @description The entry's title on this job: the job's `titleOverride` when set, otherwise the entry name. Render this. */
+        title: string;
+        /** @description The entry's description on this job: the job's `descriptionOverride` when set, otherwise the value of the field's default description field, or `null` when neither exists. Sanitised HTML when the default description field is rich text, with a plain-text override escaped into paragraphs. Render this. */
+        description: string | null;
+        /** @description The title this job set for the entry, or `null` when it uses the entry name. */
+        titleOverride: string | null;
+        /** @description The plain-text description this job set for the entry, or `null` when it uses the default description. */
+        descriptionOverride: string | null;
+        fields: {
+          key: string;
+          label: string;
+          /** @enum {string} */
+          type:
+            | 'short_text'
+            | 'long_text'
+            | 'rich_text'
+            | 'single_select'
+            | 'multi_select'
+            | 'boolean'
+            | 'number'
+            | 'date'
+            | 'url'
+            | 'email'
+            | 'phone'
+            | 'image'
+            | 'image_gallery'
+            | 'file'
+            | 'reference';
+          helpText?: string;
+          options?: {
+            key: string;
+            label: string;
+          }[];
+        }[];
+        values: {
+          [key: string]:
+            | string
+            | string[]
+            | boolean
+            | number
+            | {
+                id: string;
+                name: string;
+                contentType: string;
+                sizeBytes: number;
+                url: string;
+              }
+            | {
+                id: string;
+                name: string;
+                contentType: string;
+                sizeBytes: number;
+                url: string;
+              }[];
+        };
+        references?: {
+          [key: string]: {
+            id: string;
+            name: string;
+            /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. */
+            slug?: string;
+            fields: {
+              key: string;
+              label: string;
+              /** @enum {string} */
+              type:
+                | 'short_text'
+                | 'long_text'
+                | 'rich_text'
+                | 'single_select'
+                | 'multi_select'
+                | 'boolean'
+                | 'number'
+                | 'date'
+                | 'url'
+                | 'email'
+                | 'phone'
+                | 'image'
+                | 'image_gallery'
+                | 'file'
+                | 'reference';
+              helpText?: string;
+              options?: {
+                key: string;
+                label: string;
+              }[];
+            }[];
+            values: {
+              [key: string]:
+                | string
+                | string[]
+                | boolean
+                | number
+                | {
+                    id: string;
+                    name: string;
+                    contentType: string;
+                    sizeBytes: number;
+                    url: string;
+                  }
+                | {
+                    id: string;
+                    name: string;
+                    contentType: string;
+                    sizeBytes: number;
+                    url: string;
+                  }[];
+            };
+          }[];
+        };
+      }[];
+    };
+    ResolvedProfileObjectReference: {
+      fieldKey: string;
+      fieldLabel: string;
+      recordId: string;
+      /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. */
+      slug?: string;
+      title: string;
+      description?: string;
+      titleOverride?: string;
+      descriptionOverride?: string;
+      /** @description The entry's logo: the image in the collection's logo field, or a legacy logo URL on older entries. Absent when the entry has neither. */
+      logoUrl?: string;
+      /** @enum {string} */
+      descriptionType?: 'rich_text';
+      descriptionFieldKey?: string;
+      fields: {
+        key: string;
+        label: string;
+        /** @enum {string} */
+        type:
+          | 'short_text'
+          | 'long_text'
+          | 'rich_text'
+          | 'single_select'
+          | 'multi_select'
+          | 'boolean'
+          | 'number'
+          | 'date'
+          | 'url'
+          | 'email'
+          | 'phone'
+          | 'image'
+          | 'image_gallery'
+          | 'file'
+          | 'reference';
+        helpText?: string;
+        options?: {
+          key: string;
+          label: string;
+        }[];
+      }[];
+      attributes: {
+        [key: string]:
+          | string
+          | string[]
+          | boolean
+          | number
+          | {
+              id: string;
+              name: string;
+              contentType: string;
+              sizeBytes: number;
+              url: string;
+            }
+          | {
+              id: string;
+              name: string;
+              contentType: string;
+              sizeBytes: number;
+              url: string;
+            }[];
+      };
+      references?: {
+        [key: string]: {
+          id: string;
+          name: string;
+          /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. */
+          slug?: string;
+          fields: {
+            key: string;
+            label: string;
+            /** @enum {string} */
+            type:
+              | 'short_text'
+              | 'long_text'
+              | 'rich_text'
+              | 'single_select'
+              | 'multi_select'
+              | 'boolean'
+              | 'number'
+              | 'date'
+              | 'url'
+              | 'email'
+              | 'phone'
+              | 'image'
+              | 'image_gallery'
+              | 'file'
+              | 'reference';
+            helpText?: string;
+            options?: {
+              key: string;
+              label: string;
+            }[];
+          }[];
+          values: {
+            [key: string]:
+              | string
+              | string[]
+              | boolean
+              | number
+              | {
+                  id: string;
+                  name: string;
+                  contentType: string;
+                  sizeBytes: number;
+                  url: string;
+                }
+              | {
+                  id: string;
+                  name: string;
+                  contentType: string;
+                  sizeBytes: number;
+                  url: string;
+                }[];
+          };
+        }[];
+      };
+      valueDefinitions: components['schemas']['ScalarProfileCustomFieldDefinition'][];
+      entryDefinitions: components['schemas']['ScalarProfileCustomFieldDefinition'][];
+      values: {
+        [key: string]: string | number | boolean | string[];
+      };
+      entries: {
+        key: string;
+        values: {
+          [key: string]: string | number | boolean | string[];
+        };
+      }[];
+    };
     ResourceLinks: {
       /**
        * Format: uri
@@ -5948,6 +7197,21 @@ export interface components {
        * @description URL inside the Cavuno app where the authenticated owner can manage this resource.
        */
       admin: string;
+    };
+    ScalarProfileCustomFieldDefinition: components['schemas']['ProfileCustomFieldDefinition'] & {
+      /** @enum {string} */
+      type?:
+        | 'short_text'
+        | 'long_text'
+        | 'rich_text'
+        | 'single_select'
+        | 'multi_select'
+        | 'boolean'
+        | 'number'
+        | 'date'
+        | 'url'
+        | 'email'
+        | 'phone';
     };
     SearchBlogPostsBody: {
       query?: string;
@@ -5969,6 +7233,16 @@ export interface components {
       filters?: {
         /** @description Return companies assigned to any of these canonical market slugs. Up to 10 values. */
         markets?: string[];
+        /** @description Match every public custom-field clause; values within one clause are alternatives. */
+        customFields?: {
+          key: string;
+          values: (string | number | boolean)[];
+        }[];
+        /** @description Match every public object-reference clause; record IDs within one clause are alternatives. */
+        objectReferences?: {
+          key: string;
+          recordIds: string[];
+        }[];
       };
     };
     SearchConsoleInspectionResponse: {
@@ -6044,7 +7318,13 @@ export interface components {
       /** @description Optional faceted filters to narrow search results. Multi-value filters match jobs in any of the supplied values; range filters accept `gte` and `lte` bounds. */
       filters?: {
         /** @description Only return jobs in any of the given statuses. Up to 10 values. */
-        status?: ('draft' | 'published' | 'expired' | 'archived')[];
+        status?: (
+          | 'draft'
+          | 'published'
+          | 'expired'
+          | 'archived'
+          | 'pending_approval'
+        )[];
         /** @description Only return jobs at any of the given company IDs. Up to 10 values. */
         companyId?: string[];
         /** @description Only return jobs with any of the given remote-work options. Up to 10 values. */
@@ -6087,6 +7367,11 @@ export interface components {
            */
           lte?: string;
         };
+        /** @description Match every custom-field clause; values within one clause are alternatives. */
+        customFields?: {
+          key: string;
+          values: (string | number | boolean)[];
+        }[];
       };
       /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. Pass it back to fetch the next page of results. */
       cursor?: string;
@@ -6102,9 +7387,12 @@ export interface components {
         /** @enum {string} */
         key:
           | 'jobs.max_active'
+          | 'jobs.included_posts'
           | 'jobs.duration_days'
           | 'jobs.featured_slots'
+          | 'jobs.included_featured'
           | 'jobs.feature_selection_mode'
+          | 'jobs.posting_discount_percent'
           | 'talent.profile_unlocks'
           | 'talent.messages_sent';
         value: string;
@@ -6134,43 +7422,54 @@ export interface components {
       /** @description Whether AdSense placements are rendered on the public board. */
       adsenseEnabled?: boolean;
       /** @description AdSense publisher ID in `ca-pub-XXXXXXXXXXXXXXXX` format. Pass an empty string or `null` to clear. */
-      adsenseClientId?: string | '' | unknown | unknown;
+      adsenseClientId?: string | '' | unknown;
       /** @description Map of placement key to slot configuration. Placement keys are lowercase alphanumeric with `-`, `_`, `.`, or `:`. */
       adsenseSlots?: {
         [key: string]: components['schemas']['SettingsAdsenseSlot'];
       };
       /** @description Contents to serve from `/ads.txt`. Up to 2,000 characters. Pass an empty string or `null` to clear. */
-      adsTxt?: string | '' | unknown | unknown;
+      adsTxt?: string | '' | unknown;
     };
     SettingsAdsenseSlot: {
       /** @description Whether this placement is rendered. */
       enabled: boolean;
       /** @description Ten-digit AdSense slot ID. Pass an empty string or `null` to clear. */
-      slotId: string | '' | unknown | unknown;
+      slotId: string | '' | unknown;
       /** @description AdSense layout type for the placement. */
-      layout?:
-        | ('auto' | 'in-article' | 'in-feed' | 'fluid')
-        | ''
-        | unknown
-        | unknown;
+      layout?: ('auto' | 'in-article' | 'in-feed' | 'fluid') | '' | unknown;
       /** @description AdSense ad format. */
       format?:
         | ('auto' | 'horizontal' | 'vertical' | 'rectangle' | 'responsive')
         | ''
-        | unknown
         | unknown;
       /** @description Visual style override for the placement. */
-      style?:
-        | ('default' | 'light' | 'dark' | 'contrast')
-        | ''
-        | unknown
-        | unknown;
+      style?: ('default' | 'light' | 'dark' | 'contrast') | '' | unknown;
       /** @description How often the placement is shown (e.g. once every N items). */
-      frequency?: number | unknown | unknown;
+      frequency?: number | unknown;
     };
     SettingsPasswordProtectionBody: {
       /** @description Plaintext password used to gate the public board. Must be at least 8 characters. Stored hashed and encrypted server-side. */
       password: string;
+    };
+    /** @description Which built-in sign-in methods are switched on for candidates and for employers. SSO connections are switched on per role on `/sso-connections`. */
+    SignInMethods: {
+      candidate: components['schemas']['BuiltInSignInMethods'];
+      employer: components['schemas']['BuiltInSignInMethods'];
+    };
+    /** @description Switch built-in sign-in methods on or off per role; omitted methods stay as they are. Switching off a role’s last way to sign in (no other built-in method on, and no tested SSO connection switched on for that role) is refused with 409 `sign_in_method_last`. People already signed in stay signed in. */
+    SignInMethodsPatch: {
+      candidate?: {
+        password?: boolean;
+        magicLink?: boolean;
+        google?: boolean;
+        linkedin?: boolean;
+      };
+      employer?: {
+        password?: boolean;
+        magicLink?: boolean;
+        google?: boolean;
+        linkedin?: boolean;
+      };
     };
     Skill: {
       id: string;
@@ -6181,6 +7480,133 @@ export interface components {
       aliasSlugs: string[];
       sourceLocale: string | null;
       createdAt: string;
+    };
+    SsoConnection: {
+      /** @description Unique identifier for the SSO connection. */
+      id: string;
+      /** @enum {string} */
+      object: 'sso_connection';
+      /** @enum {string} */
+      protocol: 'oidc' | 'oauth2_userinfo' | 'saml';
+      label: string;
+      /**
+       * @description The identity provider the connection is for: `okta`, or `generic_oidc` / `generic_oauth2` for any other provider that supports OpenID Connect or OAuth 2.0. Only used to name the provider in the dashboard’s setup steps; it does not change how sign-in works.
+       * @enum {string|null}
+       */
+      provider: 'okta' | 'generic_oidc' | 'generic_oauth2' | null;
+      /** @description The provider issuer URL; empty on a draft not set up yet. */
+      issuer: string;
+      /**
+       * @description Deprecated: use liveConfigTested and offeredToCandidates/offeredToEmployers.
+       * @enum {string}
+       */
+      status: 'draft' | 'tested' | 'enabled' | 'disabled';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      candidateSignInMode: 'off' | 'available' | 'required';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      employerSignInMode: 'off' | 'available' | 'required';
+      discoveryUrl: string | null;
+      authorizationEndpoint: string | null;
+      tokenEndpoint: string | null;
+      userinfoEndpoint: string | null;
+      jwksUri: string | null;
+      scopes: string[] | null;
+      /** @description The client ID; empty on a draft not set up yet. */
+      clientId: string;
+      /** @description Whether a client secret is stored. The secret is never returned. */
+      hasClientSecret: boolean;
+      claimNames: components['schemas']['SsoConnectionClaimNames'];
+      trustedProviderEmail: boolean;
+      /**
+       * @description `auto_create` creates a board account on first sign-in; `pre_provisioned_only` signs in only people who already have one.
+       * @enum {string}
+       */
+      provisioning: 'auto_create' | 'pre_provisioned_only';
+      /** @description Whether candidates can sign in with this connection. */
+      offeredToCandidates: boolean;
+      /** @description Whether employers can sign in with this connection. */
+      offeredToEmployers: boolean;
+      /** @description A test passed on the live settings, so the connection can be switched on. Until then both switches stay off. */
+      liveConfigTested: boolean;
+      pendingChanges: components['schemas']['SsoConnectionPendingChanges'];
+      /** @description The redirect URL to register at the provider. */
+      callbackUrl: string;
+      lastTestPassedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+    };
+    SsoConnectionClaimNames: {
+      /** @description Claim holding the stable member ID. Defaults to `sub`. */
+      subject?: string | null;
+      /** @description Claim holding the email. Defaults to `email`. */
+      email?: string | null;
+      /** @description Claim saying whether the email is verified. Defaults to `email_verified`. */
+      emailVerified?: string | null;
+      /** @description Claim holding the display name. Defaults to `name`. */
+      displayName?: string | null;
+    } | null;
+    /** @description Settings edits on a tested connection wait here until a test passes on them and they are saved in the dashboard; sign-ins keep using the live settings meanwhile. */
+    SsoConnectionPendingChanges: {
+      /**
+       * @description `oidc` for OpenID Connect providers (discovery and ID tokens); `oauth2_userinfo` for OAuth 2.0 providers that expose a userinfo endpoint instead.
+       * @enum {string}
+       */
+      protocol: 'oidc' | 'oauth2_userinfo';
+      issuer: string;
+      discoveryUrl: string | null;
+      authorizationEndpoint: string | null;
+      tokenEndpoint: string | null;
+      userinfoEndpoint: string | null;
+      jwksUri: string | null;
+      scopes: string[] | null;
+      clientId: string;
+      hasClientSecret: boolean;
+      claimNames: components['schemas']['SsoConnectionClaimNames'];
+    } | null;
+    SsoConnectionTestResult: {
+      /** @enum {string} */
+      object: 'sso_connection_test_result';
+      testId: string;
+      passed: boolean;
+      /**
+       * @description Whether the test ran on the live settings or on pending changes.
+       * @enum {string}
+       */
+      configSource: 'live' | 'pending';
+      /**
+       * @description `stale_config`: settings changed during the test, so it does not count. `promoted` appears only on results recorded before saving took over making pending changes live.
+       * @enum {string}
+       */
+      outcome: 'recorded' | 'promoted' | 'stale_config';
+      principal: {
+        issuer: string;
+        subject: string;
+        email: string | null;
+        emailVerified: boolean;
+        displayName: string | null;
+      } | null;
+      /** @description The claims the provider sent, bounded in size. */
+      claims: {
+        [key: string]: unknown;
+      } | null;
+      warnings: string[];
+      error: {
+        code: string;
+        message: string;
+        expected: string | null;
+        received: string | null;
+      } | null;
+      completedAt: string;
+      expiresAt: string;
+    };
+    StartCustomObjectRecordsImportBody: {
+      records: components['schemas']['CreateCustomObjectRecordBody'][];
     };
     Subscriber: {
       /** @description Unique identifier for the subscriber. */
@@ -6201,6 +7627,30 @@ export interface components {
       /** @description ISO-8601 timestamp of when the subscriber was created. */
       createdAt: string;
     };
+    SubscriberAlert: {
+      /** @description Unique identifier for the alert. */
+      id: string;
+      /**
+       * @description String representing the object's type.
+       * @enum {string}
+       */
+      object: 'alert';
+      /** @description Identifier of the subscriber that owns this alert. */
+      subscriberId: string;
+      /** @description The job-filter criteria the alert matches against. */
+      filters?: unknown;
+      /**
+       * @description Weekly delivery cadence.
+       * @enum {string}
+       */
+      frequency: 'weekly';
+      /** @description Whether the alert is currently active. */
+      isActive: boolean;
+      /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
+      lastSentAt: string | null;
+      /** @description ISO-8601 timestamp of when the alert was created. */
+      createdAt: string;
+    };
     SubscriberCount: {
       /** @enum {string} */
       object: 'subscriber_count';
@@ -6211,37 +7661,14 @@ export interface components {
       /** @description ISO-8601 timestamp of the most recent alert dispatch, or `null`. */
       lastSentAt: string | null;
       /** @description The subscriber's alerts. */
-      alerts: (components['schemas']['Alert'] & {
-        /** @description Unique identifier for the alert. */
-        id: string;
-        /**
-         * @description String representing the object's type.
-         * @enum {string}
-         */
-        object: 'alert';
-        /** @description Identifier of the subscriber that owns this alert. */
-        subscriberId: string;
-        /** @description The job-filter criteria the alert matches against. */
-        filters?: unknown;
-        /**
-         * @description Weekly delivery cadence.
-         * @enum {string}
-         */
-        frequency: 'weekly';
-        /** @description Whether the alert is currently active. */
-        isActive: boolean;
-        /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
-        lastSentAt: string | null;
-        /** @description ISO-8601 timestamp of when the alert was created. */
-        createdAt: string;
-      })[];
+      alerts: components['schemas']['SubscriberAlert'][];
     };
     Transaction: {
       id: string;
       /** @enum {string} */
       object: 'transaction';
       /** @enum {string} */
-      kind: 'card_post' | 'invoice' | 'subscription';
+      kind: 'card_post' | 'invoice' | 'subscription' | 'service';
       /** @enum {string} */
       status: 'paid' | 'open' | 'void' | 'uncollectible';
       /** @enum {string} */
@@ -6275,6 +7702,8 @@ export interface components {
       blocked: false;
       /** @description True when the company was on the blocklist before this call. */
       was_blocked: boolean;
+      /** @description True when the company had also been removed from the board before this call. */
+      was_removed: boolean;
     };
     UpdateAuthorBody: {
       /** @description URL-friendly slug for the author. Auto-generated from `name` when omitted. */
@@ -6283,9 +7712,9 @@ export interface components {
       bio?: string;
       /**
        * Format: email
-       * @description The author's email address.
+       * @description The author's email address. Pass `null` to clear the stored value; omitted means unchanged.
        */
-      email?: string;
+      email?: string | null;
       /** @description Free-text location label for the author (e.g. `Sydney, Australia`). */
       location?: string;
       /**
@@ -6295,16 +7724,16 @@ export interface components {
       status?: 'active' | 'inactive';
       /** @description Cavuno media ID of an uploaded avatar image. Pass `null` to clear it. */
       avatarMediaId?: string | null;
-      /** @description The author's personal website URL. Normalized to a canonical URL when stored. */
-      websiteUrl?: string;
-      /** @description The author's Facebook profile URL. */
-      facebookUrl?: string;
-      /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. */
-      twitterUrl?: string;
-      /** @description The author's LinkedIn profile URL. */
-      linkedinUrl?: string;
-      /** @description The author's GitHub profile URL. */
-      githubUrl?: string;
+      /** @description The author's personal website URL. Normalized to a canonical URL when stored. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      websiteUrl?: string | null;
+      /** @description The author's Facebook profile URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      facebookUrl?: string | null;
+      /** @description The author's X (Twitter) profile URL. Stored as the canonical `https://x.com/<handle>` URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      twitterUrl?: string | null;
+      /** @description The author's LinkedIn profile URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      linkedinUrl?: string | null;
+      /** @description The author's GitHub profile URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      githubUrl?: string | null;
       /** @description SEO meta title for the author page. */
       metaTitle?: string;
       /** @description SEO meta description for the author page. */
@@ -6364,8 +7793,8 @@ export interface components {
       featureImageCaption?: string;
       seoTitle?: string;
       seoDescription?: string;
-      /** Format: uri */
-      canonicalUrl?: string;
+      /** @description Canonical URL for the post. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      canonicalUrl?: string | null;
       /** Format: date-time */
       publishedAt?: string;
       title?: string;
@@ -6384,28 +7813,55 @@ export interface components {
     UpdateCategoryBody: {
       name?: string;
       slug?: string;
-      parentId?: string | unknown | unknown;
+      parentId?: string | unknown;
       sourceLocale?: string;
     };
     UpdateCompanyBody: {
-      /** @description Public company website URL. Normalized to a canonical apex domain when stored. */
-      website?: string;
-      /** @description One-line summary of the company. Up to 280 characters. */
-      summary?: string;
-      /** @description Long-form description of the company. Up to 25,000 characters. */
-      description?: string;
-      /** @description X (Twitter) profile URL or handle. Stored as the canonical handle. */
-      xUrl?: string;
-      /** @description LinkedIn company page URL. */
-      linkedinUrl?: string;
-      /** @description Facebook company page URL. */
-      facebookUrl?: string;
+      /** @description Public company website URL. Normalized to a canonical apex domain when stored. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      website?: string | null;
+      /** @description One-line summary of the company. Up to 280 characters. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      summary?: string | null;
+      /** @description Long-form description of the company, as HTML. Up to 25,000 characters. The HTML is sanitized on write: tags and attributes outside the supported formatting set (paragraphs, headings, lists, links, inline emphasis) are removed. Plain text without HTML tags is converted to paragraphs. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      description?: string | null;
+      /** @description X (Twitter) profile URL or handle. Stored as the canonical handle. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      xUrl?: string | null;
+      /** @description LinkedIn company page URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      linkedinUrl?: string | null;
+      /** @description Facebook company page URL. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      facebookUrl?: string | null;
+      /** @description Instagram profile URL or handle. Pass `null` or `""` to clear the stored value; omitted means unchanged. */
+      instagramUrl?: string | null;
       /** @description Canonical market slugs assigned to the company. Pass an empty array to clear all markets. */
       markets?: string[];
       /** @description The company's display name. */
       name?: string;
       /** @description URL-friendly slug for the company. */
       slug?: string;
+    };
+    UpdateCustomObjectRecordBody: {
+      name?: string;
+      /** @description URL-safe identifier, unique within the collection. Changing it keeps the previous value reserved. Lowercase letters, numbers and single hyphens. Another record's current or previous slug is rejected with 400. */
+      slug?: string;
+      /**
+       * Format: uri
+       * @description Deprecated: use the collection's logo image field (`logoFieldKey` on the type). A legacy logo URL stored on older records.
+       */
+      logoUrl?: string | null;
+      externalId?: string | null;
+      values?: {
+        [key: string]: string | number | boolean | string[];
+      };
+      archived?: boolean;
+    };
+    UpdateCustomObjectTypeBody: {
+      name?: string;
+      definitions?: (
+        | components['schemas']['ScalarProfileCustomFieldDefinition']
+        | components['schemas']['CollectionMediaFieldDefinition']
+      )[];
+      archived?: boolean;
+      /** @description Key of one of the `image` definitions to use as the logo; null clears it. Removing that definition clears it too. */
+      logoFieldKey?: string | null;
     };
     UpdateInvitationBody: {
       /**
@@ -6417,7 +7873,7 @@ export interface components {
     UpdateJobBody: {
       /** @description Identifier of the company the job belongs to. */
       companyId?: string;
-      /** @description Long-form description of the role. Up to 25,000 characters. */
+      /** @description Long-form description of the role, as HTML. Up to 25,000 characters. The HTML is sanitized on write: tags and attributes outside the supported formatting set (paragraphs, headings, lists, links, inline emphasis) are removed. Plain text without HTML tags is converted to paragraphs. */
       description?: string;
       /** @description URL-friendly slug for the job. Auto-generated from `title` when omitted. */
       slug?: string;
@@ -6434,7 +7890,7 @@ export interface components {
         | 'volunteer'
         | 'other';
       /**
-       * @description Whether the role is on-site, hybrid, or fully remote. **Never valid on its own:** `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST). Sending it alone returns `400`.
+       * @description Whether the role is on-site, hybrid, or fully remote. Omitted means unchanged; `null` returns `400` because a job's workplace type can be changed but not cleared. **Never valid on its own:** `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST). Sending it alone returns `400`.
        * @enum {string}
        */
       remoteOption?: 'on_site' | 'hybrid' | 'remote';
@@ -6472,8 +7928,8 @@ export interface components {
        */
       remoteSponsorship?: 'yes' | 'no' | 'unknown';
       /**
-       * @description Seniority level of the role.
-       * @enum {string}
+       * @description Seniority level of the role. Pass `null` to clear the stored value; omitted means unchanged.
+       * @enum {string|null}
        */
       seniority?:
         | 'entry_level'
@@ -6483,17 +7939,18 @@ export interface components {
         | 'lead'
         | 'principal'
         | 'director'
-        | 'executive';
+        | 'executive'
+        | null;
       /** @description Where candidates apply. Accepts an HTTPS URL, a `mailto:` URI, or a bare email address (which is normalized to `mailto:` form). */
       applicationUrl?: string;
-      /** @description Minimum salary, in `salaryCurrency` units. Pass `null` to clear the stored value; omitted means unchanged. */
+      /** @description Minimum salary, in `salaryCurrency` units. Pass `null` to clear the stored value; omitted means unchanged. When a request sends any salary field, the resulting salary (sent values over stored ones) must have `salaryCurrency` and `salaryTimeframe` whenever `salaryMin` or `salaryMax` is set; otherwise `400`. Requests that send no salary field are not checked. */
       salaryMin?: number | null;
-      /** @description Maximum salary, in `salaryCurrency` units. Pass `null` to clear the stored value; omitted means unchanged. */
+      /** @description Maximum salary, in `salaryCurrency` units. Pass `null` to clear the stored value; omitted means unchanged. When a request sends any salary field, the resulting salary (sent values over stored ones) must have `salaryCurrency` and `salaryTimeframe` whenever `salaryMin` or `salaryMax` is set; otherwise `400`. Requests that send no salary field are not checked. */
       salaryMax?: number | null;
-      /** @description Three-letter ISO 4217 currency code for `salaryMin` and `salaryMax`. Pass `null` to clear the stored value; omitted means unchanged. */
+      /** @description Three-letter ISO 4217 currency code for `salaryMin` and `salaryMax`. Pass `null` to clear the stored value; omitted means unchanged. When a request sends any salary field, the resulting salary (sent values over stored ones) must have `salaryCurrency` and `salaryTimeframe` whenever `salaryMin` or `salaryMax` is set; otherwise `400`. Requests that send no salary field are not checked. */
       salaryCurrency?: string | null;
       /**
-       * @description Period the `salaryMin` and `salaryMax` figures are quoted against. Pass `null` to clear the stored value; omitted means unchanged.
+       * @description Period the `salaryMin` and `salaryMax` figures are quoted against. Pass `null` to clear the stored value; omitted means unchanged. When a request sends any salary field, the resulting salary (sent values over stored ones) must have `salaryCurrency` and `salaryTimeframe` whenever `salaryMin` or `salaryMax` is set; otherwise `400`. Requests that send no salary field are not checked.
        * @enum {string|null}
        */
       salaryTimeframe?:
@@ -6509,8 +7966,8 @@ export interface components {
       categories?: string[];
       /** @description Whether the job appears in featured slots on the public board. */
       isFeatured?: boolean;
-      /** @description Job expiry as a Unix epoch in milliseconds. On create, omitted or `null` defaults to 30 days from creation. On PATCH, pass `null` to clear an existing expiry. Past timestamps remove the job from the public board. */
-      expiresAt?: number | unknown | unknown;
+      /** @description Job expiry as a Unix epoch in milliseconds. On create, omitted or `null` defaults to 30 days from creation. On PATCH, `null` clears the explicit expiry; an ordinary published job then receives the board's `defaultJobDurationDays` from its publication time (30 days when unset). Draft and sponsored jobs may have no expiry. Past timestamps remove the job from the public board. */
+      expiresAt?: number | unknown;
       /** @description Time at which the job was first published, as a Unix epoch in milliseconds. When omitted on create with `status: "published"`, the server stamps the current time. Useful for bulk-importing historical jobs while preserving original publication dates. PATCH may overwrite an existing value but cannot clear it. */
       publishedAt?: number;
       /** @description Required education credentials. Each value is one of `high_school`, `associate_degree`, `bachelor_degree`, `professional_certificate`, `postgraduate_degree`, or `no_requirements`. */
@@ -6533,14 +7990,20 @@ export interface components {
       inOfficePeriod?: 'per_week' | 'per_month' | 'per_year';
       /** @description How often the candidate must be in-office over `inOfficePeriod`. */
       inOfficeFrequency?: number;
-      /** @description Physical office locations associated with the job. Each entry is forward-geocoded server-side; a country mismatch returns `400 jobs_unresolvable_location`. */
+      /** @description Physical office locations associated with the job. Prefer `{query: "City, Country"}` for free-form input; `{city, country, region?, locality?}` is also accepted when you already have structured fields. Each entry is resolved server-side; a country mismatch returns `400 jobs_unresolvable_location`. */
       officeLocations?: components['schemas']['JobOfficeLocationInput'][];
       /** @description An external identifier for the job from your own system, such as an ATS requisition ID. Pass `null` to clear the stored value; omitted means unchanged. */
       externalId?: string | null;
       /** @description Board-defined custom-field values, keyed by the field `key` (definitions, including type and option keys, are published at `GET /v1/settings/job-form`). Writes are **additive**: on `PATCH` a key you send is set/overwritten and a key you omit is preserved (unsent keys are never cleared); on `POST` this initializes the bag. Send a key with an intentional-empty value (`null`, `""`, or `[]`) to **clear** it (`""`/`null` clear any type; `[]` clears a `multi_select`); `false` and `0` are kept as real values. Values must match the field type and `single_select`/`multi_select` must use defined option **keys** (not labels); a wrong-typed value is rejected (`custom_field_wrong_type`), never silently cleared. Unknown keys are ignored. The stored bag never contains `null`/empty values. */
       customFieldValues?: {
-        [key: string]: string | string[] | boolean | number | unknown | unknown;
+        [key: string]: string | string[] | boolean | number | unknown;
       };
+      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. */
+      collectionValues?: {
+        [key: string]: string[] | unknown;
+      };
+      /** @description Per-job wording for selected collection entries, only on fields whose definition has `allowOverrides`. At most one item per selected entry; an item for an entry that is not selected on the job is rejected with `400 jobs_constraint_violation`. The list replaces the job's stored overrides: on PATCH omit it to keep them and send `[]` to clear them all. Deselecting an entry through `collectionValues` drops its override. */
+      collectionOverrides?: components['schemas']['JobCollectionOverride'][];
       /** @description The job title. */
       title?: string;
     };
@@ -6565,6 +8028,17 @@ export interface components {
       /** @description Archive the plan (soft-delete). There is no hard DELETE. */
       isArchived?: boolean;
       displayOrder?: number;
+      /**
+       * @description How the plan is sold. `priced` takes a price and syncs it to Stripe; `contact` renders a contact CTA and creates no Stripe objects — setting a price on a contact plan is rejected. Omitted on create means `priced`.
+       * @enum {string}
+       */
+      pricingMode?: 'priced' | 'contact';
+      /** @description Display price text for a contact plan. Send an empty string to clear it. */
+      priceText?: string;
+      /** @description CTA label for a contact plan. Empty string clears it. */
+      ctaText?: string;
+      /** @description CTA target for a contact plan. Must be an https, mailto:, or tel: URL. Empty string clears it. */
+      ctaDestination?: string;
     };
     UpdateRedirectBody: {
       /** @description Source path to match, for example `/old-careers`. */
@@ -6574,6 +8048,7 @@ export interface components {
       /** @description HTTP status code. One of `301` or `302`. */
       statusCode?: 301 | 302;
     };
+    /** @description Deprecated. Prefer updating the corresponding employer-service contact plan. */
     UpdateSalesLedPlanBody: {
       name: string;
       description: string;
@@ -6592,6 +8067,70 @@ export interface components {
       name?: string;
       slug?: string;
       sourceLocale?: string;
+    };
+    UpdateSsoConnectionBody: {
+      /**
+       * @description `oidc` for OpenID Connect providers (discovery and ID tokens); `oauth2_userinfo` for OAuth 2.0 providers that expose a userinfo endpoint instead.
+       * @enum {string}
+       */
+      protocol?: 'oidc' | 'oauth2_userinfo';
+      /** @description The provider issuer URL. Every sign-in must come from this issuer; it identifies linked identities. */
+      issuer?: string;
+      /** @description OpenID Connect discovery URL. Defaults to `{issuer}/.well-known/openid-configuration`. */
+      discoveryUrl?: string | null;
+      /** @description Authorization URL. Required for `oauth2_userinfo`. */
+      authorizationEndpoint?: string | null;
+      /** @description Token URL. Required for `oauth2_userinfo`. */
+      tokenEndpoint?: string | null;
+      /** @description Userinfo URL. Required for `oauth2_userinfo`. */
+      userinfoEndpoint?: string | null;
+      /** @description JWKS URL, when the discovery document does not name one. */
+      jwksUri?: string | null;
+      /** @description Scopes requested from the provider. */
+      scopes?: string[] | null;
+      /** @description The client ID registered at the provider. */
+      clientId?: string;
+      /** @description The client secret. Write-only: stored encrypted and never returned. On update, omit it to keep the stored secret or send `null` to remove it. */
+      clientSecret?: string | null;
+      /** @description Where to read identity from in the provider response. */
+      claimNames?: {
+        /** @description Claim holding the stable member ID. Defaults to `sub`. */
+        subject?: string | null;
+        /** @description Claim holding the email. Defaults to `email`. */
+        email?: string | null;
+        /** @description Claim saying whether the email is verified. Defaults to `email_verified`. */
+        emailVerified?: string | null;
+        /** @description Claim holding the display name. Defaults to `name`. */
+        displayName?: string | null;
+      } | null;
+      /** @description The text on the sign-in button. */
+      label?: string;
+      /**
+       * @description The identity provider the connection is for: `okta`, or `generic_oidc` / `generic_oauth2` for any other provider that supports OpenID Connect or OAuth 2.0. Only used to name the provider in the dashboard’s setup steps; it does not change how sign-in works.
+       * @enum {string}
+       */
+      provider?: 'okta' | 'generic_oidc' | 'generic_oauth2';
+      /** @description Sign someone straight into the existing board account with the same verified email, without a confirmation email. Only enable when the provider alone controls who has each email. */
+      trustedProviderEmail?: boolean;
+      /**
+       * @description `auto_create` creates a board account on first sign-in; `pre_provisioned_only` signs in only people who already have one.
+       * @enum {string}
+       */
+      provisioning?: 'auto_create' | 'pre_provisioned_only';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      candidateSignInMode?: 'off' | 'available' | 'required';
+      /**
+       * @description Deprecated: use per-role connection switches and settings.signInMethods instead.
+       * @enum {string}
+       */
+      employerSignInMode?: 'off' | 'available' | 'required';
+      /** @description Switch the connection on or off for candidates. Switching on needs a passing test on the live settings (409 `sso_connections_untested`); switching off is refused while it is the only way candidates can sign in (409 `sign_in_method_last`). */
+      offeredToCandidates?: boolean;
+      /** @description Switch the connection on or off for employers, with the same rules as `offeredToCandidates`. */
+      offeredToEmployers?: boolean;
     };
     UpdateTagBody: {
       /** @description URL-friendly slug for the tag. Auto-generated from `name` when omitted. */
@@ -6658,7 +8197,6 @@ export interface components {
      */
     WebhookCandidateChangedField: 'email' | 'display_name' | 'url';
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECANDIDATECREATED",
      *       "object": "event",
@@ -6715,7 +8253,6 @@ export interface components {
       };
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECANDIDATEDELETED",
      *       "object": "event",
@@ -6794,7 +8331,6 @@ export interface components {
       profile_revision: number;
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECANDIDATEPROFILE",
      *       "object": "event",
@@ -6899,7 +8435,6 @@ export interface components {
       email: string;
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECANDIDATEUPDATED",
      *       "object": "event",
@@ -6968,7 +8503,6 @@ export interface components {
       | 'logo_url'
       | 'url';
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECOMPANYCREATED",
      *       "object": "event",
@@ -7026,7 +8560,6 @@ export interface components {
       };
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECOMPANYDELETED",
      *       "object": "event",
@@ -7128,7 +8661,6 @@ export interface components {
       slug: string;
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLECOMPANYUPDATED",
      *       "object": "event",
@@ -7334,7 +8866,6 @@ export interface components {
       | 'published_at'
       | 'expires_at';
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLEJOBCREATED",
      *       "object": "event",
@@ -7408,7 +8939,6 @@ export interface components {
       };
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLEJOBDELETED",
      *       "object": "event",
@@ -7530,7 +9060,6 @@ export interface components {
       company_id: string | null;
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLEJOBUPDATED",
      *       "object": "event",
@@ -7629,7 +9158,6 @@ export interface components {
       | 'granted_at'
       | 'withdrawn_at';
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLEMARKETINGGRANT",
      *       "object": "event",
@@ -7748,7 +9276,6 @@ export interface components {
       revision: number;
     };
     /**
-     * @description Common outbound webhook event envelope.
      * @example {
      *       "id": "evt_01EXAMPLEMARKETINGWITHDRAWAL",
      *       "object": "event",
@@ -10047,6 +11574,72 @@ export interface operations {
       };
     };
   };
+  getCandidateCustomFieldValues: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Profile custom-field definitions and values. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileFieldValuesResponse'];
+        };
+      };
+      /** @description Profile not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCandidateCustomFieldValues: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileFieldValuesBody'];
+      };
+    };
+    responses: {
+      /** @description Profile custom-field definitions and values. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileFieldValuesResponse'];
+        };
+      };
+      /** @description Profile not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   deactivateCandidate: {
     parameters: {
       query?: never;
@@ -10079,6 +11672,72 @@ export interface operations {
       };
       /** @description Sandbox persona accounts cannot have their lifecycle changed. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCandidateObjectReferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Candidate references. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferencesResult'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceCandidateObjectReferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceProfileObjectReferenceSelectionsBody'];
+      };
+    };
+    responses: {
+      /** @description Candidate references. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferencesResult'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
@@ -10669,6 +12328,72 @@ export interface operations {
       };
     };
   };
+  getCompanyCustomFieldValues: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Profile custom-field definitions and values. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileFieldValuesResponse'];
+        };
+      };
+      /** @description Profile not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCompanyCustomFieldValues: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileFieldValuesBody'];
+      };
+    };
+    responses: {
+      /** @description Profile custom-field definitions and values. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileFieldValuesResponse'];
+        };
+      };
+      /** @description Profile not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listCompanyJobs: {
     parameters: {
       query?: {
@@ -10680,10 +12405,15 @@ export interface operations {
          */
         limit?: number;
         /**
-         * @description Only return jobs matching the given status. One of `draft`, `published`, `expired`, or `archived`.
+         * @description Only return jobs matching the given status. One of `draft`, `published`, `expired`, `archived`, or `pending_approval` (awaiting operator approval). `draft` does not include jobs awaiting approval.
          * @example published
          */
-        status?: 'draft' | 'published' | 'expired' | 'archived';
+        status?:
+          | 'draft'
+          | 'published'
+          | 'expired'
+          | 'archived'
+          | 'pending_approval';
       };
       header?: never;
       path: {
@@ -10818,6 +12548,72 @@ export interface operations {
       };
       /** @description Company not found, or the company has no logo to remove. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCompanyObjectReferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Company references. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferencesResult'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceCompanyObjectReferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceProfileObjectReferenceSelectionsBody'];
+      };
+    };
+    responses: {
+      /** @description Company references. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferencesResult'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
@@ -11089,6 +12885,630 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCustomObjectRecord: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        recordId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog record. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectRecord'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCustomObjectRecord: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        recordId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCustomObjectRecordBody'];
+      };
+    };
+    responses: {
+      /** @description Updated catalog record. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectRecord'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listCustomObjectTypes: {
+    parameters: {
+      query?: {
+        includeArchived?: 'true' | 'false';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog types. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectType'][];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCustomObjectType: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCustomObjectTypeBody'];
+      };
+    };
+    responses: {
+      /** @description Created catalog type. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectType'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCustomObjectType: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog type. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectType'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCustomObjectType: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCustomObjectTypeBody'];
+      };
+    };
+    responses: {
+      /** @description Updated catalog type. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectType'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listCustomObjectRecords: {
+    parameters: {
+      query?: {
+        includeArchived?: 'true' | 'false';
+        search?: string;
+      };
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog records. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectRecord'][];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCustomObjectRecord: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCustomObjectRecordBody'];
+      };
+    };
+    responses: {
+      /** @description Created catalog record. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectRecord'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  importCustomObjectRecords: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ImportCustomObjectRecordsBody'];
+      };
+    };
+    responses: {
+      /** @description Import counts. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomObjectImportResult'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  startCustomObjectRecordsImport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StartCustomObjectRecordsImportBody'];
+      };
+    };
+    responses: {
+      /** @description A catalog record import operation was started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OperationResource'];
+        };
+      };
+      /** @description Request validation failed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The import payload exceeds 10MB. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A field type is immutable or a removed field is still in use. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listDevelopmentOrigins: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/development-origins */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['DevelopmentOrigin'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createDevelopmentOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDevelopmentOriginBody'];
+      };
+    };
+    responses: {
+      /** @description The origin was already registered. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DevelopmentOrigin'];
+        };
+      };
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DevelopmentOrigin'];
+        };
+      };
+      /** @description The origin was refused (`development_origins_invalid`); the message says why. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has the maximum number of development origins (`development_origins_limit_reached`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteDevelopmentOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The development origin ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Development origin not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -11711,6 +14131,79 @@ export interface operations {
       };
     };
   };
+  deactivateEmployer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The employer id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Employer deactivated. `deactivatedAt` is set. Sign-in is blocked and sessions are revoked. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Employer'];
+        };
+      };
+      /** @description Employer not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Sandbox persona accounts cannot have their lifecycle changed. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  reactivateEmployer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The employer id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Employer reactivated. `deactivatedAt` is `null`. Sign-in is restored. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Employer'];
+        };
+      };
+      /** @description Employer not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listImports: {
     parameters: {
       query?: {
@@ -12004,6 +14497,57 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  toggleGoogleIndexingApi: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['IndexingToggleBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['IndexingConfig'];
+        };
+      };
+      /** @description `integrations_board_not_configured`: the account has no board. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A prerequisite for enabling is not met. `integrations_indexing_custom_domain_required`: connect a custom domain and set it as primary. `integrations_indexing_password_protected`: remove board password protection. `integrations_indexing_setup_not_ready`: the Google Cloud project is not provisioned yet, or its service account credentials are unusable; `details.provisioningStatus` is the current state (`pending`, `provisioning`, `ready`, `error`, or `null` when setup never started). Start or retry setup from Settings → Indexing. `integrations_indexing_search_console_access_required`: add the service account in `details.serviceAccountEmail` as an Owner of the site in Google Search Console, then retry. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `integrations_indexing_verification_failed`: Google did not confirm Search Console access (an unexpected Google response, or Google was unreachable). `details.serviceAccountEmail` is the service account that must be an Owner. Retry later. */
+      502: {
         headers: {
           [name: string]: unknown;
         };
@@ -12503,10 +15047,15 @@ export interface operations {
          */
         limit?: number;
         /**
-         * @description Only return jobs matching the given status. One of `draft`, `published`, `expired`, or `archived`.
+         * @description Only return jobs matching the given status. One of `draft`, `published`, `expired`, `archived`, or `pending_approval` (awaiting operator approval). `draft` does not include jobs awaiting approval.
          * @example published
          */
-        status?: 'draft' | 'published' | 'expired' | 'archived';
+        status?:
+          | 'draft'
+          | 'published'
+          | 'expired'
+          | 'archived'
+          | 'pending_approval';
         /** @description Only return jobs at the company with the given ID. */
         companyId?: string;
         /** @description Only return jobs matching this application URL. URLs are normalized server-side (casing, tracking params, etc.) so equivalent links match. Useful for deduplication lookups. */
@@ -12849,7 +15398,7 @@ export interface operations {
           'application/json': components['schemas']['Job'];
         };
       };
-      /** @description The request was malformed. */
+      /** @description The request was malformed, or the update breaks the board's Job form configuration (`jobs_constraint_violation`). Each field group the request sends (salary, seniority, employment type, work arrangement, office locations, remote eligibility, custom fields) is checked against the updated job; groups it omits are not re-checked. `details.violations` lists each broken rule as `{ code, path, params }`. */
       400: {
         headers: {
           [name: string]: unknown;
@@ -14292,7 +16841,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description The Board payment connection is not ready. */
+      /** @description The plan cannot carry a price: the Board payment connection is not ready, the plan is sold by contact, or it is an assign-only membership. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -14944,6 +17493,68 @@ export interface operations {
       };
     };
   };
+  getFormLayouts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FormLayouts'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceFormLayouts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceFormLayoutsBody'];
+      };
+    };
+    responses: {
+      /** @description The three form layouts after the write. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FormLayouts'];
+        };
+      };
+      /** @description A layout was rejected. `error.details.issues` names each offending field. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   deleteHeroImage: {
     parameters: {
       query?: never;
@@ -15100,6 +17711,490 @@ export interface operations {
       };
       /** @description Password protection is not currently enabled. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listProfileFieldDefinitions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        entity: 'candidate' | 'company';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Definition list. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileCustomFieldDefinition'][];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceProfileFieldDefinitions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        entity: 'candidate' | 'company';
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplaceProfileFieldDefinitionsBody'];
+      };
+    };
+    responses: {
+      /** @description Updated definition list. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileCustomFieldDefinition'][];
+        };
+      };
+      /** @description An existing field type was changed. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listProfileObjectReferenceDefinitions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        entity: 'candidate' | 'company';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reference definitions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferenceDefinition'][];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceProfileObjectReferenceDefinitions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        entity: 'candidate' | 'company';
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          definitions: components['schemas']['ProfileObjectReferenceDefinition'][];
+        };
+      };
+    };
+    responses: {
+      /** @description Reference definitions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileObjectReferenceDefinition'][];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listSsoConnections: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/sso-connections */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['SsoConnection'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateSsoConnectionBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description A field is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has five SSO connections. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The connection is the only way a role can sign in (`sign_in_method_last`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateSsoConnectionBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description A field is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A role switch was refused: the connection has not passed a test, or it is the only way that role can sign in. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  disableSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The connection is untested or this would remove the last working sign-in method. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  discardSsoConnectionPendingChanges: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  enableSsoConnection: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnection'];
+        };
+      };
+      /** @description SSO connection not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The connection is untested or this would remove the last working sign-in method. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getSsoConnectionTestResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The SSO connection ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SsoConnectionTestResult'];
+        };
+      };
+      /** @description SSO connection or test result not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -15343,30 +18438,7 @@ export interface operations {
             url: string;
             hasMore: boolean;
             nextCursor: string | null;
-            data: (components['schemas']['Alert'] & {
-              /** @description Unique identifier for the alert. */
-              id: string;
-              /**
-               * @description String representing the object's type.
-               * @enum {string}
-               */
-              object: 'alert';
-              /** @description Identifier of the subscriber that owns this alert. */
-              subscriberId: string;
-              /** @description The job-filter criteria the alert matches against. */
-              filters?: unknown;
-              /**
-               * @description Weekly delivery cadence.
-               * @enum {string}
-               */
-              frequency: 'weekly';
-              /** @description Whether the alert is currently active. */
-              isActive: boolean;
-              /** @description ISO-8601 timestamp of the last dispatch, or `null`. */
-              lastSentAt: string | null;
-              /** @description ISO-8601 timestamp of when the alert was created. */
-              createdAt: string;
-            })[];
+            data: components['schemas']['SubscriberAlert'][];
           };
         };
       };
@@ -16335,7 +19407,7 @@ export interface operations {
         cursor?: string;
         limit?: number;
         status?: 'paid' | 'open' | 'void' | 'uncollectible';
-        kind?: 'card_post' | 'invoice' | 'subscription';
+        kind?: 'card_post' | 'invoice' | 'subscription' | 'service';
         search?: string;
       };
       header?: never;

@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.10.0 — 2026-10-05
+
+- **Jobs awaiting approval.** `jobs list --status pending_approval` and
+  `companies list-jobs --status pending_approval` show jobs waiting for an
+  operator. `jobs publish` on one approves it, and `jobs delete` rejects it.
+
 ## 1.9.1 — 2026-09-25
 
 - Refresh package metadata and public release notes. Command behavior is unchanged.
