@@ -109,7 +109,7 @@ export function registerJobsCommand(root: Command): void {
       .description('List jobs (paginated).')
       .option(
         '--status <status>',
-        'Filter by status (draft|published|expired|archived)',
+        'Filter by status (draft|pending_approval|published|expired|archived)',
       )
       .option('--company-id <id>', 'Filter by company ID')
       .option(
@@ -147,7 +147,12 @@ export function registerJobsCommand(root: Command): void {
         // search body takes status/companyId as arrays — wrap the singular
         // CLI flags into single-element arrays. The server validates status
         // against the canonical enum, so we forward as-is and let it 400.
-        type StatusEnum = 'draft' | 'published' | 'expired' | 'archived';
+        type StatusEnum =
+          | 'draft'
+          | 'pending_approval'
+          | 'published'
+          | 'expired'
+          | 'archived';
         const usesSearchEndpoint =
           opts.search !== undefined ||
           opts.skills !== undefined ||
@@ -193,6 +198,7 @@ export function registerJobsCommand(root: Command): void {
         '# All jobs (first page)\ncavuno jobs list',
         '# Published only\ncavuno jobs list --status published --limit 100',
         '# Published jobs at a single company\ncavuno jobs list --status published --company-id k17abc...',
+        '# Jobs awaiting your approval (approve with `jobs publish`, reject with `jobs delete`)\ncavuno jobs list --status pending_approval',
       ],
     },
   );
@@ -625,7 +631,9 @@ export function registerJobsCommand(root: Command): void {
   annotate(
     jobs
       .command('publish')
-      .description('Publish a job (draft or expired → published).')
+      .description(
+        'Publish a job (draft, pending_approval or expired → published). Publishing a pending_approval job approves it.',
+      )
       .argument('<id>', 'Job ID')
       .option('--expires-at <iso>', 'Optional ISO 8601 expiry timestamp')
       .action(async function (this: Command, id: string) {
@@ -641,6 +649,7 @@ export function registerJobsCommand(root: Command): void {
       examples: [
         'cavuno jobs publish k17abc...',
         'cavuno jobs publish k17abc... --expires-at 2026-12-31T23:59:59Z',
+        '# Approve a job awaiting approval\ncavuno jobs publish k17abc...',
       ],
     },
   );
@@ -707,7 +716,9 @@ export function registerJobsCommand(root: Command): void {
     withYesOption(
       jobs
         .command('delete')
-        .description('Hard-delete a job. Irreversible.')
+        .description(
+          'Hard-delete a job. Irreversible. Deleting a pending_approval job rejects it.',
+        )
         .argument('<id>', 'Job ID'),
     ).action(async function (this: Command, id: string) {
       const opts = this.opts<ConfirmOptions>();
@@ -721,7 +732,10 @@ export function registerJobsCommand(root: Command): void {
     }),
     {
       mapsTo: 'DELETE /v1/jobs/:id',
-      examples: ['cavuno jobs delete k17abc... --yes'],
+      examples: [
+        'cavuno jobs delete k17abc... --yes',
+        '# Reject a job awaiting approval\ncavuno jobs delete k17abc... --yes',
+      ],
     },
   );
 

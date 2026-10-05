@@ -22,7 +22,7 @@ function makeCli() {
       .description('List jobs (paginated).')
       .option(
         '--status <status>',
-        'Filter by status (draft|published|expired|archived)',
+        'Filter by status (draft|pending_approval|published|expired|archived)',
       )
       .option('--limit <n>', 'Page size 1-100 (default 50)', (v) =>
         parseInt(v, 10),
