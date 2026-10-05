@@ -63,15 +63,15 @@ cavuno webhooks     # Manage webhook endpoints and inspect/replay deliveries
 
 | Command | Description |
 |---|---|
-| `cavuno jobs list` | List jobs with optional filters |
+| `cavuno jobs list` | List jobs with optional filters (`--status pending_approval` lists jobs awaiting your approval) |
 | `cavuno jobs get <id>` | Fetch a single job (enriched) |
 | `cavuno jobs create --title <t> [...]` | Create a draft job |
 | `cavuno jobs update <id> [...]` | Update fields on an existing job |
-| `cavuno jobs publish <id> [--expires-at <iso>]` | Publish a job (quota-gated) |
+| `cavuno jobs publish <id> [--expires-at <iso>]` | Publish a job (quota-gated); approves a `pending_approval` job |
 | `cavuno jobs pause <id>` | Pause a published job |
 | `cavuno jobs expire <id>` | Expire a published job immediately |
 | `cavuno jobs duplicate <id>` | Create a draft copy |
-| `cavuno jobs delete <id>` | Hard-delete a job |
+| `cavuno jobs delete <id>` | Hard-delete a job; rejects a `pending_approval` job |
 | `cavuno jobs batch [--file ops.json]` | Run a batch of job operations (JSON file or stdin) |
 
 ### Usage
