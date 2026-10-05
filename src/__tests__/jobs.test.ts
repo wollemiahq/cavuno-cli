@@ -136,6 +136,15 @@ describe('jobs taxonomy CLI options', () => {
     expect(mockList).not.toHaveBeenCalled();
   });
 
+  it('lists the approval queue with --status pending_approval', async () => {
+    await createProgram().parseAsync(
+      ['node', 'cavuno', 'jobs', 'list', '--status', 'pending_approval'],
+      { from: 'node' },
+    );
+
+    expect(mockList).toHaveBeenCalledWith({ status: 'pending_approval' });
+  });
+
   it('delete refuses without --yes when non-interactive (exit 2)', async () => {
     await expect(
       createProgram().parseAsync(
