@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.12.0 — 2026-10-06
+
+- **`jobs create --external-id <id>`** sets your own ID for the job (an ATS
+  requisition ID or the source job URL). Set it so reposts of the same job are
+  detected.
+- **`jobs create --allow-shared-application-url`** creates the job even when
+  another job already uses the same application URL or email, for roles that
+  share one ATS page or inbox. A job with the same `--external-id`, or an
+  identical job, is still rejected.
+
 ## 1.11.1 — 2026-10-06
 
 - Package metadata now lists `settings update-adsense --google-consent-message`,
