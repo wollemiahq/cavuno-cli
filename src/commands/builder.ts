@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 
 import { annotate } from '../lib/annotate.js';
-import { CliError } from '../lib/auth.js';
+import { CliError, resolveAuth } from '../lib/auth.js';
 import { print } from '../lib/output.js';
 import {
   BASE_REF,
@@ -34,7 +34,6 @@ import {
 } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 
-const BUILDER_KEY = /^cavuno_builder_[0-9a-f]{64}$/;
 const MAX_FILES = 10_000;
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
 const MAX_BYTES = 128 * 1024 * 1024;
@@ -54,15 +53,20 @@ type Snapshot = {
   files: SnapshotFile[];
 };
 
-function checkedBuilderKey(): string {
-  const key = process.env.CAVUNO_BUILDER_KEY;
-  if (!key || !BUILDER_KEY.test(key)) {
+/**
+ * Builder commands use the standard Operator API key (`CAVUNO_API_KEY`). The
+ * API checks that it belongs to the board and holds `builder.read`,
+ * `builder.manage` or `builder.publish` for the command.
+ */
+function builderApiKey(): string {
+  if (!process.env.CAVUNO_API_KEY && process.env.CAVUNO_BUILDER_KEY) {
     throw new CliError(
-      'CAVUNO_BUILDER_KEY must be a valid board-scoped Builder key.',
+      'Builder keys are retired; create an API key with a Builder permission ' +
+        '(builder.read / builder.manage / builder.publish) and set CAVUNO_API_KEY.',
       1,
     );
   }
-  return key;
+  return resolveAuth().apiKey;
 }
 
 function builderVersionUrl(
@@ -74,7 +78,7 @@ function builderVersionUrl(
   format: 'json' | 'table';
 } {
   const manifest = readBuilderManifest(resolve(directory));
-  const key = checkedBuilderKey();
+  const key = builderApiKey();
   const global = command.optsWithGlobals<{
     apiUrl?: string;
     format?: 'json' | 'table';
@@ -255,7 +259,9 @@ function decodeSnapshot(
 export function registerBuilderCommand(root: Command): void {
   const builder = root
     .command('builder')
-    .description('Work with an authorized Builder draft.');
+    .description(
+      'Work with a Builder draft. Needs CAVUNO_API_KEY with Builder: read, manage, or publish.',
+    );
   annotate(
     builder
       .command('checkout')
@@ -283,7 +289,7 @@ export function registerBuilderCommand(root: Command): void {
         }
         const destination = resolve(opts.directory ?? destinationName);
         assertDestination(destination);
-        const key = checkedBuilderKey();
+        const key = builderApiKey();
         const global = this.optsWithGlobals<{
           apiUrl?: string;
           format?: 'json' | 'table';
@@ -382,7 +388,7 @@ export function registerBuilderCommand(root: Command): void {
         promotePendingBase(directory);
         const { manifest, files, body, idempotencyKey } =
           buildBuilderSubmission(directory);
-        const key = checkedBuilderKey();
+        const key = builderApiKey();
         const global = this.optsWithGlobals<{
           apiUrl?: string;
           format?: 'json' | 'table';
@@ -555,7 +561,7 @@ export function registerBuilderCommand(root: Command): void {
             2,
           );
         const manifest = promotePendingBase(directory);
-        const key = checkedBuilderKey();
+        const key = builderApiKey();
         const global = this.optsWithGlobals<{
           apiUrl?: string;
           format?: 'json' | 'table';

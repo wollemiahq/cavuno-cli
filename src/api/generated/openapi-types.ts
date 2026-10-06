@@ -6506,7 +6506,7 @@ export interface components {
         type: 'api_key' | 'oauth_token' | 'user_session';
         /** @description Current live membership role. Always `null` for API keys (Board-owned service credentials). Null for OAuth/session only when no live membership remains. */
         role: string | null;
-        /** @description Current effective product permissions. API keys use the key's explicit scopes; OAuth is the intersection of token scopes and the consenting member's live permissions; sessions use the member's live permissions. */
+        /** @description Current effective product permissions. API keys use the key's explicit scopes plus the lower levels they include (`publish` includes `manage`, `manage` includes `read`); OAuth is the intersection of token scopes and the consenting member's live permissions; sessions use the member's live permissions. */
         permissions: string[];
         /** @description Credential scopes for API keys and OAuth tokens. Always `null` for user sessions. */
         scopes: string[] | null;
