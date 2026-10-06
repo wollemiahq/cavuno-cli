@@ -241,6 +241,14 @@ export function registerJobsCommand(root: Command): void {
       .option('--company-id <id>', 'Company ID (must belong to your account)')
       .option('--application-url <url>', 'Application URL or `mailto:`/email')
       .option(
+        '--external-id <id>',
+        'Your own ID for the job (ATS requisition ID or source job URL); set it so reposts are detected',
+      )
+      .option(
+        '--allow-shared-application-url',
+        'Create even if another job already uses this application URL or email (roles sharing one ATS page or inbox)',
+      )
+      .option(
         '--employment-type <type>',
         'full_time|part_time|contract|internship|temporary|volunteer|other',
       )
@@ -333,6 +341,8 @@ export function registerJobsCommand(root: Command): void {
           slug?: string;
           companyId?: string;
           applicationUrl?: string;
+          externalId?: string;
+          allowSharedApplicationUrl?: boolean;
           employmentType?: string;
           remoteOption?: string;
           seniority?: string;
@@ -364,6 +374,9 @@ export function registerJobsCommand(root: Command): void {
         if (opts.companyId !== undefined) body.companyId = opts.companyId;
         if (opts.applicationUrl !== undefined)
           body.applicationUrl = opts.applicationUrl;
+        if (opts.externalId !== undefined) body.externalId = opts.externalId;
+        if (opts.allowSharedApplicationUrl === true)
+          body.allowSharedApplicationUrl = true;
         if (opts.employmentType !== undefined)
           body.employmentType = opts.employmentType;
         if (opts.remoteOption !== undefined)
@@ -419,6 +432,7 @@ export function registerJobsCommand(root: Command): void {
         '# Common remote-only case\ncavuno jobs create \\\n  --title "Senior Platform Engineer" \\\n  --description "We’re hiring..." \\\n  --employment-type full_time \\\n  --remote-option remote \\\n  --seniority senior \\\n  --company-id k18acme...',
         '# Hybrid role (requires --office-locations)\ncavuno jobs create \\\n  --title "Staff Engineer" \\\n  --remote-option hybrid \\\n  --in-office-period per_week \\\n  --in-office-frequency 2 \\\n  --office-locations \'[{"city":"Berlin","country":"DE"}]\'',
         '# Capture the new ID\nNEW_ID=$(cavuno jobs create --title "Test" | jq -r .id)',
+        '# Second role sharing one application inbox\ncavuno jobs create \\\n  --title "Faculty Position in AI and Analytics" \\\n  --application-url recruitment@example.edu \\\n  --external-id REQ-2027-14 \\\n  --allow-shared-application-url',
       ],
     },
   );
