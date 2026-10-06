@@ -1,6 +1,6 @@
 {
   "version": "1.11.1",
-  "generatedAt": "2026-10-06T04:14:45.636Z",
+  "generatedAt": "2026-10-06T06:46:32.667Z",
   "groups": [
     {
       "name": "jobs",
@@ -104,6 +104,16 @@
             {
               "flags": "--application-url <url>",
               "description": "Application URL or `mailto:`/email",
+              "required": false
+            },
+            {
+              "flags": "--external-id <id>",
+              "description": "Your own ID for the job (ATS requisition ID or source job URL); set it so reposts are detected",
+              "required": false
+            },
+            {
+              "flags": "--allow-shared-application-url",
+              "description": "Create even if another job already uses this application URL or email (roles sharing one ATS page or inbox)",
               "required": false
             },
             {
@@ -211,7 +221,8 @@
             "# Minimal\ncavuno jobs create --title \"Senior Backend Engineer\"",
             "# Common remote-only case\ncavuno jobs create \\\n  --title \"Senior Platform Engineer\" \\\n  --description \"We’re hiring...\" \\\n  --employment-type full_time \\\n  --remote-option remote \\\n  --seniority senior \\\n  --company-id k18acme...",
             "# Hybrid role (requires --office-locations)\ncavuno jobs create \\\n  --title \"Staff Engineer\" \\\n  --remote-option hybrid \\\n  --in-office-period per_week \\\n  --in-office-frequency 2 \\\n  --office-locations '[{\"city\":\"Berlin\",\"country\":\"DE\"}]'",
-            "# Capture the new ID\nNEW_ID=$(cavuno jobs create --title \"Test\" | jq -r .id)"
+            "# Capture the new ID\nNEW_ID=$(cavuno jobs create --title \"Test\" | jq -r .id)",
+            "# Second role sharing one application inbox\ncavuno jobs create \\\n  --title \"Faculty Position in AI and Analytics\" \\\n  --application-url recruitment@example.edu \\\n  --external-id REQ-2027-14 \\\n  --allow-shared-application-url"
           ],
           "mapsTo": "POST /v1/jobs"
         },
