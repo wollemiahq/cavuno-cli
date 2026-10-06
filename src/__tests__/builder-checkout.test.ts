@@ -16,7 +16,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const KEY = `cavuno_builder_${'a'.repeat(64)}`;
+const KEY = `cavuno_live_${'a'.repeat(16)}_${'s'.repeat(32)}`;
 const snapshot = {
   object: 'builder_source_snapshot',
   boardId: 'board_1',
@@ -44,14 +44,11 @@ const snapshot = {
 describe('builder checkout CLI', () => {
   let directory: string;
   let previousKey: string | undefined;
-  let previousApiKey: string | undefined;
 
   beforeEach(() => {
     directory = mkdtempSync(join(tmpdir(), 'cavuno-cli-checkout-'));
-    previousKey = process.env.CAVUNO_BUILDER_KEY;
-    previousApiKey = process.env.CAVUNO_API_KEY;
-    process.env.CAVUNO_BUILDER_KEY = KEY;
-    delete process.env.CAVUNO_API_KEY;
+    previousKey = process.env.CAVUNO_API_KEY;
+    process.env.CAVUNO_API_KEY = KEY;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json(snapshot));
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
   });
@@ -59,10 +56,8 @@ describe('builder checkout CLI', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     rmSync(directory, { recursive: true, force: true });
-    if (previousKey === undefined) delete process.env.CAVUNO_BUILDER_KEY;
-    else process.env.CAVUNO_BUILDER_KEY = previousKey;
-    if (previousApiKey === undefined) delete process.env.CAVUNO_API_KEY;
-    else process.env.CAVUNO_API_KEY = previousApiKey;
+    if (previousKey === undefined) delete process.env.CAVUNO_API_KEY;
+    else process.env.CAVUNO_API_KEY = previousKey;
   });
 
   async function run(...args: string[]) {
@@ -591,9 +586,9 @@ describe('builder checkout CLI', () => {
     expect(existsSync(join(directory, 'checkout'))).toBe(false);
   });
 
-  it('requires the dedicated Builder credential', async () => {
-    delete process.env.CAVUNO_BUILDER_KEY;
-    await expect(run()).rejects.toThrow(/CAVUNO_BUILDER_KEY/);
+  it('requires the standard CAVUNO_API_KEY', async () => {
+    delete process.env.CAVUNO_API_KEY;
+    await expect(run()).rejects.toThrow(/CAVUNO_API_KEY/);
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
