@@ -2096,7 +2096,7 @@ export interface paths {
     put?: never;
     /**
      * Create a job
-     * @description Creates a new job in `draft` status. The request is idempotent when an `Idempotency-Key` header is supplied. Reposts of existing jobs return 409 `jobs_already_exists` with the matching job ID. `remoteOption` is required, and a `salaryMin` or `salaryMax` requires both `salaryCurrency` and `salaryTimeframe`; a missing one returns `400 validation_bad_request` naming the field.
+     * @description Creates a new job in `draft` status. The request is idempotent when an `Idempotency-Key` header is supplied. Reposts of existing jobs return 409 `jobs_already_exists` with the matching job ID. Always set `externalId` (the source job URL or ATS requisition ID) so reposts are detected reliably. When the 409 has `details.matched_on: "application_url"`, another job on your account uses the same `applicationUrl`; `details.matching_jobs` lists up to 5 of them. If the new job is a different role that shares that application destination (one ATS page or one inbox), retry with `allowSharedApplicationUrl: true`. The retry is a different request body, so send a new `Idempotency-Key` if you used one. `remoteOption` is required, and a `salaryMin` or `salaryMax` requires both `salaryCurrency` and `salaryTimeframe`; a missing one returns `400 validation_bad_request` naming the field.
      */
     post: operations['createJob'];
     delete?: never;
@@ -3788,7 +3788,7 @@ export interface paths {
     };
     /**
      * Retrieve account usage
-     * @description Retrieves actionable product capacity for your Board: used, limit, and remaining for active jobs, confirmed subscribers, and team seats. Unlimited capacities use null limit and remaining. Plan details live on GET /billing/subscription.
+     * @description Retrieves actionable product capacity and Builder credit usage for your Board. Unlimited capacities use null limit and remaining. Plan details live on GET /billing/subscription.
      */
     get: operations['getUsage'];
     put?: never;
@@ -4544,6 +4544,23 @@ export interface components {
       /** @description Time at which the tag was last updated, or `null` if it has never been updated. ISO 8601 datetime. */
       updatedAt: string | null;
     };
+    /** @description Builder credit usage in tenths of a credit for the current day and billing period, plus spendable granted credits. */
+    BuilderCreditUsage: {
+      daily: {
+        periodKey: string;
+        usedTenths: number;
+        limitTenths: number | null;
+        remainingTenths: number | null;
+      };
+      monthly: {
+        periodKey: string;
+        usedTenths: number;
+        limitTenths: number | null;
+        remainingTenths: number | null;
+        resetsAtMs: number;
+      };
+      grantedTenths: number;
+    };
     BuiltInSignInMethods: {
       /** @description Email and password. */
       password: boolean;
@@ -4756,7 +4773,7 @@ export interface components {
       bio?: string | null;
       /** @description Absent key leaves the stored location unchanged; `null` clears it. */
       location?: string | null;
-      /** @description Absent key leaves the stored country code unchanged; `null` clears it. */
+      /** @description Absent key leaves the stored country code unchanged; `null` clears it. Ignored without an error while the candidate has a home place that this request keeps (a changed `location` removes it): the country code is then that place's country. */
       countryCode?: string | null;
       /** @description Absent key leaves the stored skills unchanged. Providing an array replaces the collection wholesale (empty array clears). Maximum 200 rows. */
       skills?: string[];
@@ -5202,7 +5219,7 @@ export interface components {
       /** @description URL-friendly slug for the job. Auto-generated from `title` when omitted. */
       slug?: string;
       /**
-       * @description Employment type of the role.
+       * @description Employment type of the role. When `customEmploymentType` is also sent, this must be the Google equivalent of that custom type (or be omitted: the server sets it). Sending a built-in type without `customEmploymentType` clears any custom type on the job.
        * @enum {string}
        */
       employmentType?:
@@ -5213,6 +5230,8 @@ export interface components {
         | 'temporary'
         | 'volunteer'
         | 'other';
+      /** @description Key of one of the board's custom employment types (`GET /v1/settings/job-form` → `employmentType.customTypes`). The job is saved with the Google equivalent of that type as its built-in `employmentType`, which is what Google for Jobs and feeds see. An unknown key, a type the board no longer offers (`offered: false`), or an `employmentType` that differs from its Google equivalent returns `400 jobs_constraint_violation`. Pass `null` to clear the custom type and keep the built-in; omitted means unchanged. */
+      customEmploymentType?: string | null;
       /**
        * @description **Required.** Whether the role is on-site, hybrid, or fully remote: one of `on_site`, `hybrid`, `remote`. Omitting it or sending `null` returns `400`. It is not valid on its own either: `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST).
        * @enum {string}
@@ -5315,7 +5334,7 @@ export interface components {
       inOfficeFrequency?: number;
       /** @description Physical office locations associated with the job. Prefer `{query: "City, Country"}` for free-form input; `{city, country, region?, locality?}` is also accepted when you already have structured fields. Each entry is resolved server-side; a country mismatch returns `400 jobs_unresolvable_location`. */
       officeLocations?: components['schemas']['JobOfficeLocationInput'][];
-      /** @description An external identifier for the job from your own system, such as an ATS requisition ID. Use this value to look up the job later via `GET /v1/jobs?externalId=...` for deduplication. Scoped per-account: two different accounts may reuse the same `externalId` without collision. Up to 255 characters. `null` means not set. */
+      /** @description An external identifier for the job from your own system, such as an ATS requisition ID. Use this value to look up the job later via `GET /v1/jobs?externalId=...` for deduplication. Always set it on create (the source job URL or ATS requisition ID) so reposts of the same job are detected reliably, even when several jobs share one `applicationUrl`. Scoped per-account: two different accounts may reuse the same `externalId` without collision. Up to 255 characters. `null` means not set. */
       externalId?: string | null;
       /** @description Board-defined custom-field values, keyed by the field `key` (definitions, including type and option keys, are published at `GET /v1/settings/job-form`). Writes are **additive**: on `PATCH` a key you send is set/overwritten and a key you omit is preserved (unsent keys are never cleared); on `POST` this initializes the bag. Send a key with an intentional-empty value (`null`, `""`, or `[]`) to **clear** it (`""`/`null` clear any type; `[]` clears a `multi_select`); `false` and `0` are kept as real values. Values must match the field type and `single_select`/`multi_select` must use defined option **keys** (not labels); a wrong-typed value is rejected (`custom_field_wrong_type`), never silently cleared. Unknown keys are ignored. The stored bag never contains `null`/empty values. */
       customFieldValues?: {
@@ -5335,6 +5354,8 @@ export interface components {
        * @enum {string}
        */
       status?: 'draft' | 'published';
+      /** @description Set to `true` to create this job even though another job on your account already uses the same `applicationUrl` (for example, several roles that share one ATS page or one application inbox). Only skips the application-URL duplicate check; a matching `externalId` or an identical job (same company, title, location and description) still returns 409 `jobs_already_exists`. Defaults to `false`. */
+      allowSharedApplicationUrl?: boolean;
     };
     CreateMarketBody: {
       name: string;
@@ -6083,7 +6104,12 @@ export interface components {
         allowedOptions: string[];
       };
       employmentType?: {
+        /** @description Built-in employment types offered. Empty means every built-in, unless the board has custom types: then it means no built-in is offered, only the offered custom types. */
         allowedOptions: string[];
+        /** @description The board's custom employment types (at most 20). */
+        customTypes?: components['schemas']['JobFormCustomEmploymentType'][];
+        /** @description Display order of built-in values and custom type keys. Absent: built-ins in their standard order, then custom types. Entries it misses follow in that same order. */
+        order?: string[];
       };
       location?: {
         visible: boolean;
@@ -6093,6 +6119,16 @@ export interface components {
       customFields?: components['schemas']['CustomFieldDefinition'][];
       /** @description Collection-reference job fields, in display order. Values are stored separately in each job collectionValues bag. */
       collectionFields?: components['schemas']['JobCollectionFieldDefinition'][];
+    };
+    JobFormCustomEmploymentType: {
+      /** @description Stable key, derived from the name at creation. Send it as `customEmploymentType` on `POST`/`PATCH /v1/jobs`. */
+      key: string;
+      /** @description Display name, e.g. `Casual`. */
+      label: string;
+      /** @description The custom type's Google equivalent: a built-in employment type (Google for Jobs and feeds see this value). */
+      employmentType: string;
+      /** @description `false` when posters can no longer pick this type (jobs that use it keep its label). Absent means offered. */
+      offered?: boolean;
     };
     JobFormCustomFieldsBody: {
       /** @description Full replacement list of custom field definitions, in display order. Empty array removes all. Changing `type` on an existing `key` is rejected (422); delete + recreate instead. Renaming a key is delete+add and orphans per-job values under the old key. */
@@ -6156,7 +6192,7 @@ export interface components {
       /** @description Identifier of the company the job belongs to, or `null` if no company is attached. */
       companyId: string | null;
       /**
-       * @description Employment type of the role, or `null` if not specified.
+       * @description Employment type of the role, or `null` if not specified. For a job with a custom employment type, this is the Google equivalent of the custom type.
        * @enum {string|null}
        */
       employmentType:
@@ -6168,6 +6204,13 @@ export interface components {
         | 'volunteer'
         | 'other'
         | null;
+      /** @description The board's custom employment type for this job (for example `Casual`), or `null` when the job uses a built-in type only. A deleted custom type reads back as `null` and the job shows its built-in `employmentType`. */
+      customEmploymentType: {
+        /** @description Stable key of the custom employment type. Never changes. */
+        key: string;
+        /** @description Display name of the custom employment type, as configured. */
+        label: string;
+      } | null;
       /**
        * @description Whether the role is on-site, hybrid, or fully remote. `null` only on older jobs saved without one; create requires it and `PATCH` cannot clear it.
        * @enum {string|null}
@@ -7329,7 +7372,7 @@ export interface components {
         companyId?: string[];
         /** @description Only return jobs with any of the given remote-work options. Up to 10 values. */
         remoteOption?: ('on_site' | 'hybrid' | 'remote')[];
-        /** @description Only return jobs with any of the given employment types. Up to 10 values. */
+        /** @description Only return jobs with any of the given built-in employment types. Up to 10 values. A built-in value matches jobs of that type that have no custom employment type: a job with a custom type matches only through `customEmploymentType`. Combined with `customEmploymentType` as a union. */
         employmentType?: (
           | 'full_time'
           | 'part_time'
@@ -7339,6 +7382,8 @@ export interface components {
           | 'volunteer'
           | 'other'
         )[];
+        /** @description Only return jobs with any of the given custom employment type keys (the board's `customTypes`). Up to 10 values. Combined with `employmentType` as a union: a job matches when it has one of these custom types OR one of the given built-in types and no custom type. */
+        customEmploymentType?: string[];
         /** @description Only return jobs at any of the given seniority levels. Up to 10 values. */
         seniority?: (
           | 'entry_level'
@@ -7880,7 +7925,7 @@ export interface components {
       /** @description URL-friendly slug for the job. Auto-generated from `title` when omitted. */
       slug?: string;
       /**
-       * @description Employment type of the role.
+       * @description Employment type of the role. When `customEmploymentType` is also sent, this must be the Google equivalent of that custom type (or be omitted: the server sets it). Sending a built-in type without `customEmploymentType` clears any custom type on the job.
        * @enum {string}
        */
       employmentType?:
@@ -7891,6 +7936,8 @@ export interface components {
         | 'temporary'
         | 'volunteer'
         | 'other';
+      /** @description Key of one of the board's custom employment types (`GET /v1/settings/job-form` → `employmentType.customTypes`). The job is saved with the Google equivalent of that type as its built-in `employmentType`, which is what Google for Jobs and feeds see. An unknown key, a type the board no longer offers (`offered: false`), or an `employmentType` that differs from its Google equivalent returns `400 jobs_constraint_violation`. Pass `null` to clear the custom type and keep the built-in; omitted means unchanged. */
+      customEmploymentType?: string | null;
       /**
        * @description Whether the role is on-site, hybrid, or fully remote. Omitted means unchanged; `null` returns `400` because a job's workplace type can be changed but not cleared. **Never valid on its own:** `on_site` and `hybrid` require at least one `officeLocations` entry, and `remote` requires `remotePermits` (use `[{"type":"worldwide","value":"worldwide"}]` for anywhere; `remoteTimezones` then auto-derives on POST). Sending it alone returns `400`.
        * @enum {string}
@@ -8179,6 +8226,7 @@ export interface components {
       object: 'usage';
       /** @description Typed product capacities for active jobs, confirmed subscribers, and team seats. */
       capacities: components['schemas']['UsageCapacity'][];
+      builderCredits: components['schemas']['BuilderCreditUsage'];
     };
     UsageCapacity: {
       /**
@@ -15139,7 +15187,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A job with the same `applicationUrl`, `externalId`, or content already exists on your account. The matching job ID is returned in `details.existing_job_id`. */
+      /** @description A job with the same `applicationUrl`, `externalId`, or content already exists on your account. The matching job ID is returned in `details.existing_job_id` and the check that matched in `details.matched_on` (`application_url`, `external_id`, or `composite_hash`). For `application_url`, `details.matching_jobs` lists up to 5 jobs that use the same application URL or email, each as `{ id, title, status }`; if this is a different role that shares that destination, retry with `allowSharedApplicationUrl: true` (and a new `Idempotency-Key` if you used one). A matching `externalId` or an identical job cannot be overridden. */
       409: {
         headers: {
           [name: string]: unknown;

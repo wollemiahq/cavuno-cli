@@ -103,6 +103,43 @@ describe('jobs taxonomy CLI options', () => {
     );
   });
 
+  it('forwards the external ID and the shared-application-URL override on create', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'jobs',
+        'create',
+        '--title',
+        'Faculty Position in AI and Analytics',
+        '--application-url',
+        'recruitment@example.edu',
+        '--external-id',
+        'REQ-2027-14',
+        '--allow-shared-application-url',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalId: 'REQ-2027-14',
+        allowSharedApplicationUrl: true,
+      }),
+    );
+  });
+
+  it('omits the shared-application-URL override unless the flag is set', async () => {
+    await createProgram().parseAsync(
+      ['node', 'cavuno', 'jobs', 'create', '--title', 'Platform Engineer'],
+      { from: 'node' },
+    );
+
+    expect(mockCreate.mock.calls[0]![0]).not.toHaveProperty(
+      'allowSharedApplicationUrl',
+    );
+  });
+
   it('forwards an empty taxonomy list on update so callers can clear it', async () => {
     await createProgram().parseAsync(
       ['node', 'cavuno', 'jobs', 'update', 'job_123', '--skills', ''],
