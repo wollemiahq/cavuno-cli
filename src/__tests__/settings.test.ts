@@ -7,7 +7,9 @@ const {
   mockDeleteHero,
   mockClearPasswordProtection,
   mockSetJobFormCustomFields,
+  mockUpdateAdsense,
 } = vi.hoisted(() => ({
+  mockUpdateAdsense: vi.fn(),
   mockUpdate: vi.fn(),
   mockGet: vi.fn(),
   mockDeleteHero: vi.fn(),
@@ -21,7 +23,7 @@ vi.mock('../api/settings.js', () => ({
     get: mockGet,
     getAdsense: vi.fn(),
     deleteHero: mockDeleteHero,
-    updateAdsense: vi.fn(),
+    updateAdsense: mockUpdateAdsense,
     setPasswordProtection: vi.fn(),
     clearPasswordProtection: mockClearPasswordProtection,
     setJobFormCustomFields: mockSetJobFormCustomFields,
@@ -151,6 +153,28 @@ describe('settings update CLI options', () => {
       cookieBannerRejectLabel: 'Reject',
       cookieBannerAcceptLabel: 'Accept',
       cookieBannerManageLabel: 'Manage',
+    });
+  });
+
+  it('forwards update-adsense --google-consent-message as a boolean', async () => {
+    mockUpdateAdsense.mockResolvedValue(
+      success({ object: 'settings_adsense' }),
+    );
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'update-adsense',
+        '--google-consent-message',
+        'false',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockUpdateAdsense).toHaveBeenCalledTimes(1);
+    expect(mockUpdateAdsense.mock.calls[0]![0]).toEqual({
+      adsenseGoogleConsentMessage: false,
     });
   });
 
