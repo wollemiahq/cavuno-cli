@@ -206,6 +206,10 @@ export function registerSettingsCommand(root: Command): void {
       '--slots-json <json>',
       'AdSense slots as JSON: \'{"slot_a":{"enabled":true,"slotId":"123"}}\'',
     )
+    .option(
+      '--google-consent-message <bool>',
+      "Use Google's consent message for EEA/UK/CH visitors (true/false; default true)",
+    )
     .action(async function (this: Command) {
       const client = getClient(this);
       const format = getFormat(this);
@@ -217,6 +221,8 @@ export function registerSettingsCommand(root: Command): void {
         body.adsenseClientId = opts.clientId === '' ? null : opts.clientId;
       if (opts.adsTxt !== undefined)
         body.adsTxt = opts.adsTxt === '' ? null : opts.adsTxt;
+      if (opts.googleConsentMessage !== undefined)
+        body.adsenseGoogleConsentMessage = opts.googleConsentMessage === 'true';
       if (opts.slotsJson !== undefined) {
         try {
           body.adsenseSlots = JSON.parse(opts.slotsJson) as unknown;
