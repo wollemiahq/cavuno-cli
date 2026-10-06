@@ -4,6 +4,7 @@ import { registerAnalyticsCommand } from './commands/analytics.js';
 import { registerBackfillCommand } from './commands/backfill.js';
 import { registerBillingCommand } from './commands/billing.js';
 import { registerBlogCommand } from './commands/blog.js';
+import { registerBuilderCommand } from './commands/builder.js';
 import { registerCandidatesCommand } from './commands/candidates.js';
 import { registerCompaniesCommand } from './commands/companies.js';
 import { registerCouponsCommand } from './commands/coupons.js';
@@ -32,6 +33,7 @@ import { registerWebhooksCommand } from './commands/webhooks.js';
 
 export const PUBLIC_GROUPS = [
   'jobs',
+  'builder',
   'usage',
   'me',
   'companies',
@@ -80,6 +82,7 @@ export function createCliProgram(version: string) {
     );
 
   registerJobsCommand(program);
+  registerBuilderCommand(program);
   registerUsageCommand(program);
   registerMeCommand(program);
   registerSettingsCommand(program);
