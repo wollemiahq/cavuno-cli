@@ -7427,6 +7427,8 @@ export interface components {
       adsenseSlots?: {
         [key: string]: components['schemas']['SettingsAdsenseSlot'];
       };
+      /** @description Use Google's consent message (AdSense → Privacy & messaging) for visitors in the EEA, UK and Switzerland while AdSense is on. Defaults to `true`. Set `false` to show the board's own cookie banner to everyone instead; also turn off "Maximize message coverage" in AdSense, or European visitors may see two consent messages. */
+      adsenseGoogleConsentMessage?: boolean;
       /** @description Contents to serve from `/ads.txt`. Up to 2,000 characters. Pass an empty string or `null` to clear. */
       adsTxt?: string | '' | unknown;
     };
