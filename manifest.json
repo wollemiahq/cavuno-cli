@@ -1,6 +1,6 @@
 {
-  "version": "1.10.0",
-  "generatedAt": "2026-10-05T00:50:43.972Z",
+  "version": "1.11.0",
+  "generatedAt": "2026-10-05T21:31:29.332Z",
   "groups": [
     {
       "name": "jobs",
@@ -485,6 +485,129 @@
             "echo '{\"operations\":[]}' | cavuno jobs batch"
           ],
           "mapsTo": "POST /v1/jobs/batch"
+        }
+      ]
+    },
+    {
+      "name": "builder",
+      "description": "Work with an authorized Builder draft.",
+      "commands": [
+        {
+          "name": "checkout",
+          "description": "Create a draft from live or check out an existing Builder draft.",
+          "synopsis": "cavuno builder checkout <board-id> [options]",
+          "arguments": [
+            {
+              "name": "board-id",
+              "description": "Board ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--draft <draft-id>",
+              "description": "Existing draft ID (default: create from live)",
+              "required": false
+            },
+            {
+              "flags": "--directory <path>",
+              "description": "Destination directory (default: ./<board-id>-builder or ./<board-id>-<draft-id>)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder checkout <board-id>",
+            "cavuno builder checkout <board-id> --draft <draft-id>"
+          ],
+          "mapsTo": "POST /v1/builder/boards/:boardId/drafts; GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot"
+        },
+        {
+          "name": "submit",
+          "description": "Submit local Builder source, including uncommitted edits, for the checked-out draft. On stale_base, run builder pull, then submit again.",
+          "synopsis": "cavuno builder submit [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--directory <path>",
+              "description": "Builder checkout directory (default: current directory)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder submit",
+            "cavuno builder submit --directory ./my-checkout"
+          ],
+          "mapsTo": "POST /v1/builder/boards/:boardId/drafts/:draftId/submissions/staged"
+        },
+        {
+          "name": "pull",
+          "description": "Merge the draft's current version into committed local work, like git pull. After a publish elsewhere, pull then submit (even unchanged) to make the caught-up version publishable.",
+          "synopsis": "cavuno builder pull [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--directory <path>",
+              "description": "Builder checkout directory (default: current directory)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder pull",
+            "cavuno builder pull --directory ./my-checkout"
+          ],
+          "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot"
+        },
+        {
+          "name": "status",
+          "description": "Read the current submitted version, check, and publish status.",
+          "synopsis": "cavuno builder status [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--directory <path>",
+              "description": "Builder checkout directory (default: current directory)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder status"
+          ],
+          "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/status"
+        },
+        {
+          "name": "preview",
+          "description": "Mint a one-use private preview URL for the current version.",
+          "synopsis": "cavuno builder preview [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--directory <path>",
+              "description": "Builder checkout directory (default: current directory)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder preview"
+          ],
+          "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/preview"
+        },
+        {
+          "name": "publish",
+          "description": "Queue the current submitted version through the full Go Live gate.",
+          "synopsis": "cavuno builder publish [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--directory <path>",
+              "description": "Builder checkout directory (default: current directory)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno builder publish"
+          ],
+          "mapsTo": "POST /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/publish"
         }
       ]
     },

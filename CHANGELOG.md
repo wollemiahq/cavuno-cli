@@ -3,6 +3,17 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.11.0 — 2026-10-06
+
+- **`builder checkout`, `builder submit` and `builder pull`** let a local
+  coding agent check out an authorized website builder draft, submit source
+  changes back, and pull the latest draft. The feature is in early access and
+  is only enabled for selected accounts; for other accounts the API rejects
+  these requests.
+- **`settings update-adsense --google-consent-message <true|false>`** turns
+  Google's consent message for visitors in the EEA, UK and Switzerland on or
+  off on boards with AdSense. It is on by default.
+
 ## 1.10.0 — 2026-10-05
 
 - **Jobs awaiting approval.** `jobs list --status pending_approval` and
