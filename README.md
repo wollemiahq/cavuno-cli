@@ -57,6 +57,7 @@ cavuno taxonomies   # remote helpers + skills/categories/markets CRUD
 cavuno members      # Manage the account roster, roles, suspension, ownership
 cavuno invitations  # Manage pending invitations
 cavuno webhooks     # Manage webhook endpoints and inspect/replay deliveries
+cavuno builder      # Check out, submit, and publish Builder source
 ```
 
 ### Jobs
@@ -313,6 +314,19 @@ opt-in email.
 | `cavuno taxonomies remote-timezones` | List remote-work timezone options |
 | `cavuno taxonomies skills\|categories\|markets list\|create\|update\|delete\|add-alias\|remove-alias` | Operator taxonomy CRUD (requires `taxonomy.manage`) |
 | `cavuno taxonomies categories tree` | Nested category tree |
+
+### Builder
+
+Check out a board's Builder source, edit it locally, and submit it back. Builder commands use the same `CAVUNO_API_KEY`; give the key the Builder permissions it needs. Levels are inclusive: `builder.manage` includes `builder.read`, and `builder.publish` includes both.
+
+| Command | Permission | Description |
+|---|---|---|
+| `cavuno builder checkout <board-id> [--draft <id>]` | `builder.read` (`builder.manage` to create a draft) | Check out an existing draft, or create one from live |
+| `cavuno builder pull` | `builder.read` | Merge the draft's current version into local work |
+| `cavuno builder status` | `builder.read` | Show the submitted version's checks and publish status |
+| `cavuno builder preview` | `builder.read` | Mint a one-use private preview URL |
+| `cavuno builder submit` | `builder.manage` | Submit local source to the checked-out draft |
+| `cavuno builder publish` | `builder.publish` | Queue the submitted version through the Go Live checks |
 
 ### Members
 

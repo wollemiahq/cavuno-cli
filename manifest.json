@@ -1,6 +1,6 @@
 {
   "version": "1.12.0",
-  "generatedAt": "2026-10-06T06:46:32.667Z",
+  "generatedAt": "2026-10-06T22:26:43.613Z",
   "groups": [
     {
       "name": "jobs",
@@ -501,7 +501,7 @@
     },
     {
       "name": "builder",
-      "description": "Work with an authorized Builder draft.",
+      "description": "Work with a Builder draft. Needs CAVUNO_API_KEY with Builder: read, manage, or publish.",
       "commands": [
         {
           "name": "checkout",
