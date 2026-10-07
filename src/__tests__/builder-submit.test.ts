@@ -13,7 +13,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const KEY = `cavuno_builder_${'a'.repeat(64)}`;
+const KEY = `cavuno_live_${'a'.repeat(16)}_${'s'.repeat(32)}`;
 
 describe('builder submit CLI', () => {
   let directory: string;
@@ -32,8 +32,8 @@ describe('builder submit CLI', () => {
     );
     writeFileSync(join(directory, 'package.json'), '{"name":"site"}\n');
     writeFileSync(join(directory, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\n');
-    previousKey = process.env.CAVUNO_BUILDER_KEY;
-    process.env.CAVUNO_BUILDER_KEY = KEY;
+    previousKey = process.env.CAVUNO_API_KEY;
+    process.env.CAVUNO_API_KEY = KEY;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
       const path = String(url);
       if (path.endsWith('/staged'))
@@ -58,8 +58,8 @@ describe('builder submit CLI', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     rmSync(directory, { recursive: true, force: true });
-    if (previousKey === undefined) delete process.env.CAVUNO_BUILDER_KEY;
-    else process.env.CAVUNO_BUILDER_KEY = previousKey;
+    if (previousKey === undefined) delete process.env.CAVUNO_API_KEY;
+    else process.env.CAVUNO_API_KEY = previousKey;
   });
 
   async function run() {
@@ -202,7 +202,7 @@ describe('builder submit CLI', () => {
     ]);
   });
 
-  it('requires a valid checkout manifest and dedicated key', async () => {
+  it('requires a valid checkout manifest and CAVUNO_API_KEY', async () => {
     rmSync(join(directory, '.git', 'cavuno-builder.json'));
     await expect(run()).rejects.toThrow(/manifest/i);
     expect(globalThis.fetch).not.toHaveBeenCalled();
@@ -214,8 +214,8 @@ describe('builder submit CLI', () => {
         baseVersionId: 'version_1',
       }),
     );
-    delete process.env.CAVUNO_BUILDER_KEY;
-    await expect(run()).rejects.toThrow(/CAVUNO_BUILDER_KEY/);
+    delete process.env.CAVUNO_API_KEY;
+    await expect(run()).rejects.toThrow(/CAVUNO_API_KEY/);
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 

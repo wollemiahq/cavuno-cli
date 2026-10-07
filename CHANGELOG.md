@@ -3,6 +3,15 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.13.0 — 2026-10-06
+
+- **Builder commands use your API key.** `builder checkout`, `submit`, `pull`,
+  `status` and `publish` now authenticate with `CAVUNO_API_KEY`, like every
+  other command. Give the key a Builder permission: `builder.read` to check
+  out, `builder.manage` to submit, `builder.publish` to publish. Separate
+  Builder keys (`CAVUNO_BUILDER_KEY`) are retired; the CLI says so if only that
+  variable is set.
+
 ## 1.12.0 — 2026-10-06
 
 - **`jobs create --external-id <id>`** sets your own ID for the job (an ATS

@@ -6,7 +6,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const KEY = `cavuno_builder_${'a'.repeat(64)}`;
+const KEY = `cavuno_live_${'a'.repeat(16)}_${'s'.repeat(32)}`;
 
 describe('builder version CLI', () => {
   let directory: string;
@@ -23,8 +23,8 @@ describe('builder version CLI', () => {
         baseVersionId: 'version_2',
       }),
     );
-    previousKey = process.env.CAVUNO_BUILDER_KEY;
-    process.env.CAVUNO_BUILDER_KEY = KEY;
+    previousKey = process.env.CAVUNO_API_KEY;
+    process.env.CAVUNO_API_KEY = KEY;
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       Response.json({ object: 'builder_status', state: 'verified' }),
     );
@@ -34,8 +34,8 @@ describe('builder version CLI', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     rmSync(directory, { recursive: true, force: true });
-    if (previousKey === undefined) delete process.env.CAVUNO_BUILDER_KEY;
-    else process.env.CAVUNO_BUILDER_KEY = previousKey;
+    if (previousKey === undefined) delete process.env.CAVUNO_API_KEY;
+    else process.env.CAVUNO_API_KEY = previousKey;
   });
 
   async function run(action: 'status' | 'preview' | 'publish') {
@@ -73,16 +73,39 @@ describe('builder version CLI', () => {
   it('reports a refused publish without implying it went live', async () => {
     vi.mocked(globalThis.fetch).mockResolvedValueOnce(
       Response.json(
-        { error: { message: 'Builder publish grant unavailable' } },
+        { error: { message: 'Builder publish access unavailable' } },
         { status: 403 },
       ),
     );
     await expect(run('publish')).rejects.toThrow(/publish failed \(403\)/);
   });
 
-  it('does not send a request without a Builder key', async () => {
-    delete process.env.CAVUNO_BUILDER_KEY;
-    await expect(run('preview')).rejects.toThrow(/CAVUNO_BUILDER_KEY/);
+  it('does not send a request without an API key', async () => {
+    delete process.env.CAVUNO_API_KEY;
+    await expect(run('preview')).rejects.toThrow(/CAVUNO_API_KEY/);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('sends the standard API key', async () => {
+    await run('status');
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/status'),
+      expect.objectContaining({
+        headers: { Authorization: `Bearer ${KEY}` },
+      }),
+    );
+  });
+
+  it('tells a retired Builder key holder how to migrate', async () => {
+    delete process.env.CAVUNO_API_KEY;
+    process.env.CAVUNO_BUILDER_KEY = `cavuno_builder_${'a'.repeat(64)}`;
+    try {
+      await expect(run('status')).rejects.toThrow(
+        /Builder keys are retired.*builder\.publish.*CAVUNO_API_KEY/,
+      );
+    } finally {
+      delete process.env.CAVUNO_BUILDER_KEY;
+    }
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
