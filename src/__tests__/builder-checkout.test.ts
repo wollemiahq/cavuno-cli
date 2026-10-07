@@ -163,6 +163,111 @@ describe('builder checkout CLI', () => {
     });
   });
 
+  it("uses the API key's board when the board ID is omitted", async () => {
+    vi.mocked(globalThis.fetch)
+      .mockResolvedValueOnce(
+        Response.json({
+          object: 'list',
+          items: [
+            {
+              boardId: 'board_1',
+              rights: { read: true, write: true, publish: false },
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(Response.json(snapshot));
+    const cwd = process.cwd();
+    process.chdir(directory);
+    try {
+      await createCliProgram('test')
+        .exitOverride()
+        .parseAsync(
+          [
+            'node',
+            'cavuno',
+            '--api-url',
+            'https://example.test/api/v1',
+            'builder',
+            'checkout',
+          ],
+          { from: 'node' },
+        );
+    } finally {
+      process.chdir(cwd);
+    }
+    const calls = vi.mocked(globalThis.fetch).mock.calls;
+    expect(calls[0]?.[0]).toBe('https://example.test/api/v1/builder/boards');
+    expect(calls[1]?.[0]).toBe(
+      'https://example.test/api/v1/builder/boards/board_1/drafts',
+    );
+    expect(
+      JSON.parse(
+        readFileSync(
+          join(directory, 'board_1-builder/.git/cavuno-builder.json'),
+          'utf8',
+        ),
+      ),
+    ).toMatchObject({ boardId: 'board_1', draftId: 'draft_1' });
+  });
+
+  it.each([
+    [403, 'local_agent_not_enabled', 3],
+    [402, 'plan_upgrade_required', 5],
+  ])(
+    'reports why the API key has no usable board (%i)',
+    async (status, code, exitCode) => {
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(
+        Response.json(
+          { error: { code, message: 'Coding agents are in early access.' } },
+          { status },
+        ),
+      );
+      await expect(
+        createCliProgram('test')
+          .exitOverride()
+          .parseAsync(
+            [
+              'node',
+              'cavuno',
+              '--api-url',
+              'https://example.test/api/v1',
+              'builder',
+              'checkout',
+              '--directory',
+              join(directory, 'none'),
+            ],
+            { from: 'node' },
+          ),
+      ).rejects.toMatchObject({
+        message: `Builder checkout failed (${status}): Coding agents are in early access.`,
+        exitCode,
+      });
+      expect(existsSync(join(directory, 'none'))).toBe(false);
+    },
+  );
+
+  it('checks out a file larger than the regex stack limit', async () => {
+    const big = Buffer.alloc(8 * 1024 * 1024, 7);
+    vi.mocked(globalThis.fetch).mockResolvedValue(
+      Response.json({
+        ...snapshot,
+        files: [
+          ...snapshot.files,
+          {
+            path: 'public/hero.bin',
+            contentsBase64: big.toString('base64'),
+            executable: false,
+          },
+        ],
+      }),
+    );
+    await run();
+    expect(
+      readFileSync(join(directory, 'checkout/public/hero.bin')).equals(big),
+    ).toBe(true);
+  });
+
   it('exports the exact draft into a normal local Git repository', async () => {
     await run();
     const checkout = join(directory, 'checkout');
@@ -426,7 +531,7 @@ describe('builder checkout CLI', () => {
       git(checkout, 'commit', '-qam', 'local edit');
       serve(version2([file('src/index.ts', 'export const live = 1;\n')]));
       await expect(cli('pull')).rejects.toThrow(
-        /conflicts in:\nsrc\/index\.ts\n.*cavuno builder submit/s,
+        /conflicts in:\nsrc\/index\.ts\n.*npx cavuno@latest builder submit/s,
       );
       expect(readFileSync(join(checkout, 'src/index.ts'), 'utf8')).toContain(
         '<<<<<<<',
