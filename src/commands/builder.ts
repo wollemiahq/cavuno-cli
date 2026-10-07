@@ -383,7 +383,7 @@ export function registerBuilderCommand(root: Command): void {
       .argument('[board-id]', "Board ID (default: the API key's board)")
       .option(
         '--draft <draft-id>',
-        'Existing draft ID (default: create from live)',
+        "Existing draft ID, or the ID at the end of the task's Builder URL (default: create from live)",
       )
       .option(
         '--directory <path>',
