@@ -30,6 +30,15 @@ export function builderGit(
   args: string[],
   input?: Buffer,
 ): string {
+  return builderGitOutput(directory, args, input).trim();
+}
+
+/** builderGit without trimming, for NUL-separated listings. */
+export function builderGitOutput(
+  directory: string,
+  args: string[],
+  input?: Buffer,
+): string {
   const env = { ...process.env };
   for (const key of [
     'GIT_DIR',
@@ -65,7 +74,7 @@ export function builderGit(
       maxBuffer: 64 * 1024 * 1024,
       ...(input ? { input } : {}),
     },
-  ).trim();
+  );
 }
 
 /**

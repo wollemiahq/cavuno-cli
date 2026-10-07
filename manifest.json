@@ -1,6 +1,6 @@
 {
   "version": "1.13.0",
-  "generatedAt": "2026-10-06T22:26:43.613Z",
+  "generatedAt": "2026-10-07T04:16:23.380Z",
   "groups": [
     {
       "name": "jobs",
@@ -501,17 +501,17 @@
     },
     {
       "name": "builder",
-      "description": "Work with a Builder draft. Needs CAVUNO_API_KEY with Builder: read, manage, or publish.",
+      "description": "Work with a Builder draft from a coding agent. Needs CAVUNO_API_KEY with Builder: read, manage, or publish. Run as `npx cavuno@latest builder …`. Guide: https://cavuno.com/docs/ai-website-builder/coding-agents",
       "commands": [
         {
           "name": "checkout",
-          "description": "Create a draft from live or check out an existing Builder draft.",
-          "synopsis": "cavuno builder checkout <board-id> [options]",
+          "description": "Create a draft from live or check out an existing Builder draft. Without a board ID, uses the API key's board.",
+          "synopsis": "cavuno builder checkout [board-id] [options]",
           "arguments": [
             {
               "name": "board-id",
-              "description": "Board ID",
-              "required": true,
+              "description": "Board ID (default: the API key's board)",
+              "required": false,
               "variadic": false
             }
           ],
@@ -528,14 +528,14 @@
             }
           ],
           "examples": [
-            "cavuno builder checkout <board-id>",
-            "cavuno builder checkout <board-id> --draft <draft-id>"
+            "npx cavuno@latest builder checkout",
+            "npx cavuno@latest builder checkout <board-id> --draft <draft-id>"
           ],
-          "mapsTo": "POST /v1/builder/boards/:boardId/drafts; GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot"
+          "mapsTo": "GET /v1/builder/boards; POST /v1/builder/boards/:boardId/drafts; GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot"
         },
         {
           "name": "submit",
-          "description": "Submit local Builder source, including uncommitted edits, for the checked-out draft. On stale_base, run builder pull, then submit again.",
+          "description": "Submit local Builder source, including uncommitted edits, for the checked-out draft. Sends the files Git sees (tracked plus untracked, minus .gitignore matches). On stale_base, run builder pull, then submit again.",
           "synopsis": "cavuno builder submit [options]",
           "arguments": [],
           "options": [
@@ -546,8 +546,8 @@
             }
           ],
           "examples": [
-            "cavuno builder submit",
-            "cavuno builder submit --directory ./my-checkout"
+            "npx cavuno@latest builder submit",
+            "npx cavuno@latest builder submit --directory ./my-checkout"
           ],
           "mapsTo": "POST /v1/builder/boards/:boardId/drafts/:draftId/submissions/staged"
         },
@@ -564,14 +564,14 @@
             }
           ],
           "examples": [
-            "cavuno builder pull",
-            "cavuno builder pull --directory ./my-checkout"
+            "npx cavuno@latest builder pull",
+            "npx cavuno@latest builder pull --directory ./my-checkout"
           ],
           "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot"
         },
         {
           "name": "status",
-          "description": "Read the current submitted version, check, and publish status.",
+          "description": "Read the current submitted version, check, and publish status. With --wait, poll until checks finish: exit 0 when the version is verified and cleared to publish, 7 with the reason when it failed or was flagged.",
           "synopsis": "cavuno builder status [options]",
           "arguments": [],
           "options": [
@@ -579,10 +579,26 @@
               "flags": "--directory <path>",
               "description": "Builder checkout directory (default: current directory)",
               "required": false
+            },
+            {
+              "flags": "--wait",
+              "description": "Poll until the checks reach a final state",
+              "required": false
+            },
+            {
+              "flags": "--interval-ms <n>",
+              "description": "Poll interval in milliseconds with --wait (default 10000)",
+              "required": false
+            },
+            {
+              "flags": "--timeout-ms <n>",
+              "description": "Give up waiting after this many milliseconds (default 1200000)",
+              "required": false
             }
           ],
           "examples": [
-            "cavuno builder status"
+            "npx cavuno@latest builder status",
+            "npx cavuno@latest builder status --wait"
           ],
           "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/status"
         },
@@ -599,7 +615,7 @@
             }
           ],
           "examples": [
-            "cavuno builder preview"
+            "npx cavuno@latest builder preview"
           ],
           "mapsTo": "GET /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/preview"
         },
@@ -616,7 +632,7 @@
             }
           ],
           "examples": [
-            "cavuno builder publish"
+            "npx cavuno@latest builder publish"
           ],
           "mapsTo": "POST /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/publish"
         }
