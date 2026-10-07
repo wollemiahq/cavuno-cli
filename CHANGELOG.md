@@ -3,6 +3,27 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.14.0 — 2026-10-07
+
+- **`builder checkout` needs no board ID.** An API key belongs to one board,
+  so `npx cavuno@latest builder checkout` checks out that board. Passing a
+  board ID still works; a wrong one now returns `404 board_not_found` instead
+  of a `503`.
+- **`builder submit` sends what Git sees**: tracked files plus new ones,
+  minus anything in `.gitignore`. Local dev server state and build output stay
+  on your machine. Secrets in `.env*` and `.dev.vars*` are never sent.
+- **`builder status --wait`** waits until the checks finish. It exits `0` when
+  the version is ready to publish, `7` with the reason when a check fails or
+  flags it, and `11` on timeout (`--timeout-ms`, `--interval-ms`).
+- **Clear refusals.** Builder errors name the cause: a missing Builder
+  permission, a board not yet in early access, Builder turned off, or a plan
+  that does not include it. Exit codes follow the table in the README.
+- Source files over 3 MiB check out, pull and submit correctly.
+- `builder status` shows the board's daily agent build and screenshot limits.
+  Agent screenshots no longer use Builder credits.
+- `cavuno builder --help` links to the guide:
+  https://cavuno.com/docs/ai-website-builder/coding-agents
+
 ## 1.13.0 — 2026-10-06
 
 - **Builder commands use your API key.** `builder checkout`, `submit`, `pull`,

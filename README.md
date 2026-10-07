@@ -317,15 +317,15 @@ opt-in email.
 
 ### Builder
 
-Check out a board's Builder source, edit it locally, and submit it back. Builder commands use the same `CAVUNO_API_KEY`; give the key the Builder permissions it needs. Levels are inclusive: `builder.manage` includes `builder.read`, and `builder.publish` includes both.
+Check out a board's Builder source, edit it locally, and submit it back. Builder commands use the same `CAVUNO_API_KEY`; give the key the Builder permissions it needs. Levels are inclusive: `builder.manage` includes `builder.read`, and `builder.publish` includes both. Run them as `npx cavuno@latest builder …` so an older global install is not used. Guide for coding agents: https://cavuno.com/docs/ai-website-builder/coding-agents.
 
 | Command | Permission | Description |
 |---|---|---|
-| `cavuno builder checkout <board-id> [--draft <id>]` | `builder.read` (`builder.manage` to create a draft) | Check out an existing draft, or create one from live |
+| `cavuno builder checkout [board-id] [--draft <id>]` | `builder.read` (`builder.manage` to create a draft) | Check out an existing draft, or create one from live. Without a board ID, uses the API key's board |
 | `cavuno builder pull` | `builder.read` | Merge the draft's current version into local work |
-| `cavuno builder status` | `builder.read` | Show the submitted version's checks and publish status |
+| `cavuno builder status [--wait] [--timeout-ms <n>]` | `builder.read` | Show the submitted version's checks and publish status. `--wait` polls until checks finish: exit 0 when verified and cleared to publish, 7 when failed or flagged, 11 on timeout |
 | `cavuno builder preview` | `builder.read` | Mint a one-use private preview URL |
-| `cavuno builder submit` | `builder.manage` | Submit local source to the checked-out draft |
+| `cavuno builder submit` | `builder.manage` | Submit local source to the checked-out draft: the files Git sees, so `.gitignore` matches such as `.wrangler` stay local |
 | `cavuno builder publish` | `builder.publish` | Queue the submitted version through the Go Live checks |
 
 ### Members
