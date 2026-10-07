@@ -239,6 +239,37 @@ describe('builder submit CLI', () => {
     await expect(run()).rejects.toThrow(/stale_base: version_2/);
   });
 
+  it('prints the daily build limit and its reset time', async () => {
+    const message =
+      'Daily build limit reached: 100 agent builds per board per UTC day. Resets at 2026-10-08T00:00:00.000Z.';
+    vi.mocked(globalThis.fetch)
+      .mockImplementationOnce(async () =>
+        Response.json(
+          { operationId: 'operation_1', status: 'created' },
+          { status: 201 },
+        ),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json({ operationId: 'operation_1', status: 'uploaded' }),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json(
+          {
+            error: {
+              code: 'daily_build_limit',
+              message,
+              details: { limit: 100, resetsAtMs: 1_791_417_600_000 },
+            },
+          },
+          { status: 429, headers: { 'Retry-After': '3600' } },
+        ),
+      );
+    await expect(run()).rejects.toMatchObject({
+      message: `Builder submit failed (429): ${message}`,
+      exitCode: 5,
+    });
+  });
+
   it('tells the agent to pull when create already sees a stale base', async () => {
     vi.mocked(globalThis.fetch).mockImplementationOnce(async () =>
       Response.json(

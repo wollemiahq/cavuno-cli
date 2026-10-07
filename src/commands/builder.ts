@@ -519,7 +519,7 @@ export function registerBuilderCommand(root: Command): void {
         }
         const error =
           data && typeof data === 'object' && 'error' in data
-            ? (data as { error?: { message?: string } }).error
+            ? (data as { error?: { code?: string; message?: string } }).error
             : undefined;
         throw new CliError(
           `Builder submit failed (${response.status}): ${error?.message ?? response.statusText}`,
@@ -529,7 +529,9 @@ export function registerBuilderCommand(root: Command): void {
               ? 3
               : response.status === 404
                 ? 4
-                : 10,
+                : error?.code === 'daily_build_limit'
+                  ? 5
+                  : 10,
         );
       }),
     {
