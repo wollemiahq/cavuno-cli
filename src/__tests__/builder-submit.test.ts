@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { builderGit } from '../commands/builder-git.js';
 import { createCliProgram } from '../program.js';
 
 import {
@@ -21,7 +22,7 @@ describe('builder submit CLI', () => {
 
   beforeEach(() => {
     directory = mkdtempSync(join(tmpdir(), 'cavuno-cli-submit-'));
-    mkdirSync(join(directory, '.git'));
+    builderGit(directory, ['init', '--quiet']);
     writeFileSync(
       join(directory, '.git', 'cavuno-builder.json'),
       JSON.stringify({
@@ -239,6 +240,37 @@ describe('builder submit CLI', () => {
     await expect(run()).rejects.toThrow(/stale_base: version_2/);
   });
 
+  it('prints the daily build limit and its reset time', async () => {
+    const message =
+      'Daily build limit reached: 100 agent builds per board per UTC day. Resets at 2026-10-08T00:00:00.000Z.';
+    vi.mocked(globalThis.fetch)
+      .mockImplementationOnce(async () =>
+        Response.json(
+          { operationId: 'operation_1', status: 'created' },
+          { status: 201 },
+        ),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json({ operationId: 'operation_1', status: 'uploaded' }),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json(
+          {
+            error: {
+              code: 'daily_build_limit',
+              message,
+              details: { limit: 100, resetsAtMs: 1_791_417_600_000 },
+            },
+          },
+          { status: 429, headers: { 'Retry-After': '3600' } },
+        ),
+      );
+    await expect(run()).rejects.toMatchObject({
+      message: `Builder submit failed (429): ${message}`,
+      exitCode: 5,
+    });
+  });
+
   it('tells the agent to pull when create already sees a stale base', async () => {
     vi.mocked(globalThis.fetch).mockImplementationOnce(async () =>
       Response.json(
@@ -246,9 +278,12 @@ describe('builder submit CLI', () => {
         { status: 409 },
       ),
     );
-    await expect(run()).rejects.toThrow(
-      /Draft base changed\. Run `cavuno builder pull`/,
-    );
+    await expect(run()).rejects.toMatchObject({
+      message: expect.stringMatching(
+        /Draft base changed\. Run `npx cavuno@latest builder pull`/,
+      ),
+      exitCode: 7,
+    });
   });
 
   it('changes the idempotency key when source changes and accepts no_changes', async () => {
@@ -290,5 +325,67 @@ describe('builder submit CLI', () => {
     expect(JSON.parse(calls[0]![1]!.body as string).idempotencyKey).toBe(
       JSON.parse(calls[1]![1]!.body as string).idempotencyKey,
     );
+  });
+  it('submits what Git sees: no ignored dev state, no deleted tracked files', async () => {
+    writeFileSync(join(directory, '.gitignore'), '.wrangler\nsrc/paraglide\n');
+    mkdirSync(join(directory, 'src', 'paraglide'), { recursive: true });
+    writeFileSync(join(directory, 'src', 'old.ts'), 'old\n');
+    writeFileSync(join(directory, 'src', 'paraglide', 'en.js'), 'generated');
+    builderGit(directory, ['add', '--all', '--force', '--', '.']);
+    builderGit(directory, ['commit', '--quiet', '-m', 'checkout']);
+    // Force-added ignored files stay tracked, as checkout's baseline does.
+    writeFileSync(join(directory, 'src', 'kept.ts'), 'untracked\n');
+    rmSync(join(directory, 'src', 'old.ts'));
+    mkdirSync(join(directory, '.wrangler', 'state', 'v3', 'd1'), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(directory, '.wrangler', 'state', 'v3', 'd1', 'db.sqlite-wal'),
+      'dev server state',
+    );
+
+    await run();
+
+    const body = JSON.parse(
+      vi.mocked(globalThis.fetch).mock.calls[1]![1]!.body as string,
+    ) as { source: { files: Array<{ path: string }> } };
+    expect(body.source.files.map((file) => file.path)).toEqual([
+      '.gitignore',
+      'package.json',
+      'pnpm-lock.yaml',
+      'src/kept.ts',
+      'src/paraglide/en.js',
+    ]);
+  });
+
+  it('refuses a tracked file under a symlinked, ignored parent directory', async () => {
+    writeFileSync(join(directory, '.gitignore'), 'src\n');
+    mkdirSync(join(directory, 'src'));
+    writeFileSync(join(directory, 'src', 'x.ts'), 'inside\n');
+    builderGit(directory, ['add', '--all', '--force', '--', '.']);
+    builderGit(directory, ['commit', '--quiet', '-m', 'checkout']);
+    const outside = mkdtempSync(join(tmpdir(), 'cavuno-cli-outside-'));
+    writeFileSync(join(outside, 'x.ts'), 'outside secret\n');
+    rmSync(join(directory, 'src'), { recursive: true });
+    symlinkSync(outside, join(directory, 'src'));
+
+    await expect(run()).rejects.toThrow(/symbolic link/i);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    rmSync(outside, { recursive: true, force: true });
+  });
+
+  it('refuses a directory that is not a Git repository', async () => {
+    rmSync(join(directory, '.git'), { recursive: true, force: true });
+    mkdirSync(join(directory, '.git'));
+    writeFileSync(
+      join(directory, '.git', 'cavuno-builder.json'),
+      JSON.stringify({
+        boardId: 'board_1',
+        draftId: 'draft_1',
+        baseVersionId: 'version_1',
+      }),
+    );
+    await expect(run()).rejects.toThrow(/needs Git and a Builder checkout/);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
