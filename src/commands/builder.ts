@@ -38,7 +38,8 @@ const MAX_FILES = 10_000;
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
 const MAX_BYTES = 128 * 1024 * 1024;
 const STALE_BASE_NEXT_STEP =
-  '. Run `cavuno builder pull`, resolve any conflicts and commit, then submit again.';
+  '. Run `npx cavuno@latest builder pull`, resolve any conflicts and commit, then submit again.';
+const DOCS_URL = 'https://cavuno.com/docs/ai-website-builder/coding-agents';
 
 type SnapshotFile = {
   path: string;
@@ -92,34 +93,155 @@ function builderVersionUrl(
   return { url, key, format: global.format ?? 'json' };
 }
 
+async function fetchVersion(
+  url: string,
+  key: string,
+  action: 'status' | 'preview' | 'publish',
+): Promise<unknown> {
+  const response = await fetch(`${url}/${action}`, {
+    method: action === 'publish' ? 'POST' : 'GET',
+    headers: { Authorization: `Bearer ${key}` },
+  });
+  const data: unknown = await response.json().catch(() => null);
+  if (!response.ok)
+    throw new CliError(
+      `Builder ${action} failed (${response.status}): ${apiErrorMessage(data) ?? response.statusText}`,
+      exitCodeFor(response.status),
+    );
+  return data;
+}
+
+type VersionStatus = {
+  candidate?: { state?: string; failedSummary?: string | null };
+  publicExposure?: {
+    state?: string;
+    reason?: string;
+    checks?: Record<string, string> | null;
+  } | null;
+};
+
+/**
+ * Where a submitted version's checks stand: `ready` once the candidate is
+ * verified and cleared for public exposure, a one-line reason once it failed,
+ * was flagged or revoked, and null while checks are still running.
+ */
+function builderStatusOutcome(
+  value: unknown,
+): { ready: true } | { ready: false; reason: string } | null {
+  const status = (value ?? {}) as VersionStatus;
+  const candidate = status.candidate?.state;
+  const exposure = status.publicExposure;
+  if (candidate === 'failed')
+    return {
+      ready: false,
+      reason: `Candidate checks failed: ${status.candidate?.failedSummary ?? 'no summary'}`,
+    };
+  // Staff can clear a flagged version; the flag stays in its evidence.
+  if (candidate === 'verified' && exposure?.state === 'cleared')
+    return { ready: true };
+  const flagged = Object.entries(exposure?.checks ?? {})
+    .filter(([, result]) => result === 'flagged')
+    .map(([name]) => name);
+  // `held` with only `unknown` checks may still be collecting results.
+  if (
+    exposure?.state === 'revoked' ||
+    (exposure?.state !== 'cleared' && flagged.length)
+  )
+    return {
+      ready: false,
+      reason: `Version ${exposure?.state === 'revoked' ? 'revoked' : `flagged by ${flagged.join(', ')}`}: ${exposure?.reason ?? 'no reason given'}`,
+    };
+  return null;
+}
+
+async function waitForVersion(
+  command: Command,
+  directory: string,
+  intervalMs: number,
+  timeoutMs: number,
+): Promise<void> {
+  const { url, key, format } = builderVersionUrl(command, directory);
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const data = await fetchVersion(url, key, 'status');
+    const outcome = builderStatusOutcome(data);
+    if (outcome) {
+      print(data, format);
+      if (outcome.ready) return;
+      throw new CliError(outcome.reason, 7);
+    }
+    if (Date.now() >= deadline) {
+      print(data, format);
+      const held = (data as VersionStatus | null)?.publicExposure;
+      throw new CliError(
+        held?.state === 'held'
+          ? `Version still held after ${timeoutMs}ms: ${held.reason ?? 'no reason given'}`
+          : `Builder checks did not finish within ${timeoutMs}ms; run \`npx cavuno@latest builder status --wait\` again.`,
+        11,
+      );
+    }
+    await new Promise((done) => setTimeout(done, intervalMs));
+  }
+}
+
 async function versionAction(
   command: Command,
   directory: string,
   action: 'status' | 'preview' | 'publish',
 ): Promise<void> {
   const { url, key, format } = builderVersionUrl(command, directory);
-  const response = await fetch(`${url}/${action}`, {
-    method: action === 'publish' ? 'POST' : 'GET',
+  print(await fetchVersion(url, key, action), format);
+}
+
+function positiveIntegerOption(flag: string, min: number, max: number) {
+  return (raw: string): number => {
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value < min || value > max)
+      throw new CliError(
+        `${flag}: expected an integer from ${min} to ${max}, got ${raw}`,
+        2,
+      );
+    return value;
+  };
+}
+
+/** Exit codes from the README table. */
+function exitCodeFor(status: number): number {
+  const codes: Record<number, number> = {
+    400: 2,
+    401: 1,
+    402: 5,
+    403: 3,
+    404: 4,
+    409: 7,
+    422: 2,
+    429: 6,
+  };
+  return codes[status] ?? 10;
+}
+
+function apiErrorMessage(data: unknown): string | undefined {
+  return data && typeof data === 'object' && 'error' in data
+    ? (data as { error?: { message?: string } }).error?.message
+    : undefined;
+}
+
+/** The one board this API key may use, from `GET /v1/builder/boards`. */
+async function discoverBoardId(baseUrl: string, key: string): Promise<string> {
+  const response = await fetch(`${baseUrl}/builder/boards`, {
     headers: { Authorization: `Bearer ${key}` },
   });
   const data: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    const message =
-      data && typeof data === 'object' && 'error' in data
-        ? (data as { error?: { message?: string } }).error?.message
-        : undefined;
+  if (!response.ok)
     throw new CliError(
-      `Builder ${action} failed (${response.status}): ${message ?? response.statusText}`,
-      response.status === 401
-        ? 1
-        : response.status === 403
-          ? 3
-          : response.status === 404
-            ? 4
-            : 10,
+      `Builder checkout failed (${response.status}): ${apiErrorMessage(data) ?? response.statusText}`,
+      exitCodeFor(response.status),
     );
-  }
-  print(data, format);
+  const boardId = (data as { items?: Array<{ boardId?: unknown }> } | null)
+    ?.items?.[0]?.boardId;
+  if (typeof boardId !== 'string' || !boardId)
+    throw new CliError('This API key has no Builder board.', 4);
+  return boardId;
 }
 
 function assertDestination(destination: string): void {
@@ -145,18 +267,10 @@ async function fetchSnapshot(
     headers: { Authorization: `Bearer ${key}` },
   });
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as {
-      error?: { message?: string };
-    } | null;
+    const data: unknown = await response.json().catch(() => null);
     throw new CliError(
-      `Builder ${action} failed (${response.status}): ${body?.error?.message ?? response.statusText}`,
-      response.status === 401
-        ? 1
-        : response.status === 403
-          ? 3
-          : response.status === 404
-            ? 4
-            : 10,
+      `Builder ${action} failed (${response.status}): ${apiErrorMessage(data) ?? response.statusText}`,
+      exitCodeFor(response.status),
     );
   }
   return (await response.json()) as Snapshot;
@@ -220,17 +334,15 @@ function decodeSnapshot(
     if (seen.has(folded))
       throw new CliError(`Duplicate Builder snapshot path: ${path}`, 10);
     seen.add(folded);
-    if (
-      !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
-        file.contentsBase64,
-      )
-    ) {
+    // The round trip is the canonical check; no regex (V8 overflows its
+    // stack on base64 patterns for files over ~3.2 MiB).
+    const bytes = Buffer.from(file.contentsBase64, 'base64');
+    if (bytes.toString('base64') !== file.contentsBase64) {
       throw new CliError(
         `Invalid base64 for Builder snapshot path: ${path}`,
         10,
       );
     }
-    const bytes = Buffer.from(file.contentsBase64, 'base64');
     if (
       (isBuilderCredentialPath(path) && !isApprovedBuilderConfigPath(path)) ||
       (isApprovedBuilderConfigPath(path) && !isSafeBuilderConfig(path, bytes))
@@ -260,15 +372,15 @@ export function registerBuilderCommand(root: Command): void {
   const builder = root
     .command('builder')
     .description(
-      'Work with a Builder draft. Needs CAVUNO_API_KEY with Builder: read, manage, or publish.',
+      `Work with a Builder draft from a coding agent. Needs CAVUNO_API_KEY with Builder: read, manage, or publish. Run as \`npx cavuno@latest builder …\`. Guide: ${DOCS_URL}`,
     );
   annotate(
     builder
       .command('checkout')
       .description(
-        'Create a draft from live or check out an existing Builder draft.',
+        "Create a draft from live or check out an existing Builder draft. Without a board ID, uses the API key's board.",
       )
-      .argument('<board-id>', 'Board ID')
+      .argument('[board-id]', "Board ID (default: the API key's board)")
       .option(
         '--draft <draft-id>',
         'Existing draft ID (default: create from live)',
@@ -279,16 +391,10 @@ export function registerBuilderCommand(root: Command): void {
       )
       .action(async function (
         this: Command,
-        boardId: string,
+        boardIdArgument: string | undefined,
         opts: { draft?: string; directory?: string },
       ) {
-        if (!boardId) throw new CliError('Board ID is required.', 2);
-        const destinationName = `${boardId}-${opts.draft ?? 'builder'}`;
-        if (!opts.directory && !/^[A-Za-z0-9_-]+$/.test(destinationName)) {
-          throw new CliError('Use --directory for this board/draft ID.', 2);
-        }
-        const destination = resolve(opts.directory ?? destinationName);
-        assertDestination(destination);
+        if (opts.directory) assertDestination(resolve(opts.directory));
         const key = builderApiKey();
         const global = this.optsWithGlobals<{
           apiUrl?: string;
@@ -299,6 +405,14 @@ export function registerBuilderCommand(root: Command): void {
           process.env.CAVUNO_API_URL ??
           'https://api.cavuno.com/v1'
         ).replace(/\/+$/, '');
+        const boardId =
+          boardIdArgument || (await discoverBoardId(baseUrl, key));
+        const destinationName = `${boardId}-${opts.draft ?? 'builder'}`;
+        if (!opts.directory && !/^[A-Za-z0-9_-]+$/.test(destinationName)) {
+          throw new CliError('Use --directory for this board/draft ID.', 2);
+        }
+        const destination = resolve(opts.directory ?? destinationName);
+        assertDestination(destination);
         const draftsUrl = `${baseUrl}/builder/boards/${encodeURIComponent(boardId)}/drafts`;
         const url = opts.draft
           ? `${draftsUrl}/${encodeURIComponent(opts.draft)}/snapshot`
@@ -366,10 +480,10 @@ export function registerBuilderCommand(root: Command): void {
       }),
     {
       mapsTo:
-        'POST /v1/builder/boards/:boardId/drafts; GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot',
+        'GET /v1/builder/boards; POST /v1/builder/boards/:boardId/drafts; GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot',
       examples: [
-        'cavuno builder checkout <board-id>',
-        'cavuno builder checkout <board-id> --draft <draft-id>',
+        'npx cavuno@latest builder checkout',
+        'npx cavuno@latest builder checkout <board-id> --draft <draft-id>',
       ],
     },
   );
@@ -377,7 +491,7 @@ export function registerBuilderCommand(root: Command): void {
     builder
       .command('submit')
       .description(
-        'Submit local Builder source, including uncommitted edits, for the checked-out draft. On stale_base, run builder pull, then submit again.',
+        'Submit local Builder source, including uncommitted edits, for the checked-out draft. Sends the files Git sees (tracked plus untracked, minus .gitignore matches). On stale_base, run builder pull, then submit again.',
       )
       .option(
         '--directory <path>',
@@ -430,7 +544,7 @@ export function registerBuilderCommand(root: Command): void {
             `Builder submit create failed (${created.status}): ${error?.message ?? created.statusText}${
               error?.code === 'stale_base' ? STALE_BASE_NEXT_STEP : ''
             }`,
-            created.status === 401 ? 1 : 3,
+            exitCodeFor(created.status),
           );
         }
         const operationId = (createdData as { operationId: string })
@@ -448,13 +562,9 @@ export function registerBuilderCommand(root: Command): void {
           });
           if (!upload.ok) {
             const detail: unknown = await upload.json().catch(() => null);
-            const message =
-              detail && typeof detail === 'object' && 'error' in detail
-                ? (detail as { error?: { message?: string } }).error?.message
-                : undefined;
             throw new CliError(
-              `Builder submit upload failed (${upload.status}): ${message ?? upload.statusText}`,
-              upload.status === 422 ? 2 : 3,
+              `Builder submit upload failed (${upload.status}): ${apiErrorMessage(detail) ?? upload.statusText}`,
+              exitCodeFor(upload.status),
             );
           }
         }
@@ -514,30 +624,26 @@ export function registerBuilderCommand(root: Command): void {
             `Builder submit ${kind}${context ? `: ${context}` : ''}${
               kind === 'stale_base' ? STALE_BASE_NEXT_STEP : ''
             }`,
-            response.status === 422 ? 2 : 3,
+            exitCodeFor(response.status),
           );
         }
         const error =
           data && typeof data === 'object' && 'error' in data
-            ? (data as { error?: { message?: string } }).error
+            ? (data as { error?: { code?: string; message?: string } }).error
             : undefined;
         throw new CliError(
           `Builder submit failed (${response.status}): ${error?.message ?? response.statusText}`,
-          response.status === 401
-            ? 1
-            : response.status === 403
-              ? 3
-              : response.status === 404
-                ? 4
-                : 10,
+          error?.code === 'daily_build_limit'
+            ? 5
+            : exitCodeFor(response.status),
         );
       }),
     {
       mapsTo:
         'POST /v1/builder/boards/:boardId/drafts/:draftId/submissions/staged',
       examples: [
-        'cavuno builder submit',
-        'cavuno builder submit --directory ./my-checkout',
+        'npx cavuno@latest builder submit',
+        'npx cavuno@latest builder submit --directory ./my-checkout',
       ],
     },
   );
@@ -557,7 +663,7 @@ export function registerBuilderCommand(root: Command): void {
         const git = (args: string[]) => builderGit(directory, args);
         if (git(['status', '--porcelain']))
           throw new CliError(
-            'Commit or remove local changes before `cavuno builder pull`.',
+            'Commit or remove local changes before `npx cavuno@latest builder pull`.',
             2,
           );
         const manifest = promotePendingBase(directory);
@@ -627,7 +733,7 @@ export function registerBuilderCommand(root: Command): void {
             pendingBaseVersionId: versionId,
           });
           throw new CliError(
-            `Builder pull merged version ${versionId} with conflicts in:\n${conflicts}\nResolve them, commit, then run \`cavuno builder submit\`.`,
+            `Builder pull merged version ${versionId} with conflicts in:\n${conflicts}\nResolve them, commit, then run \`npx cavuno@latest builder submit\`.`,
             7,
           );
         }
@@ -650,14 +756,63 @@ export function registerBuilderCommand(root: Command): void {
     {
       mapsTo: 'GET /v1/builder/boards/:boardId/drafts/:draftId/snapshot',
       examples: [
-        'cavuno builder pull',
-        'cavuno builder pull --directory ./my-checkout',
+        'npx cavuno@latest builder pull',
+        'npx cavuno@latest builder pull --directory ./my-checkout',
       ],
     },
   );
-  for (const action of ['status', 'preview', 'publish'] as const) {
+  annotate(
+    builder
+      .command('status')
+      .description(
+        'Read the current submitted version, check, and publish status. With --wait, poll until checks finish: exit 0 when the version is verified and cleared to publish, 7 with the reason when it failed or was flagged.',
+      )
+      .option(
+        '--directory <path>',
+        'Builder checkout directory (default: current directory)',
+      )
+      .option('--wait', 'Poll until the checks reach a final state')
+      .option(
+        '--interval-ms <n>',
+        'Poll interval in milliseconds with --wait (default 10000)',
+        positiveIntegerOption('--interval-ms', 1000, 600_000),
+      )
+      .option(
+        '--timeout-ms <n>',
+        'Give up waiting after this many milliseconds (default 1200000)',
+        positiveIntegerOption('--timeout-ms', 1000, 86_400_000),
+      )
+      .action(async function (
+        this: Command,
+        opts: {
+          directory?: string;
+          wait?: boolean;
+          intervalMs?: number;
+          timeoutMs?: number;
+        },
+      ) {
+        if (!opts.wait) {
+          await versionAction(this, opts.directory ?? '.', 'status');
+          return;
+        }
+        await waitForVersion(
+          this,
+          opts.directory ?? '.',
+          opts.intervalMs ?? 10_000,
+          opts.timeoutMs ?? 1_200_000,
+        );
+      }),
+    {
+      mapsTo:
+        'GET /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/status',
+      examples: [
+        'npx cavuno@latest builder status',
+        'npx cavuno@latest builder status --wait',
+      ],
+    },
+  );
+  for (const action of ['preview', 'publish'] as const) {
     const description = {
-      status: 'Read the current submitted version, check, and publish status.',
       preview: 'Mint a one-use private preview URL for the current version.',
       publish:
         'Queue the current submitted version through the full Go Live gate.',
@@ -675,7 +830,7 @@ export function registerBuilderCommand(root: Command): void {
         }),
       {
         mapsTo: `${action === 'publish' ? 'POST' : 'GET'} /v1/builder/boards/:boardId/drafts/:draftId/versions/:versionId/${action}`,
-        examples: [`cavuno builder ${action}`],
+        examples: [`npx cavuno@latest builder ${action}`],
       },
     );
   }

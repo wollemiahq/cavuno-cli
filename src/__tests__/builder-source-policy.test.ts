@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { builderGit } from '../commands/builder-git.js';
 import { isSafeBuilderConfig } from '../commands/builder-source-policy.js';
 import { packageBuilderSource } from '../commands/builder-submit.js';
 
@@ -33,6 +34,7 @@ describe('Builder public configuration policy', () => {
   ])('refuses unsafe config during packaging %s (%s)', (path, contents) => {
     const directory = mkdtempSync(join(tmpdir(), 'builder-policy-'));
     try {
+      builderGit(directory, ['init', '--quiet']);
       writeFileSync(join(directory, path), contents);
       expect(() => packageBuilderSource(directory)).toThrow(/Unsafe Builder/);
     } finally {

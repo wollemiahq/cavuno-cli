@@ -1,4 +1,5 @@
 import { CliError } from '../lib/auth.js';
+import { builderGitOutput } from './builder-git.js';
 import {
   isApprovedBuilderConfigPath,
   isBuilderCredentialPath,
@@ -12,7 +13,7 @@ import {
   lstatSync,
   openSync,
   readFileSync,
-  readdirSync,
+  realpathSync,
   renameSync,
   rmSync,
   writeFileSync,
@@ -185,6 +186,32 @@ export function advanceBuilderManifest(
   writeBuilderManifest(directory, { ...current, baseVersionId: versionId });
 }
 
+/**
+ * The checkout's source as Git sees it: tracked files plus untracked files
+ * that .gitignore does not exclude, so dev-server state (`.wrangler`) and
+ * generated output never upload. Tracked files deleted from the working tree
+ * are left out, which deletes them in the submission.
+ */
+function listBuilderSourcePaths(root: string): string[] {
+  let listing: string;
+  try {
+    listing = builderGitOutput(root, [
+      'ls-files',
+      '-z',
+      '--cached',
+      '--others',
+      '--exclude-standard',
+    ]);
+  } catch (error) {
+    throw new CliError(
+      `Builder submit needs Git and a Builder checkout repository: ${error instanceof Error ? error.message : 'git ls-files failed'}`,
+      2,
+    );
+  }
+  // An unmerged path appears once per stage.
+  return [...new Set(listing.split('\0').filter(Boolean))];
+}
+
 export function packageBuilderSource(directory: string): {
   format: 'cavuno-builder-source-v1';
   files: SourceFile[];
@@ -194,57 +221,61 @@ export function packageBuilderSource(directory: string): {
   if (!rootStat?.isDirectory() || rootStat.isSymbolicLink()) {
     throw new CliError('Builder source directory must be a real directory.', 2);
   }
+  const realRoot = realpathSync(root);
   const files: SourceFile[] = [];
   let totalBytes = 0;
-  const visit = (relative: string): void => {
-    const absolute = relative ? join(root, relative) : root;
-    for (const entry of readdirSync(absolute, { withFileTypes: true })) {
-      const path = relative ? `${relative}/${entry.name}` : entry.name;
-      const name = entry.name.toLowerCase();
-      if (
-        EXCLUDED_DIRS.has(name) ||
-        (!relative && EXCLUDED_ROOT_DIRS.has(name)) ||
-        (isBuilderCredentialPath(path) &&
-          !isApprovedBuilderConfigPath(path) &&
-          path !== '.cavuno')
-      )
-        continue;
-      assertSafePath(path);
-      const fullPath = join(root, path);
-      const stat = lstatSync(fullPath);
-      if (path === '.cavuno' && !stat.isDirectory())
+  for (const path of listBuilderSourcePaths(root)) {
+    const segments = path.split('/');
+    if (
+      segments.some((segment) => EXCLUDED_DIRS.has(segment.toLowerCase())) ||
+      EXCLUDED_ROOT_DIRS.has(segments[0]!.toLowerCase()) ||
+      (isBuilderCredentialPath(path) && !isApprovedBuilderConfigPath(path))
+    ) {
+      if (path === '.cavuno')
         throw new CliError(`Unsafe Builder source configuration: ${path}`, 2);
-      if (stat.isSymbolicLink() || (!stat.isDirectory() && !stat.isFile())) {
-        throw new CliError(
-          `Builder source contains a symbolic link or special file: ${path}`,
-          2,
-        );
-      }
-      if (stat.isDirectory()) {
-        visit(path);
-        continue;
-      }
-      if (files.length >= MAX_FILES)
-        throw new CliError('Builder source exceeds 10,000 files.', 2);
-      if (stat.size > MAX_FILE_BYTES)
-        throw new CliError(`Builder source file exceeds 32 MiB: ${path}`, 2);
-      const contents = readRegularFile(fullPath, MAX_FILE_BYTES);
-      if (
-        isApprovedBuilderConfigPath(path) &&
-        !isSafeBuilderConfig(path, contents)
-      )
-        throw new CliError(`Unsafe Builder source configuration: ${path}`, 2);
-      totalBytes += contents.length;
-      if (totalBytes > MAX_TOTAL_BYTES)
-        throw new CliError('Builder source exceeds 128 MiB.', 2);
-      files.push({
-        path,
-        contentsBase64: contents.toString('base64'),
-        executable: (stat.mode & 0o111) !== 0,
-      });
+      continue;
     }
-  };
-  visit('');
+    // Git lists an untracked nested repository as `dir/`.
+    if (path.endsWith('/'))
+      throw new CliError(
+        `Builder source contains a nested Git repository: ${path}`,
+        2,
+      );
+    assertSafePath(path);
+    const fullPath = join(root, path);
+    const stat = lstatSync(fullPath, { throwIfNoEntry: false });
+    if (!stat) continue;
+    // realpath also catches a symlinked parent directory, which Git still
+    // lists tracked files under when the link's own name is ignored.
+    if (
+      stat.isSymbolicLink() ||
+      !stat.isFile() ||
+      realpathSync(fullPath) !== join(realRoot, path)
+    ) {
+      throw new CliError(
+        `Builder source contains a symbolic link, submodule or special file: ${path}`,
+        2,
+      );
+    }
+    if (files.length >= MAX_FILES)
+      throw new CliError('Builder source exceeds 10,000 files.', 2);
+    if (stat.size > MAX_FILE_BYTES)
+      throw new CliError(`Builder source file exceeds 32 MiB: ${path}`, 2);
+    const contents = readRegularFile(fullPath, MAX_FILE_BYTES);
+    if (
+      isApprovedBuilderConfigPath(path) &&
+      !isSafeBuilderConfig(path, contents)
+    )
+      throw new CliError(`Unsafe Builder source configuration: ${path}`, 2);
+    totalBytes += contents.length;
+    if (totalBytes > MAX_TOTAL_BYTES)
+      throw new CliError('Builder source exceeds 128 MiB.', 2);
+    files.push({
+      path,
+      contentsBase64: contents.toString('base64'),
+      executable: (stat.mode & 0o111) !== 0,
+    });
+  }
   files.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   return { format: 'cavuno-builder-source-v1', files };
 }
