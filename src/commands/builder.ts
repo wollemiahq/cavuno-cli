@@ -93,6 +93,9 @@ function builderVersionUrl(
   return { url, key, format: global.format ?? 'json' };
 }
 
+/** A gateway answer while Cavuno deploys or restarts; asking again is safe. */
+class GatewayUnavailableError extends CliError {}
+
 async function fetchVersion(
   url: string,
   key: string,
@@ -103,11 +106,13 @@ async function fetchVersion(
     headers: { Authorization: `Bearer ${key}` },
   });
   const data: unknown = await response.json().catch(() => null);
-  if (!response.ok)
-    throw new CliError(
-      `Builder ${action} failed (${response.status}): ${apiErrorMessage(data) ?? response.statusText}`,
-      exitCodeFor(response.status),
-    );
+  if (!response.ok) {
+    const message = `Builder ${action} failed (${response.status}): ${apiErrorMessage(data) ?? response.statusText}`;
+    const exitCode = exitCodeFor(response.status);
+    throw [502, 503, 504].includes(response.status)
+      ? new GatewayUnavailableError(message, exitCode)
+      : new CliError(message, exitCode);
+  }
   return data;
 }
 
@@ -163,7 +168,20 @@ async function waitForVersion(
   const { url, key, format } = builderVersionUrl(command, directory);
   const deadline = Date.now() + timeoutMs;
   for (;;) {
-    const data = await fetchVersion(url, key, 'status');
+    let data: unknown;
+    try {
+      data = await fetchVersion(url, key, 'status');
+    } catch (error) {
+      // Keep polling through a deploy's brief 502/503/504 until the deadline.
+      if (!(error instanceof GatewayUnavailableError)) throw error;
+      if (Date.now() >= deadline)
+        throw new CliError(
+          `${error.message}; run \`npx cavuno@latest builder status --wait\` again.`,
+          11,
+        );
+      await new Promise((done) => setTimeout(done, intervalMs));
+      continue;
+    }
     const outcome = builderStatusOutcome(data);
     if (outcome) {
       print(data, format);
@@ -383,7 +401,7 @@ export function registerBuilderCommand(root: Command): void {
       .argument('[board-id]', "Board ID (default: the API key's board)")
       .option(
         '--draft <draft-id>',
-        'Existing draft ID (default: create from live)',
+        "Existing draft ID, or the ID at the end of the task's Builder URL (default: create from live)",
       )
       .option(
         '--directory <path>',

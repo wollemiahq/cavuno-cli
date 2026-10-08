@@ -1,6 +1,6 @@
 {
   "version": "1.14.0",
-  "generatedAt": "2026-10-07T04:16:23.380Z",
+  "generatedAt": "2026-10-07T21:53:38.505Z",
   "groups": [
     {
       "name": "jobs",
@@ -518,7 +518,7 @@
           "options": [
             {
               "flags": "--draft <draft-id>",
-              "description": "Existing draft ID (default: create from live)",
+              "description": "Existing draft ID, or the ID at the end of the task's Builder URL (default: create from live)",
               "required": false
             },
             {
