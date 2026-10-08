@@ -3,6 +3,13 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.14.1 — 2026-10-08
+
+- **`builder status --wait` rides out deploys.** A `502`, `503` or `504`
+  while Cavuno deploys no longer stops the wait; it keeps polling until the
+  checks finish or `--timeout-ms` runs out.
+- `--draft` accepts the chat ID from a Builder URL as well as a draft ID.
+
 ## 1.14.0 — 2026-10-07
 
 - **`builder checkout` needs no board ID.** An API key belongs to one board,

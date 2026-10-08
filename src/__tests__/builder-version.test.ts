@@ -178,6 +178,42 @@ describe('builder version CLI', () => {
       expect(console.log).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps polling through a 503 while Cavuno deploys', async () => {
+      vi.mocked(globalThis.fetch)
+        .mockResolvedValueOnce(
+          new Response('Service Unavailable', {
+            status: 503,
+            statusText: 'Service Unavailable',
+          }),
+        )
+        .mockResolvedValueOnce(
+          status('verified', {
+            state: 'cleared',
+            reason: 'All required checks passed',
+            checks: { build: 'pass' },
+          }),
+        );
+      const done = wait();
+      await vi.advanceTimersByTimeAsync(1000);
+      await done;
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('exits 11 like any timeout when a 503 lasts past it', async () => {
+      vi.mocked(globalThis.fetch).mockImplementation(
+        async () =>
+          new Response('Service Unavailable', {
+            status: 503,
+            statusText: 'Service Unavailable',
+          }),
+      );
+      const done = expect(wait('--timeout-ms', '2500')).rejects.toMatchObject({
+        exitCode: 11,
+      });
+      await vi.advanceTimersByTimeAsync(4000);
+      await done;
+    });
+
     it('exits 7 with the reason when checks fail or are flagged', async () => {
       vi.mocked(globalThis.fetch).mockResolvedValueOnce(
         status('failed', null, 'Build failed: src/app.ts'),
