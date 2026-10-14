@@ -146,7 +146,7 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies get <id>` | Fetch a single company |
 | `cavuno companies create --name <n> [...]` | Create a company |
 | `cavuno companies update <id> [...]` | Update a company |
-| `cavuno companies delete <id>` | Delete a company (cascades to its jobs) |
+| `cavuno companies delete <id>` | Delete a company (cascades to its jobs); `--block` also keeps it blocked |
 | `cavuno companies upload-logo <id> <file>` | Upload or replace a company logo |
 | `cavuno companies delete-logo <id>` | Delete a company logo |
 | `cavuno companies search <query>` | Search companies by name |
