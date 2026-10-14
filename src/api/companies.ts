@@ -43,13 +43,13 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
         o: { body: AnyBody },
       ) => Promise<unknown>
     )(path, { body });
-  const del = (path: string) =>
+  const del = (path: string, query?: Record<string, unknown>) =>
     (
       c.DELETE as unknown as (
         p: string,
         o?: Record<string, unknown>,
       ) => Promise<unknown>
-    )(path);
+    )(path, query ? { params: { query } } : undefined);
 
   return {
     list: (query?: CompanyListQuery) => get('/companies', query),
@@ -57,7 +57,16 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
     create: (body: AnyBody) => post('/companies', body),
     update: (id: string, body: AnyBody) =>
       patch(`/companies/${encodeURIComponent(id)}`, body),
-    remove: (id: string) => del(`/companies/${encodeURIComponent(id)}`),
+    /**
+     * Delete a company. With `block: true`, delete and block: the company is
+     * removed from the board and stays blocked so nothing can add it back.
+     * Without it, a plain delete.
+     */
+    remove: (id: string, opts?: { block?: boolean }) =>
+      del(
+        `/companies/${encodeURIComponent(id)}`,
+        opts?.block ? { block: 'true' } : undefined,
+      ),
     /**
      * Company blocklist. Without `remove`, archives live jobs and stops
      * automated re-import while keeping the profile. With `remove: true`,
