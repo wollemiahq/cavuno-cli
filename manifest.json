@@ -1,6 +1,6 @@
 {
-  "version": "1.14.1",
-  "generatedAt": "2026-10-07T21:53:38.505Z",
+  "version": "1.15.0",
+  "generatedAt": "2026-10-14T00:07:02.882Z",
   "groups": [
     {
       "name": "jobs",
@@ -864,13 +864,19 @@
           ],
           "options": [
             {
+              "flags": "--block",
+              "description": "Delete and block: keep the company blocked so backfill, imports and the API cannot add it back until it is unblocked.",
+              "required": false
+            },
+            {
               "flags": "-y, --yes",
               "description": "Skip the confirmation prompt",
               "required": false
             }
           ],
           "examples": [
-            "cavuno companies delete k18acme... --yes"
+            "cavuno companies delete k18acme... --yes",
+            "cavuno companies delete k18acme... --block --yes"
           ],
           "mapsTo": "DELETE /v1/companies/:id"
         },
