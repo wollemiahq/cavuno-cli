@@ -1063,7 +1063,7 @@ export interface paths {
     post?: never;
     /**
      * Delete a company
-     * @description Permanently deletes a company and cascades to delete every job attached to it (along with each job’s child records). It cannot be undone. Deleting a company that is on the blocklist never takes it off the blocklist: the company stays blocked and is removed from the board instead of being purged, so automated sourcing cannot recreate it. To purge a blocked company completely, unblock it first and then delete it.
+     * @description Permanently deletes a company and cascades to delete every job attached to it (along with each job’s child records). It cannot be undone. Pass `block=true` to delete and block: the company is removed from the board and stays on the blocklist, so automated sourcing cannot recreate it. Deleting a company that is on the blocklist never takes it off the blocklist: the company stays blocked and is removed from the board instead of being purged. To purge a blocked company completely, unblock it first and then delete it.
      */
     delete: operations['deleteCompany'];
     options?: never;
@@ -3063,7 +3063,7 @@ export interface paths {
     get?: never;
     /**
      * Replace custom job field definitions
-     * @description Whole-array replace of the board's custom job field definitions (`jobFormConfig.customFields` only: other job-form keys are untouched). Array order is display order. Empty array removes all fields. Content validation rejects empty labels, duplicate keys, optionless selects, inverted number bounds, and cap breaches (400). Changing `type` on an existing key is rejected (422 `settings_custom_field_type_immutable`); delete the field and recreate it. Renaming a key is delete+add and orphans per-job values under the old key. Response shape matches `GET /v1/settings/job-form`.
+     * @description Whole-array replace of the board's custom job field definitions (`jobFormConfig.customFields` only: other job-form keys are untouched). Array order is display order. Empty array removes all fields. Content validation rejects empty labels, duplicate keys, optionless selects, inverted number bounds, and cap breaches (400). Changing `type` on an existing key is rejected (422 `settings_custom_field_type_immutable`); delete the field and recreate it. Renaming a key is delete+add and orphans per-job values under the old key. A field sent without `visibility` keeps its current visibility. The key of a deleted private field cannot be used for a new field (400), so its saved answers stay private. Response shape matches `GET /v1/settings/job-form`.
      */
     put: operations['updateJobFormCustomFields'];
     post?: never;
@@ -5576,6 +5576,11 @@ export interface components {
       min?: number;
       /** @description Inclusive maximum for `number` fields, when set. */
       max?: number;
+      /**
+       * @description Who sees the field. `public` (or absent): the job page, employers, search and the Board API. `private`: only the board team, in the dashboard and this Operator API. Board API (`/v1/boards/...`) responses never include private fields or their values. Omitted on an existing field keeps its current visibility.
+       * @enum {string}
+       */
+      visibility?: 'public' | 'private';
     };
     CustomFieldOption: {
       /** @description Stable option key — the value stored on a job, not the label. */
@@ -6060,6 +6065,11 @@ export interface components {
       allowOverrides?: boolean;
       /** @description Key of the collection's short, long or rich text field whose value is a selected entry's default description. When that field is rich text, an entry's `description` is sanitised HTML. Absent means entries have no default description. */
       descriptionFieldKey?: string;
+      /**
+       * @description Who sees the field. `public` (or absent): the job page, employers, search and the Board API. `private`: only the board team, in the dashboard and this Operator API. Board API (`/v1/boards/...`) responses never include private fields or their values. Omitted on an existing field keeps its current visibility.
+       * @enum {string}
+       */
+      visibility?: 'public' | 'private';
     };
     JobCollectionOverride: {
       /** @description The collection field key used in `collectionValues`. */
@@ -6549,6 +6559,10 @@ export interface components {
       companyFacebookUrl?: string | null;
       companyLinkedinUrl?: string | null;
       companyInstagramUrl?: string | null;
+      /**
+       * @deprecated
+       * @description Deprecated: no longer shown on the password gate. Gate copy now lives on the board's builder-designed coming-soon page. Still accepted and returned for compatibility; it will be removed with the hosted board.
+       */
       passwordProtectionMessage?: string | null;
       defaultJobDurationDays?: number;
       /** @enum {string} */
@@ -6664,7 +6678,10 @@ export interface components {
       companyInstagramUrl?: string | '' | unknown;
       /** @description Label shown for the talent directory in the public navigation. 1–50 characters. */
       talentNavLabel?: string;
-      /** @description Custom copy displayed on the password gate. Up to 500 characters. Pass `null` to clear. */
+      /**
+       * @deprecated
+       * @description Deprecated: no longer shown on the password gate. Gate copy now lives on the board's builder-designed coming-soon page. Still accepted and returned for compatibility; it will be removed with the hosted board. Up to 500 characters. Pass `null` to clear.
+       */
       passwordProtectionMessage?: string | '' | unknown;
       signInMethods?: components['schemas']['SignInMethodsPatch'];
     };
@@ -12251,7 +12268,10 @@ export interface operations {
   };
   deleteCompany: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Pass `true` to delete and block: the company is removed from the board and kept on the blocklist, so backfill, imports and the API cannot add it back until it is unblocked. Defaults to `false`, a plain delete after which backfill may add the company again if it still matches the board’s sources. Ignored for a company whose website domain is shared with another company on the board, which is always a plain delete. */
+        block?: 'true' | 'false';
+      };
       header?: never;
       path: {
         /**
@@ -18592,8 +18612,10 @@ export interface operations {
         limit?: number;
         /** @description Full-text search over the taxonomy name (matches name tokens, not slug). */
         search?: string;
-        /** @description Filter to a parent category id, or the literal "null" for top-level categories. When set, a page may be short or empty while hasMore is true: keep paging until hasMore is false. */
+        /** @description Filter to the direct children of a parent category id. The literal "null" is a deprecated alias for `topLevel=true`. Combined with `search`, a page may be short or empty while hasMore is true: keep paging until hasMore is false. */
         parentId?: string;
+        /** @description When `true`, return only top-level categories (those with no parent). Cannot be combined with a `parentId` category id. */
+        topLevel?: 'true' | 'false';
       };
       header?: never;
       path?: never;
