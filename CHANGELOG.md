@@ -3,6 +3,14 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.15.0 — 2026-10-14
+
+- **`companies delete --block`** deletes a company and keeps it on the
+  blocklist, so sourcing, imports and the API cannot add it back until it is
+  unblocked. Without `--block` it is a plain delete, after which sourcing may
+  add the company again. A company that shares its website domain with another
+  company on the board is always a plain delete.
+
 ## 1.14.1 — 2026-10-08
 
 - **`builder status --wait` rides out deploys.** A `502`, `503` or `504`
