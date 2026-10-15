@@ -286,20 +286,31 @@ export function registerCompaniesCommand(root: Command): void {
       companies
         .command('delete')
         .description('Delete a company and cascade-delete its jobs.')
-        .argument('<id>', 'Company ID'),
+        .argument('<id>', 'Company ID')
+        .option(
+          '--block',
+          'Delete and block: keep the company blocked so backfill, imports and the API cannot add it back until it is unblocked.',
+        ),
     ).action(async function (this: Command, id: string) {
-      const opts = this.opts<ConfirmOptions>();
+      const opts = this.opts<ConfirmOptions & { block?: boolean }>();
       await confirmOrAbort({
-        message: `Delete company ${id} and cascade-delete its jobs?`,
+        message: opts.block
+          ? `Delete company ${id}, cascade-delete its jobs, and block it from being added back?`
+          : `Delete company ${id} and cascade-delete its jobs?`,
         yes: opts.yes,
       });
       const client = getClient(this);
-      const r = unwrap(await client.remove(id));
+      const r = unwrap(
+        await client.remove(id, opts.block ? { block: true } : undefined),
+      );
       if (r.error) throw fromApiError(r.error, r.response);
     }),
     {
       mapsTo: 'DELETE /v1/companies/:id',
-      examples: ['cavuno companies delete k18acme... --yes'],
+      examples: [
+        'cavuno companies delete k18acme... --yes',
+        'cavuno companies delete k18acme... --block --yes',
+      ],
     },
   );
 
