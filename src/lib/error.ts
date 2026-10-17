@@ -152,6 +152,10 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   internal_error: 10,
 };
 
+/** One line that tells an agent where to report friction with Cavuno. */
+export const FEEDBACK_HINT =
+  '  Agents: if Cavuno got in your way, report it with `cavuno feedback` (see --help).';
+
 export function fromApiError(
   envelope: unknown,
   response: { status: number; headers: Headers },
@@ -159,5 +163,8 @@ export function fromApiError(
   const env = envelope as ErrorEnvelope | undefined;
   const code = env?.error?.code ?? `http_${response.status}`;
   const exit = EXIT_CODE_BY_REASON[code] ?? 10;
-  return new CliError(formatApiError(envelope, response), exit);
+  return new CliError(
+    `${formatApiError(envelope, response)}\n${FEEDBACK_HINT}`,
+    exit,
+  );
 }

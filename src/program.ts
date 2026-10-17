@@ -11,6 +11,7 @@ import { registerCouponsCommand } from './commands/coupons.js';
 import { registerDomainsCommand } from './commands/domains.js';
 import { registerEmployerSubscriptionsCommand } from './commands/employer-subscriptions.js';
 import { registerEmployersCommand } from './commands/employers.js';
+import { registerFeedbackCommand } from './commands/feedback.js';
 import { registerImportsCommand } from './commands/imports.js';
 import { registerIndexingCommand } from './commands/indexing.js';
 import { registerInvitationsCommand } from './commands/invitations.js';
@@ -63,6 +64,7 @@ export const PUBLIC_GROUPS = [
   'redirects',
   'webhooks',
   'marketing-permissions',
+  'feedback',
 ];
 
 export function createCliProgram(version: string) {
@@ -112,6 +114,7 @@ export function createCliProgram(version: string) {
   registerRedirectsCommand(program);
   registerWebhooksCommand(program);
   registerMarketingPermissionsCommand(program);
+  registerFeedbackCommand(program);
 
   return program;
 }
