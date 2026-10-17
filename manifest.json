@@ -1,6 +1,6 @@
 {
-  "version": "1.14.1",
-  "generatedAt": "2026-10-07T21:53:38.505Z",
+  "version": "1.15.1",
+  "generatedAt": "2026-10-17T06:34:41.241Z",
   "groups": [
     {
       "name": "jobs",
@@ -864,13 +864,19 @@
           ],
           "options": [
             {
+              "flags": "--block",
+              "description": "Delete and block: keep the company blocked so backfill, imports and the API cannot add it back until it is unblocked.",
+              "required": false
+            },
+            {
               "flags": "-y, --yes",
               "description": "Skip the confirmation prompt",
               "required": false
             }
           ],
           "examples": [
-            "cavuno companies delete k18acme... --yes"
+            "cavuno companies delete k18acme... --yes",
+            "cavuno companies delete k18acme... --block --yes"
           ],
           "mapsTo": "DELETE /v1/companies/:id"
         },
@@ -5854,6 +5860,100 @@
             "cavuno marketing-permissions withdraw boardUsers_01EXAMPLE --yes"
           ],
           "mapsTo": "POST /v1/marketing-permissions/{id}/withdraw"
+        }
+      ]
+    },
+    {
+      "name": "feedback",
+      "description": "Report a problem with Cavuno (API, CLI, MCP or SDK) to its engineers, as an AI agent or a person.",
+      "commands": [
+        {
+          "name": "send",
+          "description": "Send an Agent Feedback Protocol report. Works without CAVUNO_API_KEY; a valid key attributes it to your board. Never include credentials or personal data. 20 reports per 5 minutes.",
+          "synopsis": "cavuno feedback send [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--type <type>",
+              "description": "Kind of problem (required unless --json)",
+              "required": false
+            },
+            {
+              "flags": "--goal <text>",
+              "description": "What you were trying to accomplish, in plain language (required unless --json)",
+              "required": false
+            },
+            {
+              "flags": "--message <text>",
+              "description": "What prevented or complicated the task (required unless --json)",
+              "required": false
+            },
+            {
+              "flags": "--endpoint <path>",
+              "description": "API path, CLI command or MCP tool involved, e.g. /jobs",
+              "required": false
+            },
+            {
+              "flags": "--method <method>",
+              "description": "HTTP method of the endpoint",
+              "required": false
+            },
+            {
+              "flags": "--outcome <outcome>",
+              "description": "blocked (task failed), degraded (worse or slower), completed (suggestion only)",
+              "required": false
+            },
+            {
+              "flags": "--expected <text>",
+              "description": "What you expected to find or happen",
+              "required": false
+            },
+            {
+              "flags": "--suggestion <text>",
+              "description": "A concrete change that would have let you succeed",
+              "required": false
+            },
+            {
+              "flags": "--workaround [description]",
+              "description": "You found a workaround; optionally describe it",
+              "required": false
+            },
+            {
+              "flags": "--session-id <id>",
+              "description": "Reuse one value per task; a retry with the same content returns the original report",
+              "required": false
+            },
+            {
+              "flags": "--request-id <id>",
+              "description": "X-Request-Id of the failing call",
+              "required": false
+            },
+            {
+              "flags": "--agent-name <name>",
+              "description": "Agent or product name",
+              "required": false
+            },
+            {
+              "flags": "--agent-model <model>",
+              "description": "Model name",
+              "required": false
+            },
+            {
+              "flags": "--json",
+              "description": "Read the full report as JSON from --file or stdin; flags override its fields",
+              "required": false
+            },
+            {
+              "flags": "--file <path>",
+              "description": "JSON report file for --json (otherwise stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno feedback --type missing_capability --goal \"What you were trying to do\" --message \"What got in the way\" --agent-name my-agent --agent-model model-name",
+            "cavuno feedback --json --file report.json"
+          ],
+          "mapsTo": "POST /v1/feedback"
         }
       ]
     }

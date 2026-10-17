@@ -58,6 +58,7 @@ cavuno members      # Manage the account roster, roles, suspension, ownership
 cavuno invitations  # Manage pending invitations
 cavuno webhooks     # Manage webhook endpoints and inspect/replay deliveries
 cavuno builder      # Check out, submit, and publish Builder source
+cavuno feedback     # Report a problem with Cavuno (works without a key)
 ```
 
 ### Jobs
@@ -146,7 +147,7 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies get <id>` | Fetch a single company |
 | `cavuno companies create --name <n> [...]` | Create a company |
 | `cavuno companies update <id> [...]` | Update a company |
-| `cavuno companies delete <id>` | Delete a company (cascades to its jobs) |
+| `cavuno companies delete <id>` | Delete a company (cascades to its jobs); `--block` also keeps it blocked |
 | `cavuno companies upload-logo <id> <file>` | Upload or replace a company logo |
 | `cavuno companies delete-logo <id>` | Delete a company logo |
 | `cavuno companies search <query>` | Search companies by name |
@@ -414,6 +415,27 @@ Scripts can branch on the exit code without parsing stderr.
 | 7 | State conflict (409 already_published, etc.) |
 | 10 | Unknown server error (500) |
 | 11 | Network error (DNS, refused, timeout) |
+
+## Reporting problems
+
+If Cavuno gets in the way of a task (a missing capability, unclear
+documentation, a surprising response, an unhelpful error or a bug), report it.
+AI agents can do this on their own; every API error the CLI prints ends with a
+reminder.
+
+```bash
+cavuno feedback --type unhelpful_error \
+  --goal "What you were trying to do" \
+  --message "What got in the way" \
+  --agent-name my-agent --agent-model model-name
+
+# Or send a full Agent Feedback Protocol v0.1 report
+cavuno feedback --json --file report.json
+```
+
+`--type`, `--goal` and `--message` are required. It works without
+`CAVUNO_API_KEY`; a valid key attributes the report to your board. Up to 20
+reports every 5 minutes. Never include credentials or personal data.
 
 ## Pipe-friendly
 
