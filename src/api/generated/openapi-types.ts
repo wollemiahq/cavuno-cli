@@ -6052,6 +6052,7 @@ export interface components {
         requestId: string;
         /** @description Structured context for some errors, such as per-field validation issues. */
         details?: unknown;
+        upgrade?: components['schemas']['PlanUpgradeHint'];
       };
     };
     /** @description A single export row. Fields mirror the entity’s CSV columns (camelCase); array fields are JSON arrays and timestamps are epoch-millisecond UTC numbers. */
@@ -7036,6 +7037,38 @@ export interface components {
       /** @description Unit amount in the smallest currency unit. */
       amountCents: number;
     } | null;
+    /** @description Present only on Operator API errors caused by the board's Cavuno plan. Read `GET /v1/billing/subscription` to choose between `checkout` and `changePlan`, call it with `{ "planKey": requiredPlan }`, and give the returned `url` to a person to confirm. Each `path` is relative to the API origin, not to a `/v1` base URL. Both endpoints need `billing.manage`. Board API errors never include it. */
+    PlanUpgradeHint: {
+      /**
+       * @description The plan capability that blocked the request, named as in `GET /v1/billing/subscription` `capabilities`.
+       * @enum {string}
+       */
+      capability:
+        | 'activeJobsLimit'
+        | 'teamSeatLimit'
+        | 'canBePublic'
+        | 'canRemoveBranding'
+        | 'apiAccess';
+      /**
+       * @description The cheapest self-serve plan that unlocks the action. Pass it as `planKey`. Omitted when it cannot be told without more information; read `GET /v1/billing/subscription` and pick a higher plan.
+       * @enum {string}
+       */
+      requiredPlan?: 'starter' | 'basic' | 'grow' | 'advanced' | 'scale';
+      /** @description Starts a hosted checkout when the board has no active subscription (for example during a trial). */
+      checkout: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/checkout';
+      };
+      /** @description Starts a hosted plan change when the board already has an active subscription. */
+      changePlan: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/upgrade';
+      };
+    };
     ProfileCustomFieldDefinition: {
       key: string;
       label: string;
@@ -15957,6 +15990,7 @@ export interface operations {
                 code: string;
                 message: string;
                 details?: unknown;
+                upgrade?: components['schemas']['PlanUpgradeHint'];
               };
             }[];
           };
