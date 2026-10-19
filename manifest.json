@@ -1087,6 +1087,229 @@
           "mapsTo": "GET /v1/companies/:id/jobs"
         },
         {
+          "name": "list-plan-assignments",
+          "description": "List the plans assigned to a company (active first, then expired and revoked).",
+          "synopsis": "cavuno companies list-plan-assignments <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (active|expired|revoked)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Cursor from a previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list-plan-assignments k18acme... --status active"
+          ],
+          "mapsTo": "GET /v1/companies/:id/plan-assignments"
+        },
+        {
+          "name": "assign-plan",
+          "description": "Assign a membership plan to a company at no charge. One membership per company; revoke the current one first.",
+          "synopsis": "cavuno companies assign-plan <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--plan <planId>",
+              "description": "Active membership plan ID",
+              "required": true
+            },
+            {
+              "flags": "--expires-at <iso>",
+              "description": "ISO-8601 time the assignment ends (default: no end)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies assign-plan k18acme... --plan k22gold...",
+            "cavuno companies assign-plan k18acme... --plan k22gold... --expires-at 2027-01-01T00:00:00Z"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-assignments"
+        },
+        {
+          "name": "revoke-plan",
+          "description": "Revoke a company's plan assignment now. Does not cancel a recurring plan invoice.",
+          "synopsis": "cavuno companies revoke-plan <id> <assignmentId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "assignmentId",
+              "description": "Plan assignment ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies revoke-plan k18acme... k33assign... --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-assignments/:assignmentId/revoke"
+        },
+        {
+          "name": "list-plan-invoices",
+          "description": "List plan invoices issued to a company, newest first. A paid invoice names the assignment it created.",
+          "synopsis": "cavuno companies list-plan-invoices <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Cursor from a previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list-plan-invoices k18acme..."
+          ],
+          "mapsTo": "GET /v1/companies/:id/plan-invoices"
+        },
+        {
+          "name": "invoice-plan",
+          "description": "Invoice a company for a membership plan through Stripe (due in 30 days). Prints the invoice link to share with the employer; the plan is assigned when it is paid.",
+          "synopsis": "cavuno companies invoice-plan <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--plan <planId>",
+              "description": "Active membership plan ID",
+              "required": true
+            },
+            {
+              "flags": "--email <email>",
+              "description": "Employer's billing email",
+              "required": true
+            },
+            {
+              "flags": "--amount-cents <n>",
+              "description": "Amount per invoice in minor units (only for a plan without a price)",
+              "required": false
+            },
+            {
+              "flags": "--currency <code>",
+              "description": "ISO 4217 currency, with --amount-cents (e.g. usd)",
+              "required": false
+            },
+            {
+              "flags": "--interval <interval>",
+              "description": "Make it recur: month|year (not for a subscription plan with its own interval)",
+              "required": false
+            },
+            {
+              "flags": "--interval-count <n>",
+              "description": "Intervals between invoices, 1-12 (month + 3 = quarterly)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies invoice-plan k18acme... --plan k22gold... --email billing@acme.com",
+            "cavuno companies invoice-plan k18acme... --plan k22silver... --email billing@acme.com --amount-cents 49900 --currency usd --interval month --interval-count 3"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-invoices"
+        },
+        {
+          "name": "cancel-plan-invoice",
+          "description": "Cancel a plan invoice awaiting payment: a recurring invoice stops, and the Stripe invoice is voided.",
+          "synopsis": "cavuno companies cancel-plan-invoice <id> <invoiceId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "invoiceId",
+              "description": "Plan invoice ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies cancel-plan-invoice k18acme... k44invoice... --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-invoices/:invoiceId/cancel"
+        },
+        {
           "name": "batch",
           "description": "Run a batch of company operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
           "synopsis": "cavuno companies batch [options]",
