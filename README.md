@@ -156,6 +156,12 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies find-by-domain <domain>` | Resolve a company by website domain |
 | `cavuno companies find-or-create --name <n> [...]` | Resolve by domain or create |
 | `cavuno companies list-jobs <id>` | List jobs at a company |
+| `cavuno companies list-plan-assignments <id> [--status]` | List the plans assigned to a company (`plans.read`) |
+| `cavuno companies assign-plan <id> --plan <planId> [--expires-at]` | Assign a membership plan at no charge (`plans.manage`) |
+| `cavuno companies revoke-plan <id> <assignmentId>` | Revoke a company's plan assignment (`plans.manage`) |
+| `cavuno companies list-plan-invoices <id>` | List plan invoices issued to a company (`plans.read`) |
+| `cavuno companies invoice-plan <id> --plan <planId> --email <e> [...]` | Invoice a company for a membership plan through Stripe; prints the invoice link (`plans.manage`) |
+| `cavuno companies cancel-plan-invoice <id> <invoiceId>` | Cancel a plan invoice awaiting payment (`plans.manage`) |
 | `cavuno companies batch [--file ops.json]` | Run a batch of company operations |
 
 ### Blog
