@@ -3549,6 +3549,17 @@
           "mapsTo": "GET /v1/billing/connect"
         },
         {
+          "name": "connect-link",
+          "description": "Create a single-use Stripe onboarding URL for a human to connect payments (expires within minutes).",
+          "synopsis": "cavuno billing connect-link",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno billing connect-link"
+          ],
+          "mapsTo": "POST /v1/billing/connect/onboarding-link"
+        },
+        {
           "name": "checkout",
           "description": "Create a hosted checkout URL for a target plan.",
           "synopsis": "cavuno billing checkout [options]",

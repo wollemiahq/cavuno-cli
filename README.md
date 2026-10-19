@@ -90,6 +90,7 @@ The operator's own platform billing. Reads need `billing.read`; `checkout`/`upgr
 |---|---|
 | `cavuno billing subscription` | Show the account's platform subscription (`active:false` when none) |
 | `cavuno billing connect` | Show normalized payment connection readiness |
+| `cavuno billing connect-link` | Get a single-use Stripe onboarding URL for a human (expires within minutes) |
 | `cavuno billing checkout --plan <key> [--interval]` | Get a hosted Checkout URL to subscribe (rejects if already subscribed — use `upgrade`) |
 | `cavuno billing upgrade --plan <key> [--interval]` | Get a hosted human-confirmation URL for a plan change |
 
