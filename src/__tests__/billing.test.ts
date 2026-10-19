@@ -1,15 +1,18 @@
 import { Command } from 'commander';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockGetSubscription, mockGetConnect } = vi.hoisted(() => ({
-  mockGetSubscription: vi.fn(),
-  mockGetConnect: vi.fn(),
-}));
+const { mockGetSubscription, mockGetConnect, mockPostConnectOnboardingLink } =
+  vi.hoisted(() => ({
+    mockGetSubscription: vi.fn(),
+    mockGetConnect: vi.fn(),
+    mockPostConnectOnboardingLink: vi.fn(),
+  }));
 
 vi.mock('../api/billing.js', () => ({
   createBillingClient: vi.fn(() => ({
     getSubscription: mockGetSubscription,
     getConnect: mockGetConnect,
+    postConnectOnboardingLink: mockPostConnectOnboardingLink,
   })),
 }));
 
@@ -58,6 +61,13 @@ describe('billing CLI read commands', () => {
     mockGetConnect.mockResolvedValue(
       success({ object: 'billing_connect', connected: false }),
     );
+    mockPostConnectOnboardingLink.mockResolvedValue(
+      success({
+        object: 'billing_connect_onboarding_link',
+        url: 'https://connect.stripe.com/setup/s/abc',
+        expiresAt: '2024-01-01T00:05:00.000Z',
+      }),
+    );
   });
 
   afterEach(() => {
@@ -81,5 +91,16 @@ describe('billing CLI read commands', () => {
       from: 'node',
     });
     expect(mockGetConnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls postConnectOnboardingLink for billing connect-link and prints the URL', async () => {
+    await createProgram().parseAsync(
+      ['node', 'cavuno', 'billing', 'connect-link'],
+      { from: 'node' },
+    );
+    expect(mockPostConnectOnboardingLink).toHaveBeenCalledTimes(1);
+    expect(logSpy.mock.calls.flat().join('\n')).toContain(
+      'https://connect.stripe.com/setup/s/abc',
+    );
   });
 });
