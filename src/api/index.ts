@@ -76,6 +76,10 @@ export { createCouponsClient, type CouponsClient } from './coupons.js';
 export { createBlogClient, type BlogClient } from './blog.js';
 export { createDomainsClient, type DomainsClient } from './domains.js';
 export {
+  createEmailDomainsClient,
+  type EmailDomainsClient,
+} from './email-domains.js';
+export {
   createRedirectsClient,
   type RedirectsClient,
   type RedirectListQuery,

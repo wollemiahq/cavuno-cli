@@ -3,6 +3,14 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.17.0 — 2026-10-19
+
+- **`cavuno email-domains`** manages the domain a board sends email from:
+  `list`, `get`, `add`, `update` (sender name or mailbox), `verify` (check the
+  DNS records now) and `remove`.
+- **`cavuno billing connect-link`** creates a single-use payments onboarding
+  URL for a person to open. It expires within minutes.
+
 ## 1.16.0 — 2026-10-17
 
 - **`cavuno feedback send`** reports anything in Cavuno's API, CLI, MCP server

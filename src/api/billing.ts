@@ -9,7 +9,7 @@ import type { paths } from './generated/openapi-types.js';
 /**
  * Ergonomic facade for the v1 billing surfaces:
  * - Reads: own-account subscription and Connect status
- * - Writes: hosted checkout, guarded plan upgrade
+ * - Writes: hosted checkout, guarded plan upgrade, Connect onboarding link
  *
  * Wire shape:  §1 (funding union) + §5.
  */
@@ -31,6 +31,12 @@ export function createBillingClient(opts: CavunoClientOptions) {
   return {
     getSubscription: () => c.GET('/billing/subscription'),
     getConnect: () => c.GET('/billing/connect'),
+
+    /**
+     * POST /v1/billing/connect/onboarding-link — single-use hosted Stripe
+     * onboarding URL for a human; expires within minutes.
+     */
+    postConnectOnboardingLink: () => c.POST('/billing/connect/onboarding-link'),
 
     /** POST /v1/billing/checkout — hosted Checkout Session URL. */
     postCheckout: (body: BillingCheckoutBody) =>
