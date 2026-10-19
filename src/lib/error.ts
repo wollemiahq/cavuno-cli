@@ -68,6 +68,12 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   domains_reserved_hostname: 3,
   domains_not_found: 4,
   domains_hostname_taken: 7,
+  email_domains_invalid_hostname: 2,
+  email_domains_plan_required: 5,
+  email_domains_not_found: 4,
+  email_domains_already_exists: 7,
+  email_domains_not_verified: 7,
+  email_domains_primary_domain_required: 7,
   //
   operations_not_found: 4,
   operations_already_terminal: 7,

@@ -1,6 +1,6 @@
 {
   "version": "1.16.0",
-  "generatedAt": "2026-10-17T06:34:41.241Z",
+  "generatedAt": "2026-10-19T05:16:14.665Z",
   "groups": [
     {
       "name": "jobs",
@@ -2122,6 +2122,142 @@
       ]
     },
     {
+      "name": "email-domains",
+      "description": "Manage the custom email sender domain for the authenticated account.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List the email sender domain (a board has at most one).",
+          "synopsis": "cavuno email-domains list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno email-domains list"
+          ],
+          "mapsTo": "GET /v1/email-domains"
+        },
+        {
+          "name": "get",
+          "description": "Fetch an email sender domain with its status and DNS records.",
+          "synopsis": "cavuno email-domains get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Email domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno email-domains get ed_123"
+          ],
+          "mapsTo": "GET /v1/email-domains/:id"
+        },
+        {
+          "name": "add",
+          "description": "Add an email sender domain and print the DNS records to publish.",
+          "synopsis": "cavuno email-domains add <host> [options]",
+          "arguments": [
+            {
+              "name": "host",
+              "description": "Hostname, for example notifications.example.com",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--sender-name <name>",
+              "description": "From display name (defaults to the board name)",
+              "required": false
+            },
+            {
+              "flags": "--sender-local-part <mailbox>",
+              "description": "Mailbox before the @ (defaults to info)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-domains add notifications.example.com",
+            "cavuno email-domains add notifications.example.com --sender-name \"Acme Jobs\" --sender-local-part hello"
+          ],
+          "mapsTo": "POST /v1/email-domains"
+        },
+        {
+          "name": "update",
+          "description": "Change the sender name or mailbox of a verified domain.",
+          "synopsis": "cavuno email-domains update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Email domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--sender-name <name>",
+              "description": "From display name",
+              "required": false
+            },
+            {
+              "flags": "--sender-local-part <mailbox>",
+              "description": "Mailbox before the @",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-domains update ed_123 --sender-name \"Acme Jobs\""
+          ],
+          "mapsTo": "PATCH /v1/email-domains/:id"
+        },
+        {
+          "name": "verify",
+          "description": "Check the DNS records now and print the updated domain.",
+          "synopsis": "cavuno email-domains verify <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Email domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno email-domains verify ed_123"
+          ],
+          "mapsTo": "POST /v1/email-domains/:id/verify"
+        },
+        {
+          "name": "remove",
+          "description": "Delete the email sender domain.",
+          "synopsis": "cavuno email-domains remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Email domain ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-domains remove ed_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/email-domains/:id"
+        }
+      ]
+    },
+    {
       "name": "operations",
       "description": "Poll and cancel async operations by ID.",
       "commands": [
@@ -3547,6 +3683,17 @@
             "cavuno billing connect"
           ],
           "mapsTo": "GET /v1/billing/connect"
+        },
+        {
+          "name": "connect-link",
+          "description": "Create a single-use Stripe onboarding URL for a human to connect payments (expires within minutes).",
+          "synopsis": "cavuno billing connect-link",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno billing connect-link"
+          ],
+          "mapsTo": "POST /v1/billing/connect/onboarding-link"
         },
         {
           "name": "checkout",

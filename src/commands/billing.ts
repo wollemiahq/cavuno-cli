@@ -111,6 +111,23 @@ export function registerBillingCommand(root: Command): void {
 
   annotate(
     billing
+      .command('connect-link')
+      .description(
+        'Create a single-use Stripe onboarding URL for a human to connect payments (expires within minutes).',
+      )
+      .action(async function (this: Command) {
+        const r = unwrap(await getClient(this).postConnectOnboardingLink());
+        if (r.error) throw fromApiError(r.error, r.response);
+        print(r.data, getFormat(this));
+      }),
+    {
+      mapsTo: 'POST /v1/billing/connect/onboarding-link',
+      examples: ['cavuno billing connect-link'],
+    },
+  );
+
+  annotate(
+    billing
       .command('checkout')
       .description('Create a hosted checkout URL for a target plan.')
       .requiredOption(
