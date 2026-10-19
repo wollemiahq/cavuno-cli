@@ -6052,6 +6052,7 @@ export interface components {
         requestId: string;
         /** @description Structured context for some errors, such as per-field validation issues. */
         details?: unknown;
+        upgrade?: components['schemas']['PlanUpgradeHint'];
       };
     };
     /** @description A single export row. Fields mirror the entity’s CSV columns (camelCase); array fields are JSON arrays and timestamps are epoch-millisecond UTC numbers. */
@@ -6858,6 +6859,15 @@ export interface components {
       companyFacebookUrl?: string | null;
       companyLinkedinUrl?: string | null;
       companyInstagramUrl?: string | null;
+      ga4MeasurementId?: string | null;
+      gtmContainerId?: string | null;
+      metaPixelId?: string | null;
+      linkedinPartnerId?: string | null;
+      linkedinConversionSignUpId?: string | null;
+      linkedinConversionLoginId?: string | null;
+      linkedinConversionApplyClickId?: string | null;
+      linkedinConversionApplySubmitId?: string | null;
+      linkedinConversionJobAlertSubscribeId?: string | null;
       /**
        * @deprecated
        * @description Deprecated: no longer shown on the password gate. Gate copy now lives on the board's builder-designed coming-soon page. Still accepted and returned for compatibility; it will be removed with the hosted board.
@@ -6988,6 +6998,24 @@ export interface components {
       companyLinkedinUrl?: string | '' | unknown;
       /** @description Company Instagram handle or profile URL. Pass `null` to clear. */
       companyInstagramUrl?: string | '' | unknown;
+      /** @description Google Analytics 4 measurement ID (for example `G-XXXXXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      ga4MeasurementId?: string | null;
+      /** @description Google Tag Manager container ID (for example `GTM-XXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      gtmContainerId?: string | null;
+      /** @description Meta Pixel ID loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      metaPixelId?: string | null;
+      /** @description LinkedIn Insight Tag partner ID loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinPartnerId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor signs up. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionSignUpId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor signs in. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionLoginId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor clicks Apply. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionApplyClickId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor submits an application. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionApplySubmitId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor subscribes to job alerts. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionJobAlertSubscribeId?: string | null;
       /** @description Label shown for the talent directory in the public navigation. 1–50 characters. */
       talentNavLabel?: string;
       /**
@@ -7036,6 +7064,38 @@ export interface components {
       /** @description Unit amount in the smallest currency unit. */
       amountCents: number;
     } | null;
+    /** @description Present only on Operator API errors caused by the board's Cavuno plan. Read `GET /v1/billing/subscription` to choose between `checkout` and `changePlan`, call it with `{ "planKey": requiredPlan }`, and give the returned `url` to a person to confirm. Each `path` is relative to the API origin, not to a `/v1` base URL. Both endpoints need `billing.manage`. Board API errors never include it. */
+    PlanUpgradeHint: {
+      /**
+       * @description The plan capability that blocked the request, named as in `GET /v1/billing/subscription` `capabilities`.
+       * @enum {string}
+       */
+      capability:
+        | 'activeJobsLimit'
+        | 'teamSeatLimit'
+        | 'canBePublic'
+        | 'canRemoveBranding'
+        | 'apiAccess';
+      /**
+       * @description The cheapest self-serve plan that unlocks the action. Pass it as `planKey`. Omitted when it cannot be told without more information; read `GET /v1/billing/subscription` and pick a higher plan.
+       * @enum {string}
+       */
+      requiredPlan?: 'starter' | 'basic' | 'grow' | 'advanced' | 'scale';
+      /** @description Starts a hosted checkout when the board has no active subscription (for example during a trial). */
+      checkout: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/checkout';
+      };
+      /** @description Starts a hosted plan change when the board already has an active subscription. */
+      changePlan: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/upgrade';
+      };
+    };
     ProfileCustomFieldDefinition: {
       key: string;
       label: string;
@@ -7301,7 +7361,7 @@ export interface components {
        */
       object: 'reporting_integration';
       /**
-       * @description The reporting provider key.
+       * @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing.
        * @enum {string}
        */
       provider:
@@ -15411,7 +15471,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15448,7 +15508,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15483,7 +15543,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15524,7 +15584,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15957,6 +16017,7 @@ export interface operations {
                 code: string;
                 message: string;
                 details?: unknown;
+                upgrade?: components['schemas']['PlanUpgradeHint'];
               };
             }[];
           };
