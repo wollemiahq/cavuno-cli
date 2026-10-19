@@ -112,7 +112,7 @@ export interface paths {
     };
     /**
      * Get analytics traffic tables
-     * @description Typed Board homepage traffic breakdowns: top pages, sources, locations, devices, and first-touch UTM campaigns with apply-click attribution. Sources are normalized referrers (never full URLs). Campaigns are tagged inbound sessions only (utm_campaign / utm_source / utm_medium parsed from the first-touch href). Inclusive UTC date-only range; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. `limit` caps each table (1–10, default 10).
+     * @description Typed Board homepage traffic breakdowns: top pages, sources, locations, devices, and first-touch UTM campaigns with apply-click attribution. Sources are normalized referrers (never full URLs). Campaigns are tagged inbound sessions only (utm_campaign / utm_source / utm_medium parsed from the first-touch href), one row per triple; `campaignGroupBy=content` also splits them by utm_content / utm_term. Inclusive UTC date-only range; defaults to the last 30 completed UTC days ending yesterday. Max range 366 days. `limit` caps each table (1–10, default 10).
      */
     get: operations['getAnalyticsTraffic'];
     put?: never;
@@ -369,6 +369,26 @@ export interface paths {
     get: operations['getBillingConnect'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/connect/onboarding-link': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create a Stripe Connect onboarding link
+     * @description Returns a hosted Stripe onboarding URL for the Board's payment connection, creating the connected account first if the Board has none. The URL is single-use and expires within minutes: hand it to a human immediately, then poll `GET /v1/billing/connect` until `acceptingPayments` and `payoutsEnabled` are both true. Calling this again issues a fresh link, so request a new one if the human did not finish in time. When the human finishes or the link expires, Stripe sends them to the Board's payment settings in the dashboard. Sandbox boards use a platform-provisioned test connection and are refused with `sandbox_connect_managed` (409). Requires `plans.manage`.
+     */
+    post: operations['createBillingConnectOnboardingLink'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1517,6 +1537,78 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/email-domains': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List email sender domains
+     * @description Returns the custom email sender domain for your board. A board has at most one, so the list holds zero or one item.
+     */
+    get: operations['listEmailDomains'];
+    put?: never;
+    /**
+     * Add an email sender domain
+     * @description Registers a custom domain for the board’s outgoing email (job alerts, magic links, receipts, Inbox replies) and returns the DNS records to publish. The setup loop is: create the domain, publish every required record in `dnsRecords` at the DNS provider (DNS-only, not proxied), then call `POST /email-domains/{id}/verify` until `status` is `verified`. Cavuno also re-checks pending domains in the background and emails the board owners when the domain verifies. Until then board email keeps sending from the Cavuno address. Requires an active primary custom domain (see `POST /domains`) and a plan that includes branding removal.
+     */
+    post: operations['createEmailDomain'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-domains/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an email sender domain
+     * @description Returns the sender domain with its current status and the DNS records to publish, as of the last check.
+     */
+    get: operations['getEmailDomain'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an email sender domain
+     * @description Removes the sender domain. Board email goes back to the Cavuno address immediately; the DNS records can then be deleted.
+     */
+    delete: operations['deleteEmailDomain'];
+    options?: never;
+    head?: never;
+    /**
+     * Update the email sender
+     * @description Changes the From name or mailbox for a verified sender domain. Requires the `settings.manage` permission, as in the dashboard.
+     */
+    patch: operations['updateEmailDomain'];
+    trace?: never;
+  };
+  '/email-domains/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Verify an email sender domain
+     * @description Checks the domain’s DNS records now and returns the updated domain. Call it after publishing the records in `dnsRecords`; DNS changes can take a few minutes to propagate, so a `pending` or `failed` result right after publishing is normal. If `dnsRecords` was empty, this also retries setting the domain up with the email provider.
+     */
+    post: operations['verifyEmailDomain'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/employer-subscriptions': {
     parameters: {
       query?: never;
@@ -1755,6 +1847,26 @@ export interface paths {
      * @description Restores sign-in for a previously deactivated employer. Company memberships, claims, and jobs were preserved by deactivate. Sessions revoked by deactivate stay revoked; the employer signs in again. Idempotent: an already-active employer returns 200 with the unchanged employer. Requires `employers.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     post: operations['reactivateEmployer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/feedback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report a problem as an AI agent
+     * @description Agent Feedback Protocol v0.1 (https://trybackloop.com/spec/). Report anything that prevented or complicated a task on Cavuno's API, CLI, MCP server or SDK. Responses use the protocol's own shapes, not the usual error envelope. Bodies over 16384 bytes and unknown fields are rejected. 20 reports per account or visitor every 5 minutes. Never include credentials or personal data; send the report, then continue with your task. Discovery: `/.well-known/agent-feedback`.
+     */
+    post: operations['submitAgentFeedback'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2596,6 +2708,34 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/page-content': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a page intro
+     * @description Returns the intro written for one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     */
+    get: operations['getPageContent'];
+    /**
+     * Set a page intro
+     * @description Sets the intro of one category or location page; the last write wins. The page shows it on page 1 with no filters, and the board's public category and place resolutions return it as `introHtml`. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     */
+    put: operations['updatePageContent'];
+    post?: never;
+    /**
+     * Delete a page intro
+     * @description Removes the intro of one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     */
+    delete: operations['deletePageContent'];
     options?: never;
     head?: never;
     patch?: never;
@@ -4043,6 +4183,93 @@ export interface components {
       /** @description ISO-8601 creation timestamp. */
       createdAt: string;
     };
+    AgentFeedbackAccepted: {
+      /** @description The report id, e.g. `fb_…`. */
+      id: string;
+      /** @enum {string} */
+      status: 'accepted';
+      /** @description When Cavuno first received this report (ISO 8601). A retry returns the original time. */
+      received_at: string;
+    };
+    AgentFeedbackError: {
+      error: {
+        /** @description `invalid_json`, `invalid_feedback`, `payload_too_large`, `unsupported_media_type`, `rate_limited`, `rate_limit_unavailable` or `internal_error`. */
+        code: string;
+        /** @description Human-readable explanation. */
+        message: string;
+        /** @description Every problem with the report, for `invalid_feedback`. */
+        details?: {
+          path: string;
+          message: string;
+        }[];
+      };
+    };
+    AgentFeedbackReport: {
+      /**
+       * @description The kind of problem.
+       * @enum {string}
+       */
+      type:
+        | 'missing_capability'
+        | 'bug'
+        | 'unclear_documentation'
+        | 'unexpected_response'
+        | 'unhelpful_error'
+        | 'performance'
+        | 'other';
+      /** @description What you or your user were trying to accomplish, in plain language. */
+      goal: string;
+      /** @description What prevented or complicated the task. */
+      message: string;
+      /** @description API path, CLI command or MCP tool involved, e.g. `/jobs`. */
+      endpoint?: string;
+      /**
+       * @description HTTP method, when `endpoint` is a path.
+       * @enum {string}
+       */
+      method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+      /**
+       * @description `blocked`: the task failed. `degraded`: it finished worse or slower. `completed`: a suggestion only.
+       * @enum {string}
+       */
+      outcome?: 'blocked' | 'degraded' | 'completed';
+      /** @description Whether you found a workaround. */
+      workaround?: boolean;
+      /** @description The workaround, if any. */
+      workaround_description?: string;
+      /** @description What you expected to find or happen. */
+      expected?: string;
+      /** @description A concrete change that would have let you succeed. */
+      suggestion?: string;
+      /** @description The `X-Request-Id` of the failing call, if you have it. */
+      request_id?: string;
+      /** @description Reuse one value for every report in a task; a retry with the same content returns the original report. */
+      session_id?: string;
+      /** @description Who is reporting: name (agent or product) and model. */
+      agent?: {
+        name?: string;
+        version?: string;
+        model?: string;
+        framework?: string;
+      };
+      /** @description Sanitized details of the failing call, with no credentials or personal data. */
+      evidence?: {
+        status_code?: number;
+        request?: {
+          [key: string]: unknown;
+        };
+        response_excerpt?: string;
+      };
+      /** @description Any other context, as a JSON object. */
+      metadata?: {
+        [key: string]: unknown;
+      };
+      /**
+       * @description Protocol version. Only `0.1` is accepted.
+       * @enum {string}
+       */
+      spec_version?: '0.1';
+    };
     AnalyticsChange: {
       absolute: number;
       /** @description Null when both periods are zero (undefined percent change). */
@@ -4138,6 +4365,10 @@ export interface components {
       source: string;
       /** @description utm_medium from the session first-touch href. */
       medium: string;
+      /** @description utm_content from the session first-touch href, '' when untagged. Only with `campaignGroupBy=content`. */
+      content?: string;
+      /** @description utm_term from the session first-touch href, '' when untagged. Only with `campaignGroupBy=content`. */
+      term?: string;
       visits: number;
       visitsChangePercentage: number | null;
       applyClicks: number;
@@ -4342,6 +4573,20 @@ export interface components {
       payoutsEnabled: boolean;
       detailsSubmitted: boolean;
       actionRequired: boolean;
+    };
+    BillingConnectOnboardingLink: {
+      /** @enum {string} */
+      object: 'billing_connect_onboarding_link';
+      /**
+       * Format: uri
+       * @description Single-use hosted Stripe onboarding URL. Hand it to a human straight away; it expires within minutes.
+       */
+      url: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 time after which the URL no longer works.
+       */
+      expiresAt: string;
     };
     BillingHostedCheckoutFunding: {
       /** @enum {string} */
@@ -4601,7 +4846,7 @@ export interface components {
       updatedAt: string | null;
       /** @description Monotonic Candidate lifecycle revision; legacy rows are 0 until the rollout migration runs. */
       revision: number;
-      /** @description ISO-8601 timestamp of the last sign-in, or `null`. */
+      /** @description ISO-8601 timestamp of the last activity on the board (a sign-in or signed-in use), to the hour, or `null`. */
       lastActiveAt: string | null;
     };
     CandidateDetail: components['schemas']['Candidate'] & {
@@ -5199,6 +5444,14 @@ export interface components {
       /** @enum {string} */
       source?: 'external';
     };
+    CreateEmailDomainBody: {
+      /** @description Hostname to send from. It must be the board’s active primary custom domain or one of its subdomains; a subdomain such as `notifications.acme.com` is recommended so the main domain’s email reputation stays separate. Normalized to lowercase. */
+      domain: string;
+      /** @description Display name recipients see in the From header, for example `Acme Jobs`. Defaults to the board name. */
+      senderName?: string;
+      /** @description Mailbox before the `@`, for example `info` or `hello`. Defaults to `info`. Normalized to lowercase. */
+      senderLocalPart?: string;
+    };
     CreateInvitationBody: {
       /**
        * Format: email
@@ -5669,6 +5922,51 @@ export interface components {
       expectedValue: string | null;
     };
     DuplicateJobBody: Record<string, never>;
+    EmailDomain: {
+      id: string;
+      /** @enum {string} */
+      object: 'email_domain';
+      /** @description The sending hostname. */
+      domain: string;
+      /**
+       * @description `pending` until the required DNS records verify, `verified` once board email sends from this domain, `failed` when the last check found a problem (see `statusReason`; publish or fix the records and verify again).
+       * @enum {string}
+       */
+      status: 'pending' | 'verified' | 'failed';
+      senderName: string;
+      senderLocalPart: string;
+      /** @description The From address once the domain is verified. */
+      senderAddress: string;
+      /** @description Records to publish at the domain’s DNS provider. Empty while the domain is still being set up with the email provider; call verify to retry. */
+      dnsRecords: components['schemas']['EmailDomainDnsRecord'][];
+      /**
+       * @description Why the last check failed, when it did. `setup_required`: the domain must be set up with the email provider again; call verify, which re-stages it and returns fresh DNS records. `dns_verification_failed`: the published records do not match yet; check each record’s `status`, fix them and verify again.
+       * @enum {string|null}
+       */
+      statusReason: 'setup_required' | 'dns_verification_failed' | null;
+      verifiedAt: string | null;
+      lastCheckedAt: string | null;
+      createdAt: string;
+    };
+    EmailDomainDnsRecord: {
+      /**
+       * @description `dkim` signs outgoing mail, `return_path` receives bounces and complaints, `dmarc` is an optional policy record.
+       * @enum {string}
+       */
+      purpose: 'dkim' | 'return_path' | 'dmarc';
+      /** @description DNS record type, for example `CNAME` or `TXT`. */
+      type: string;
+      /** @description Host to create the record on, relative to the DNS zone the domain lives in (`@` is the zone itself), as most DNS providers expect it typed. */
+      name: string;
+      /** @description Exact value to publish. */
+      value: string;
+      /** @description Suggested TTL. `Auto` means the DNS provider’s default. */
+      ttl: string;
+      /** @description Whether the domain needs this record to send. DMARC is recommended but optional. */
+      required: boolean;
+      /** @description Last check of this record: `pending`, `verified`, or `failed`. */
+      status: string;
+    };
     Employer: {
       /** @description Unique identifier for the employer. */
       id: string;
@@ -5683,6 +5981,7 @@ export interface components {
       avatarUrl: string | null;
       emailVerifiedAt: string | null;
       createdAt: string;
+      /** @description ISO-8601 timestamp of the last activity on the board (a sign-in or signed-in use), to the hour, or `null`. */
       lastActiveAt: string | null;
       /**
        * Format: date-time
@@ -5935,13 +6234,13 @@ export interface components {
       id: 'indexing_config';
       /** @enum {string} */
       object: 'indexing_config';
-      /** @description Whether the Google Indexing API is enabled: Google is notified immediately when jobs are published or removed. Your site is indexed by Google either way. */
+      /** @description Whether the Google Indexing API is enabled: Google is notified immediately when jobs are published or removed. Your site is indexed by Google either way. `true` means setup is complete: Cavuno only enables it after Google confirms the service account is an Owner of the Search Console property, so there is nothing left to add or verify. Use `lastRunAt` and `lastError` to check that submissions keep succeeding. */
       enabled: boolean;
       /** @description Whether IndexNow (Bing/Yandex) instant indexing is enabled. */
       indexNowEnabled: boolean;
       /** @description Provisioning state of the board's Google Cloud project for the Google Indexing API (`pending` | `provisioning` | `ready` | `error`), or null when setup has not started. */
       provisioningStatus: string | null;
-      /** @description ISO-8601 timestamp of the last Google Indexing API submission, or null. */
+      /** @description ISO-8601 timestamp of the last successful Google Indexing API submission, or null. Submissions are sent when jobs are published or removed, so it stays null until the first one succeeds after indexing is enabled. */
       lastRunAt: string | null;
       /** @description The last recorded Google Indexing API error message, or null. */
       lastError: string | null;
@@ -6574,6 +6873,19 @@ export interface components {
         | 'public';
       signInMethods: components['schemas']['SignInMethods'];
     };
+    PageContent: {
+      /** @enum {string} */
+      object: 'page_content';
+      /** @description The category slug the page was addressed by. */
+      category: string | null;
+      /** @description The place slug the page was addressed by. */
+      place: string | null;
+      /** @description The intro markdown. */
+      intro: string;
+      /** @enum {string} */
+      source: 'human' | 'llm';
+      updatedAt: string;
+    };
     PatchReportingIntegrationBody: {
       /** @description Whether collection is enabled for this integration. */
       enabled?: boolean;
@@ -6850,6 +7162,16 @@ export interface components {
         intervalUnit?: 'day' | 'week' | 'month' | 'year' | null;
         intervalCount?: number | null;
       }[];
+    };
+    PutPageContentBody: {
+      /** @description Markdown shown above the job list on page 1 of the page. Served as sanitized HTML. */
+      intro: string;
+      /**
+       * @description `llm` marks an AI draft a person approved. Defaults to `human`.
+       * @default human
+       * @enum {string}
+       */
+      source: 'human' | 'llm';
     };
     ReconcileCandidateBody: {
       /** @description Opaque caller-chosen identifier for the membership system this write comes from (1–64 characters, `[a-z0-9._-]`). Identifies the source, not the person, and must stay stable: changing it treats the caller as a new source and cannot update an existing link. */
@@ -7926,6 +8248,12 @@ export interface components {
       archived?: boolean;
       /** @description Key of one of the `image` definitions to use as the logo; null clears it. Removing that definition clears it too. */
       logoFieldKey?: string | null;
+    };
+    UpdateEmailDomainBody: {
+      /** @description Display name recipients see in the From header. */
+      senderName?: string;
+      /** @description Mailbox before the `@`. Normalized to lowercase. */
+      senderLocalPart?: string;
     };
     UpdateInvitationBody: {
       /**
@@ -9770,6 +10098,8 @@ export interface operations {
         end?: string;
         /** @description Max rows per traffic table (1–10). Defaults to 10. */
         limit?: number;
+        /** @description Grouping for the `campaigns` table. `campaign` (default) groups by utm_campaign, utm_source and utm_medium. `content` also groups by utm_content and utm_term, for per-post attribution, and adds `content` and `term` to each row. Visits and apply clicks are matched on the same values. */
+        campaignGroupBy?: 'campaign' | 'content';
       };
       header?: never;
       path?: never;
@@ -10283,6 +10613,35 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['BillingConnect'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createBillingConnectOnboardingLink: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Onboarding link created. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BillingConnectOnboardingLink'];
         };
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -13764,6 +14123,287 @@ export interface operations {
       };
     };
   };
+  listEmailDomains: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/email-domains */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['EmailDomain'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEmailDomainBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailDomain'];
+        };
+      };
+      /** @description The hostname is malformed or is not the primary custom domain or one of its subdomains (`email_domains_invalid_hostname`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has a sender domain (`email_domains_already_exists`), or has no active primary custom domain (`email_domains_primary_domain_required`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email domain ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailDomain'];
+        };
+      };
+      /** @description Email domain not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email domain ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Email domain not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email domain ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEmailDomainBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailDomain'];
+        };
+      };
+      /** @description The sender name or mailbox is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Email domain not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The domain is not verified yet (`email_domains_not_verified`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  verifyEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email domain ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailDomain'];
+        };
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Email domain not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listEmployerSubscriptions: {
     parameters: {
       query?: {
@@ -14270,6 +14910,75 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  submitAgentFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AgentFeedbackReport'];
+      };
+    };
+    responses: {
+      /** @description Accepted. A retry with the same `session_id` and content returns the original report. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackAccepted'];
+        };
+      };
+      /** @description `invalid_json` or `invalid_feedback`. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackError'];
+        };
+      };
+      /** @description `payload_too_large`. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackError'];
+        };
+      };
+      /** @description `unsupported_media_type`. */
+      415: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackError'];
+        };
+      };
+      /** @description `rate_limited`. Wait for `Retry-After` seconds. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackError'];
+        };
+      };
+      /** @description `rate_limit_unavailable`. Continue with your task. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AgentFeedbackError'];
         };
       };
     };
@@ -16524,6 +17233,110 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getPageContent: {
+    parameters: {
+      query?: {
+        /** @description Slug of the category page: its slug, an alias, or its board-language slug. */
+        category?: string;
+        /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias. */
+        place?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PageContent'];
+        };
+      };
+      /** @description Unknown page, or the page has no intro. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updatePageContent: {
+    parameters: {
+      query?: {
+        /** @description Slug of the category page: its slug, an alias, or its board-language slug. */
+        category?: string;
+        /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias. */
+        place?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PutPageContentBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PageContent'];
+        };
+      };
+      /** @description Unknown page. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deletePageContent: {
+    parameters: {
+      query?: {
+        /** @description Slug of the category page: its slug, an alias, or its board-language slug. */
+        category?: string;
+        /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias. */
+        place?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted, or the page had no intro. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unknown page. */
+      404: {
         headers: {
           [name: string]: unknown;
         };

@@ -50,6 +50,7 @@ cavuno blog         # Manage blog posts, authors, and tags
 cavuno media        # Upload and fetch media assets
 cavuno settings     # Read and update board settings
 cavuno domains      # Custom domains + DNS verify
+cavuno email-domains  # Custom email sender domain + DNS verify
 cavuno imports      # Bulk-load jobs from CSV (upload → confirm → execute)
 cavuno operations   # Poll / cancel async operations by ID
 cavuno subscribers  # Manage alert subscribers (list, export, import)
@@ -90,6 +91,7 @@ The operator's own platform billing. Reads need `billing.read`; `checkout`/`upgr
 |---|---|
 | `cavuno billing subscription` | Show the account's platform subscription (`active:false` when none) |
 | `cavuno billing connect` | Show normalized payment connection readiness |
+| `cavuno billing connect-link` | Get a single-use Stripe onboarding URL for a human (expires within minutes) |
 | `cavuno billing checkout --plan <key> [--interval]` | Get a hosted Checkout URL to subscribe (rejects if already subscribed — use `upgrade`) |
 | `cavuno billing upgrade --plan <key> [--interval]` | Get a hosted human-confirmation URL for a plan change |
 
@@ -201,6 +203,17 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno domains add <host>` | Register a custom domain |
 | `cavuno domains verify <id>` | Start async DNS verification |
 | `cavuno domains remove <id>` | Delete a custom domain |
+
+### Email domains
+
+| Command | Description |
+|---|---|
+| `cavuno email-domains list` | List the email sender domain (at most one per board) |
+| `cavuno email-domains get <id>` | Fetch the domain, its status, and the DNS records to publish |
+| `cavuno email-domains add <host>` | Register a sender domain (`--sender-name`, `--sender-local-part`) |
+| `cavuno email-domains update <id>` | Change the sender name or mailbox once verified |
+| `cavuno email-domains verify <id>` | Check the DNS records now |
+| `cavuno email-domains remove <id>` | Delete the sender domain (`--yes`) |
 
 ### Webhooks
 
@@ -372,7 +385,7 @@ Run `cavuno <group> <command> --help` for full flag detail, or see [the online r
 
 ## Destructive commands
 
-Every command that deletes data — any command backed by a `DELETE` route (`jobs delete`, `companies delete`, `companies delete-logo`, `blog posts/authors/tags delete`, `domains remove`, `candidates delete`, `employers delete`, `reporting disconnect`, `members remove`, `invitations revoke`) plus `members transfer-ownership` (which is irreversible without the new owner handing it back) — confirms before it runs.
+Every command that deletes data — any command backed by a `DELETE` route (`jobs delete`, `companies delete`, `companies delete-logo`, `blog posts/authors/tags delete`, `domains remove`, `email-domains remove`, `candidates delete`, `employers delete`, `reporting disconnect`, `members remove`, `invitations revoke`) plus `members transfer-ownership` (which is irreversible without the new owner handing it back) — confirms before it runs.
 
 - In an interactive terminal you get a `y/N` prompt that defaults to **No**. Anything but `y`/`yes` aborts with exit code 2.
 - Pass `--yes` (`-y`) to skip the prompt. This is the documented path for scripts, CI, and agents.
