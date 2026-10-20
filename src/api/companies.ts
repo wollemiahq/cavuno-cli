@@ -1,6 +1,7 @@
 import {
   type CavunoClient,
   type CavunoClientOptions,
+  type IdempotencyOptions,
   createCavunoClient,
 } from './client.js';
 
@@ -29,13 +30,22 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
         o: { params: { query: Record<string, unknown> } },
       ) => Promise<unknown>
     )(path, { params: { query: query ?? {} } });
-  const post = (path: string, body?: AnyBody) =>
+  const post = (
+    path: string,
+    body?: AnyBody,
+    idempotency?: IdempotencyOptions,
+  ) =>
     (
       c.POST as unknown as (
         p: string,
-        o: { body?: AnyBody },
+        o: { body?: AnyBody; headers?: Record<string, string> },
       ) => Promise<unknown>
-    )(path, { body });
+    )(path, {
+      body,
+      ...(idempotency
+        ? { headers: { 'Idempotency-Key': idempotency.idempotencyKey } }
+        : {}),
+    });
   const patch = (path: string, body: AnyBody) =>
     (
       c.PATCH as unknown as (
@@ -85,6 +95,66 @@ export function createCompaniesClient(opts: CavunoClientOptions) {
       id: string,
       query?: { cursor?: string; limit?: number; status?: string },
     ) => get(`/companies/${encodeURIComponent(id)}/jobs`, query),
+    /** Plans assigned to a company, active first. */
+    listPlanAssignments: (
+      id: string,
+      query?: { cursor?: string; limit?: number; status?: string },
+    ) => get(`/companies/${encodeURIComponent(id)}/plan-assignments`, query),
+    /** Assign a membership plan at no charge. */
+    assignPlan: (
+      id: string,
+      body: { planId: string; expiresAt?: string },
+      idempotency?: IdempotencyOptions,
+    ) =>
+      post(
+        `/companies/${encodeURIComponent(id)}/plan-assignments`,
+        body,
+        idempotency,
+      ),
+    revokePlanAssignment: (
+      id: string,
+      assignmentId: string,
+      idempotency?: IdempotencyOptions,
+    ) =>
+      post(
+        `/companies/${encodeURIComponent(id)}/plan-assignments/${encodeURIComponent(assignmentId)}/revoke`,
+        {},
+        idempotency,
+      ),
+    /** Plan invoices issued to a company, newest first. */
+    listPlanInvoices: (
+      id: string,
+      query?: { cursor?: string; limit?: number },
+    ) => get(`/companies/${encodeURIComponent(id)}/plan-invoices`, query),
+    /** Invoice a company for a membership plan. Idempotency-Key required. */
+    invoicePlan: (
+      id: string,
+      body: {
+        planId: string;
+        contactEmail: string;
+        amountCents?: number;
+        currency?: string;
+        billingInterval?: 'month' | 'year';
+        billingIntervalCount?: number;
+      },
+      idempotency: IdempotencyOptions,
+    ) =>
+      post(
+        `/companies/${encodeURIComponent(id)}/plan-invoices`,
+        body,
+        idempotency,
+      ),
+    /** Cancel a plan invoice awaiting payment. Idempotency-Key required. */
+    cancelPlanInvoice: (
+      id: string,
+      invoiceId: string,
+      idempotency: IdempotencyOptions,
+    ) =>
+      post(
+        `/companies/${encodeURIComponent(id)}/plan-invoices/${encodeURIComponent(invoiceId)}/cancel`,
+        {},
+        idempotency,
+      ),
     deleteLogo: (id: string) =>
       del(`/companies/${encodeURIComponent(id)}/logo`),
     /**

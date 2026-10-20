@@ -8,7 +8,7 @@
  * as the CLI does, instead of dumping raw envelope JSON.
  *
  * Wire shape per `docs/api/v1/01-conventions.md §5.2`:
- *   { error: { code, message, requestId, details? } }
+ *   { error: { code, message, requestId, details?, upgrade? } }
  *
  * The function is pure and synchronous: caller passes the parsed
  * `error` envelope (typed loosely as `unknown`) plus the `Response`
@@ -22,6 +22,12 @@ interface ErrorEnvelope {
     message?: string;
     details?: unknown;
     requestId?: string;
+    upgrade?: {
+      capability?: string;
+      requiredPlan?: string;
+      checkout?: { method?: string; path?: string };
+      changePlan?: { method?: string; path?: string };
+    };
   };
 }
 
@@ -40,6 +46,7 @@ interface ResponseLike {
  *     <message>
  *     - <issue.path>: <issue.message>          (when validation_*)
  *     retry-after: <Retry-After>s              (when 429)
+ *     upgrade: <plan hint and billing endpoints>  (plan-limit errors)
  *     request-id: <requestId>                  (when present)
  */
 export function formatApiError(
@@ -67,6 +74,17 @@ export function formatApiError(
   if (response.status === 429) {
     const retryAfter = response.headers.get('retry-after');
     if (retryAfter) lines.push(`  retry-after: ${retryAfter}s`);
+  }
+
+  const upgrade = env?.error?.upgrade;
+  if (upgrade?.checkout?.path && upgrade.changePlan?.path) {
+    const plan = upgrade.requiredPlan ?? 'a higher plan';
+    const planKey = upgrade.requiredPlan
+      ? `{"planKey":"${upgrade.requiredPlan}"}`
+      : 'a higher planKey';
+    lines.push(
+      `  upgrade: ${plan} unlocks ${upgrade.capability ?? 'this'}. ${upgrade.checkout.method ?? 'POST'} ${upgrade.checkout.path} (no subscription) or ${upgrade.changePlan.path} with ${planKey}, then a person opens the returned url`,
+    );
   }
 
   if (env?.error?.requestId) {

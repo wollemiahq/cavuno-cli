@@ -1201,6 +1201,94 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/companies/{id}/plan-assignments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a company's plan assignments
+     * @description Lists the plans assigned to a company, active first, then expired and revoked. Use `status=active` for the plans that currently give the company its benefits (for example, the membership that lets it post jobs). Cursor-paginated. Requires `plans.read`.
+     */
+    get: operations['listCompanyPlanAssignments'];
+    put?: never;
+    /**
+     * Assign a plan to a company
+     * @description Gives a company a membership plan at no charge, the same as **Assign** in the company plan dialog. The plan must be an active membership plan. A company holds one membership at a time: assigning while it has an active membership, or a membership invoice awaiting payment, returns 409 `company_plan_membership_taken`. To charge for the plan, create a plan invoice instead. Accepts an optional `Idempotency-Key` header. Requires `plans.manage`.
+     */
+    post: operations['createCompanyPlanAssignment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/plan-assignments/{assignmentId}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revoke a company's plan assignment
+     * @description Ends an active plan assignment now, the same as **Revoke** in the company plan dialog. The record stays, with `status: revoked`. Revoking an assignment that is already revoked or expired returns it unchanged. Revoking does not cancel a recurring plan invoice. Accepts an optional `Idempotency-Key` header. Requires `plans.manage`.
+     */
+    post: operations['revokeCompanyPlanAssignment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/plan-invoices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a company's plan invoices
+     * @description Lists the plan invoices issued to a company, newest first. Poll it to see when an invoice is paid: the status becomes `paid` and `assignmentId` names the plan assignment it created. Cursor-paginated. Requires `plans.read`.
+     */
+    get: operations['listCompanyPlanInvoices'];
+    put?: never;
+    /**
+     * Invoice a company for a plan
+     * @description Sells a membership plan to a company by invoice, the same as **Generate invoice** in the company plan dialog. Issues a Stripe invoice on the board's connected account, due in 30 days, and returns its `hostedInvoiceUrl`. Cavuno does not send the invoice itself; share the link with the employer. The plan is assigned to the company when the invoice is paid. The plan's own price and, for a subscription plan, its interval set the terms; for a plan without a price, send `amountCents` and `currency`. Send `billingInterval` to make the invoice recur. A company holds one membership at a time, so a company with an active membership or another membership invoice awaiting payment gets 409 `company_plan_membership_taken`. Requires an `Idempotency-Key` header: a retry with the same key returns the first response and never issues a second invoice. Requires `plans.manage`.
+     */
+    post: operations['createCompanyPlanInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/plan-invoices/{invoiceId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a company's plan invoice
+     * @description Cancels a plan invoice awaiting payment, the same as **Cancel invoice** in the company plan dialog: a recurring invoice stops recurring, the Stripe invoice is voided, and the company can be assigned or invoiced again. Canceling an invoice that is already canceled returns it unchanged. Requires an `Idempotency-Key` header and `plans.manage`.
+     */
+    post: operations['cancelCompanyPlanInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/companies/{id}/unblock': {
     parameters: {
       query?: never;
@@ -2187,6 +2275,98 @@ export interface paths {
      * @description Rotates the accept token and extends the expiry by 7 days. The response includes the new token and `acceptUrl`.
      */
     post: operations['renewInvitation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/job-feeds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List job feeds
+     * @description Returns your Board's recurring job feeds, oldest first.
+     */
+    get: operations['listJobFeeds'];
+    put?: never;
+    /**
+     * Create a job feed
+     * @description Connects an XML job feed URL (for example an ATS or Indeed-style feed). The URL is fetched once to check it serves XML before it is saved. The first run starts straight away and detects the field mapping; until it finishes the feed is `pending_mapping` and `mapping` is `null`. Poll `GET /job-feeds/{id}`.
+     */
+    post: operations['createJobFeed'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/job-feeds/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a job feed
+     * @description Returns one job feed with its schedule, last run outcome, and mapping review state.
+     */
+    get: operations['getJobFeed'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a job feed
+     * @description Stops pulling the feed. Jobs it already published stay published and are no longer linked to it.
+     */
+    delete: operations['deleteJobFeed'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a job feed
+     * @description Changes any of the URL, name, schedule, enabled state, job limit, apply-URL attribution, and mapping in one request. A changed URL is checked first. A mapping edit applies from the next run, which starts now.
+     */
+    patch: operations['updateJobFeed'];
+    trace?: never;
+  };
+  '/job-feeds/{id}/redetect-mapping': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Re-detect a job feed mapping
+     * @description Discards the current mapping and detects a fresh one on the next run, which starts now. The feed is returned with `mapping: null` until that run finishes.
+     */
+    post: operations['redetectJobFeedMapping'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/job-feeds/{id}/runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List job feed runs
+     * @description Returns the runs of one feed, most recent first, with row counts and row errors.
+     */
+    get: operations['listJobFeedRuns'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -5178,6 +5358,69 @@ export interface components {
       /** @description ISO-8601 timestamp the claim was created. */
       requestedAt: string;
     };
+    CompanyPlanAssignment: {
+      /** @description The plan assignment ID. */
+      id: string;
+      /** @enum {string} */
+      object: 'company_plan_assignment';
+      companyId: string;
+      /** @description The assigned plan. Null for a custom level granted in the dashboard without a plan. */
+      planId: string | null;
+      planName: string | null;
+      /**
+       * @description `manual`: assigned by an operator. `purchase`: bought at checkout. `invoice`: granted when a plan invoice was paid. `synced`: set by a membership sync.
+       * @enum {string}
+       */
+      source: 'manual' | 'purchase' | 'invoice' | 'synced';
+      /**
+       * @description Only `active` assignments give the company its plan benefits.
+       * @enum {string}
+       */
+      status: 'active' | 'expired' | 'revoked';
+      /** @description ISO-8601 time the assignment ends, or null for no end. */
+      expiresAt: string | null;
+      /** @description ISO-8601 creation time. */
+      createdAt: string;
+      /** @description ISO-8601 time of the last change. */
+      updatedAt: string;
+    };
+    CompanyPlanInvoice: {
+      /** @description The plan invoice ID. */
+      id: string;
+      /** @enum {string} */
+      object: 'company_plan_invoice';
+      companyId: string;
+      planId: string;
+      planName: string | null;
+      /**
+       * @description `issued`: awaiting payment. `paid`: paid, and the plan was assigned to the company. `canceled`: canceled before payment. `uncollectible`: marked uncollectible in Stripe.
+       * @enum {string}
+       */
+      status: 'issued' | 'paid' | 'canceled' | 'uncollectible';
+      /** @description Amount per invoice, in currency minor units. */
+      amountCents: number;
+      /** @description Lowercase ISO 4217 currency code. */
+      currency: string;
+      /**
+       * @description Null for a one-off invoice; otherwise how often it recurs.
+       * @enum {string|null}
+       */
+      billingInterval: 'month' | 'year' | null;
+      /** @description Number of intervals between invoices (3 months = quarterly). */
+      billingIntervalCount: number | null;
+      /** @description The billing email the invoice is for. */
+      contactEmail: string;
+      /** @description The payment page for the employer. Cavuno does not send the invoice itself; share this link with them. */
+      hostedInvoiceUrl: string | null;
+      /** @description ISO-8601 due date (30 days after issue). */
+      dueAt: string | null;
+      /** @description The plan assignment created when the invoice was paid; null until then. */
+      assignmentId: string | null;
+      /** @description ISO-8601 creation time. */
+      createdAt: string;
+      /** @description ISO-8601 time of the last change. */
+      updatedAt: string;
+    };
     CompanySummary: {
       /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the company endpoints (e.g. `GET /v1/companies/{id}`). */
       id: string;
@@ -5398,6 +5641,35 @@ export interface components {
       /** @description URL-friendly slug for the company. Auto-generated from `name` when omitted. */
       slug?: string;
     };
+    CreateCompanyPlanAssignmentBody: {
+      /** @description An active (not archived) plan with `purpose: membership` on this board. */
+      planId: string;
+      /**
+       * Format: date-time
+       * @description ISO-8601 time the assignment ends; must be in the future. Omit for no end.
+       */
+      expiresAt?: string;
+    };
+    CreateCompanyPlanInvoiceBody: {
+      /** @description An active (not archived) plan with `purpose: membership` on this board. */
+      planId: string;
+      /**
+       * Format: email
+       * @description Billing email of the employer who will pay.
+       */
+      contactEmail: string;
+      /** @description Amount per invoice in currency minor units. Required when the plan has no price; rejected when it has one. */
+      amountCents?: number;
+      /** @description ISO 4217 currency code. Send it together with `amountCents`. */
+      currency?: string;
+      /**
+       * @description Make the invoice recur. Omit for a one-off invoice. Rejected when the plan is a subscription with its own interval, which then sets the terms.
+       * @enum {string}
+       */
+      billingInterval?: 'month' | 'year';
+      /** @description Intervals between invoices (default 1; `month` with 3 is quarterly). Needs `billingInterval`. */
+      billingIntervalCount?: number;
+    };
     CreateCouponBody: {
       name: string;
       percentOff?: number | null;
@@ -5609,6 +5881,30 @@ export interface components {
       status?: 'draft' | 'published';
       /** @description Set to `true` to create this job even though another job on your account already uses the same `applicationUrl` (for example, several roles that share one ATS page or one application inbox). Only skips the application-URL duplicate check; a matching `externalId` or an identical job (same company, title, location and description) still returns 409 `jobs_already_exists`. Defaults to `false`. */
       allowSharedApplicationUrl?: boolean;
+    };
+    CreateJobFeedBody: {
+      /**
+       * Format: uri
+       * @description The XML feed URL. Checked before it is saved: Cavuno fetches it once and refuses a blocked, unreachable or non-XML URL.
+       */
+      url: string;
+      /** @description Display name. Defaults to a name derived from the URL host. */
+      name?: string;
+      /**
+       * @description Hours between pulls.
+       * @default 6
+       */
+      intervalHours: 1 | 3 | 6 | 12 | 24;
+      /**
+       * @description Expire a job once it is missing from two successful runs in a row.
+       * @default true
+       */
+      expireMissing: boolean;
+      /**
+       * @description Most jobs this feed may have published at once. `null` means no per-feed cap (plan and Board limits still apply).
+       * @default null
+       */
+      jobLimit: number | null;
     };
     CreateMarketBody: {
       name: string;
@@ -6052,6 +6348,7 @@ export interface components {
         requestId: string;
         /** @description Structured context for some errors, such as per-field validation issues. */
         details?: unknown;
+        upgrade?: components['schemas']['PlanUpgradeHint'];
       };
     };
     /** @description A single export row. Fields mirror the entity’s CSV columns (camelCase); array fields are JSON arrays and timestamps are epoch-millisecond UTC numbers. */
@@ -6393,6 +6690,141 @@ export interface components {
       /** @description Company website URL, or `null` if no website is set. */
       website: string | null;
     } | null;
+    JobFeed: {
+      id: string;
+      /** @enum {string} */
+      object: 'job_feed';
+      name: string;
+      url: string;
+      /**
+       * @description `pending_mapping`: the first run (or a re-detection) has not produced a mapping yet. `failing`: recent runs failed (see `lastError`). `needs_review`: runs are held until the mapping is fixed or re-detected.
+       * @enum {string}
+       */
+      status: 'pending_mapping' | 'active' | 'failing' | 'needs_review';
+      enabled: boolean;
+      intervalHours: number;
+      expireMissing: boolean;
+      jobLimit: number | null;
+      applyUrlAttribution: components['schemas']['JobFeedApplyUrlAttribution'];
+      lastRunAt: string | null;
+      /** @description When the next pull is due. `null` while the feed is disabled. */
+      nextRunAt: string | null;
+      lastError: string | null;
+      consecutiveFailures: number;
+      createdAt: string;
+    };
+    /** @description Outbound apply-URL attribution for this feed's jobs. `inherit` uses the Board setting. */
+    JobFeedApplyUrlAttribution:
+      | {
+          /** @enum {string} */
+          mode: 'inherit';
+        }
+      | {
+          /** @enum {string} */
+          mode: 'off';
+        }
+      | {
+          /** @enum {string} */
+          mode: 'append';
+          params: components['schemas']['ApplyUrlParamTemplate'][];
+        };
+    JobFeedDetail: {
+      id: string;
+      /** @enum {string} */
+      object: 'job_feed';
+      name: string;
+      url: string;
+      /**
+       * @description `pending_mapping`: the first run (or a re-detection) has not produced a mapping yet. `failing`: recent runs failed (see `lastError`). `needs_review`: runs are held until the mapping is fixed or re-detected.
+       * @enum {string}
+       */
+      status: 'pending_mapping' | 'active' | 'failing' | 'needs_review';
+      enabled: boolean;
+      intervalHours: number;
+      expireMissing: boolean;
+      jobLimit: number | null;
+      applyUrlAttribution: components['schemas']['JobFeedApplyUrlAttribution'];
+      lastRunAt: string | null;
+      /** @description When the next pull is due. `null` while the feed is disabled. */
+      nextRunAt: string | null;
+      lastError: string | null;
+      consecutiveFailures: number;
+      createdAt: string;
+      /** @description Typed, operator-reviewable mapping. `null` until the first run (or a re-detection) has detected one. */
+      mapping: {
+        fieldMappings: {
+          sourceColumn: string;
+          targetField: string;
+          confidence: number;
+          notes?: string;
+        }[];
+        valueTransforms: {
+          sourceColumn: string;
+          targetField: string;
+          map: {
+            [key: string]: string;
+          };
+          fallback?: string;
+        }[];
+        defaults: {
+          employmentType?: string;
+          remoteOption?: string;
+          currency?: string;
+          descriptionFormat?: string;
+        };
+        /** @description Job fields whose detected mapping should be checked. */
+        fieldsNeedingReview: string[];
+        /** @description Columns seen in the feed, with a few sample values. */
+        sourceColumns: {
+          name: string;
+          samples: string[];
+        }[];
+      } | null;
+    };
+    JobFeedFieldMapping: {
+      sourceColumn: string;
+      /** @description A Cavuno job field, e.g. `title`, `company_name`, `description`, `apply_url`, `location_label`, `employment_type`. */
+      targetField: string;
+      confidence: number;
+      notes?: string;
+    };
+    /** @description Replaces the feed's column mappings and value transforms. Applies from the next run, which starts now. */
+    JobFeedMappingInput: {
+      fieldMappings: components['schemas']['JobFeedFieldMapping'][];
+      /** @default [] */
+      valueTransforms: components['schemas']['JobFeedValueTransform'][];
+    };
+    JobFeedRun: {
+      id: string;
+      /** @enum {string} */
+      object: 'job_feed_run';
+      status: string;
+      totalRows: number;
+      processedRows: number;
+      createdCount: number;
+      updatedCount: number;
+      skippedCount: number;
+      errorCount: number;
+      /** @description The first 20 row errors; `errorCount` is the total. */
+      errors: {
+        rowIndex: number;
+        code: string;
+        message: string;
+      }[];
+      startedAt: string | null;
+      completedAt: string | null;
+      createdAt: string;
+    };
+    JobFeedValueTransform: {
+      sourceColumn: string;
+      /** @description A Cavuno job field, e.g. `title`, `company_name`, `description`, `apply_url`, `location_label`, `employment_type`. */
+      targetField: string;
+      /** @description Source value → Cavuno value. */
+      map: {
+        [key: string]: string;
+      };
+      fallback?: string;
+    };
     JobFormConfig: {
       sponsorship?: {
         visible: boolean;
@@ -6858,6 +7290,15 @@ export interface components {
       companyFacebookUrl?: string | null;
       companyLinkedinUrl?: string | null;
       companyInstagramUrl?: string | null;
+      ga4MeasurementId?: string | null;
+      gtmContainerId?: string | null;
+      metaPixelId?: string | null;
+      linkedinPartnerId?: string | null;
+      linkedinConversionSignUpId?: string | null;
+      linkedinConversionLoginId?: string | null;
+      linkedinConversionApplyClickId?: string | null;
+      linkedinConversionApplySubmitId?: string | null;
+      linkedinConversionJobAlertSubscribeId?: string | null;
       /**
        * @deprecated
        * @description Deprecated: no longer shown on the password gate. Gate copy now lives on the board's builder-designed coming-soon page. Still accepted and returned for compatibility; it will be removed with the hosted board.
@@ -6988,6 +7429,24 @@ export interface components {
       companyLinkedinUrl?: string | '' | unknown;
       /** @description Company Instagram handle or profile URL. Pass `null` to clear. */
       companyInstagramUrl?: string | '' | unknown;
+      /** @description Google Analytics 4 measurement ID (for example `G-XXXXXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      ga4MeasurementId?: string | null;
+      /** @description Google Tag Manager container ID (for example `GTM-XXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      gtmContainerId?: string | null;
+      /** @description Meta Pixel ID loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      metaPixelId?: string | null;
+      /** @description LinkedIn Insight Tag partner ID loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinPartnerId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor signs up. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionSignUpId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor signs in. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionLoginId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor clicks Apply. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionApplyClickId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor submits an application. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionApplySubmitId?: string | null;
+      /** @description LinkedIn conversion ID fired when a visitor subscribes to job alerts. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
+      linkedinConversionJobAlertSubscribeId?: string | null;
       /** @description Label shown for the talent directory in the public navigation. 1–50 characters. */
       talentNavLabel?: string;
       /**
@@ -7036,6 +7495,38 @@ export interface components {
       /** @description Unit amount in the smallest currency unit. */
       amountCents: number;
     } | null;
+    /** @description Present only on Operator API errors caused by the board's Cavuno plan. Read `GET /v1/billing/subscription` to choose between `checkout` and `changePlan`, call it with `{ "planKey": requiredPlan }`, and give the returned `url` to a person to confirm. Each `path` is relative to the API origin, not to a `/v1` base URL. Both endpoints need `billing.manage`. Board API errors never include it. */
+    PlanUpgradeHint: {
+      /**
+       * @description The plan capability that blocked the request, named as in `GET /v1/billing/subscription` `capabilities`.
+       * @enum {string}
+       */
+      capability:
+        | 'activeJobsLimit'
+        | 'teamSeatLimit'
+        | 'canBePublic'
+        | 'canRemoveBranding'
+        | 'apiAccess';
+      /**
+       * @description The cheapest self-serve plan that unlocks the action. Pass it as `planKey`. Omitted when it cannot be told without more information; read `GET /v1/billing/subscription` and pick a higher plan.
+       * @enum {string}
+       */
+      requiredPlan?: 'starter' | 'basic' | 'grow' | 'advanced' | 'scale';
+      /** @description Starts a hosted checkout when the board has no active subscription (for example during a trial). */
+      checkout: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/checkout';
+      };
+      /** @description Starts a hosted plan change when the board already has an active subscription. */
+      changePlan: {
+        /** @enum {string} */
+        method: 'POST';
+        /** @enum {string} */
+        path: '/v1/billing/upgrade';
+      };
+    };
     ProfileCustomFieldDefinition: {
       key: string;
       label: string;
@@ -7301,7 +7792,7 @@ export interface components {
        */
       object: 'reporting_integration';
       /**
-       * @description The reporting provider key.
+       * @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing.
        * @enum {string}
        */
       provider:
@@ -8400,6 +8891,23 @@ export interface components {
       collectionOverrides?: components['schemas']['JobCollectionOverride'][];
       /** @description The job title. */
       title?: string;
+    };
+    UpdateJobFeedBody: {
+      /**
+       * Format: uri
+       * @description The XML feed URL. Checked before it is saved: Cavuno fetches it once and refuses a blocked, unreachable or non-XML URL.
+       */
+      url?: string;
+      name?: string;
+      /** @description Hours between pulls. */
+      intervalHours?: 1 | 3 | 6 | 12 | 24;
+      expireMissing?: boolean;
+      /** @description A disabled feed is not pulled until it is enabled again. */
+      enabled?: boolean;
+      /** @description Most jobs this feed may have published at once. `null` means no per-feed cap (plan and Board limits still apply). */
+      jobLimit?: number | null;
+      applyUrlAttribution?: components['schemas']['JobFeedApplyUrlAttribution'];
+      mapping?: components['schemas']['JobFeedMappingInput'];
     };
     UpdateMarketBody: {
       name?: string;
@@ -13052,6 +13560,315 @@ export interface operations {
       };
     };
   };
+  listCompanyPlanAssignments: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+        /** @description Only return assignments in this status. */
+        status?: 'active' | 'expired' | 'revoked';
+      };
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A page of plan assignments. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/companies/{id}/plan-assignments */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CompanyPlanAssignment'][];
+          };
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCompanyPlanAssignment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCompanyPlanAssignmentBody'];
+      };
+    };
+    responses: {
+      /** @description The new plan assignment. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyPlanAssignment'];
+        };
+      };
+      /** @description Invalid body, or `expiresAt` is not in the future. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Company or plan not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The plan is archived or not a membership plan (`company_plan_not_assignable`), or the company already has a membership or a membership invoice awaiting payment (`company_plan_membership_taken`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  revokeCompanyPlanAssignment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+        /** @description The plan assignment ID returned by the list or assign call. */
+        assignmentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The plan assignment after the revoke. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyPlanAssignment'];
+        };
+      };
+      /** @description Company or plan assignment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listCompanyPlanInvoices: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A page of plan invoices. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/companies/{id}/plan-invoices */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CompanyPlanInvoice'][];
+          };
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCompanyPlanInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCompanyPlanInvoiceBody'];
+      };
+    };
+    responses: {
+      /** @description The issued plan invoice. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyPlanInvoice'];
+        };
+      };
+      /** @description Invalid body, a plan without a price and no amount (`company_plan_invoice_amount_required`), or an amount or interval for a plan that sets its own (`company_plan_invoice_terms_fixed`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Company or plan not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Stripe is not connected (`company_plan_invoice_connect_required`), the plan is archived or not a membership plan (`company_plan_not_assignable`), or the company already has a membership or a membership invoice awaiting payment (`company_plan_membership_taken`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Stripe could not confirm the invoice (`company_plan_invoice_stripe_error`). An invoice may still have been issued: list the company's plan invoices before trying again with a new Idempotency-Key. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  cancelCompanyPlanInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+        /** @description The plan invoice ID returned by the list or create call. */
+        invoiceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The plan invoice after the cancel. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyPlanInvoice'];
+        };
+      };
+      /** @description Company or plan invoice not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The invoice is paid or uncollectible, or is still being issued and can be canceled in a few seconds (`company_plan_invoice_not_cancelable`), or Stripe is not connected (`company_plan_invoice_connect_required`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Stripe could not cancel the invoice (`company_plan_invoice_stripe_error`); try again. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   createCompanyUnblock: {
     parameters: {
       query?: never;
@@ -15411,7 +16228,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15448,7 +16265,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15483,7 +16300,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15524,7 +16341,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The reporting provider key. */
+        /** @description The reporting provider key. `tinybird` is deprecated: first-party Board analytics need no connection and are served live by the `/v1/analytics` endpoints, so connecting it changes nothing. */
         provider:
           | 'search_console'
           | 'adsense'
@@ -15815,6 +16632,324 @@ export interface operations {
       };
     };
   };
+  listJobFeeds: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/job-feeds */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['JobFeed'][];
+          };
+        };
+      };
+      /** @description The pagination cursor or query is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createJobFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateJobFeedBody'];
+      };
+    };
+    responses: {
+      /** @description The created job feed. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobFeedDetail'];
+        };
+      };
+      /** @description Invalid request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The Board already has its maximum job feeds. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The feed URL failed the pre-save check. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Too many feed URL checks. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getJobFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The job feed ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobFeedDetail'];
+        };
+      };
+      /** @description Job feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteJobFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The job feed ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateJobFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The job feed ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateJobFeedBody'];
+      };
+    };
+    responses: {
+      /** @description The updated job feed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobFeedDetail'];
+        };
+      };
+      /** @description Invalid request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Job feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A mapping edit before the feed has a mapping. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The new feed URL failed the pre-save check. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Too many feed URL checks. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  redetectJobFeedMapping: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The job feed ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The job feed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobFeedDetail'];
+        };
+      };
+      /** @description Job feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listJobFeedRuns: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The job feed ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/job-feeds/{id}/runs */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['JobFeedRun'][];
+          };
+        };
+      };
+      /** @description The pagination cursor or query is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Job feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listJobs: {
     parameters: {
       query?: {
@@ -15957,6 +17092,7 @@ export interface operations {
                 code: string;
                 message: string;
                 details?: unknown;
+                upgrade?: components['schemas']['PlanUpgradeHint'];
               };
             }[];
           };

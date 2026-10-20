@@ -95,6 +95,39 @@ export function registerSettingsCommand(root: Command): void {
       '--cookie-banner-manage-label <text>',
       'Cookie banner manage/preferences label',
     )
+    .option(
+      '--ga4-measurement-id <id>',
+      'Google Analytics 4 measurement ID (pass "" to clear)',
+    )
+    .option(
+      '--gtm-container-id <id>',
+      'Google Tag Manager container ID (pass "" to clear)',
+    )
+    .option('--meta-pixel-id <id>', 'Meta Pixel ID (pass "" to clear)')
+    .option(
+      '--linkedin-partner-id <id>',
+      'LinkedIn Insight Tag partner ID (pass "" to clear)',
+    )
+    .option(
+      '--linkedin-conversion-sign-up-id <id>',
+      'LinkedIn conversion ID for sign-ups (pass "" to clear)',
+    )
+    .option(
+      '--linkedin-conversion-login-id <id>',
+      'LinkedIn conversion ID for sign-ins (pass "" to clear)',
+    )
+    .option(
+      '--linkedin-conversion-apply-click-id <id>',
+      'LinkedIn conversion ID for Apply clicks (pass "" to clear)',
+    )
+    .option(
+      '--linkedin-conversion-apply-submit-id <id>',
+      'LinkedIn conversion ID for submitted applications (pass "" to clear)',
+    )
+    .option(
+      '--linkedin-conversion-job-alert-subscribe-id <id>',
+      'LinkedIn conversion ID for job alert sign-ups (pass "" to clear)',
+    )
     .action(async function (this: Command) {
       const client = getClient(this);
       const format = getFormat(this);
@@ -146,6 +179,20 @@ export function registerSettingsCommand(root: Command): void {
         body.cookieBannerAcceptLabel = opts.cookieBannerAcceptLabel;
       if (opts.cookieBannerManageLabel !== undefined)
         body.cookieBannerManageLabel = opts.cookieBannerManageLabel;
+      // Analytics tracking IDs: an empty string clears the stored ID.
+      for (const key of [
+        'ga4MeasurementId',
+        'gtmContainerId',
+        'metaPixelId',
+        'linkedinPartnerId',
+        'linkedinConversionSignUpId',
+        'linkedinConversionLoginId',
+        'linkedinConversionApplyClickId',
+        'linkedinConversionApplySubmitId',
+        'linkedinConversionJobAlertSubscribeId',
+      ] as const) {
+        if (opts[key] !== undefined) body[key] = opts[key];
+      }
       if (Object.keys(body).length === 0) {
         console.error('No fields to update — pass at least one --flag.');
         process.exit(2);
