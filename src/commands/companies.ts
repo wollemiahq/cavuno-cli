@@ -10,6 +10,11 @@ import {
   withYesOption,
 } from '../lib/confirm.js';
 import { fromApiError } from '../lib/error.js';
+import {
+  resolveIdempotency,
+  type IdempotencyOptions,
+  withIdempotencyOption,
+} from '../lib/idempotency.js';
 import { print, type OutputFormat } from '../lib/output.js';
 
 import { readFile } from 'node:fs/promises';
@@ -535,6 +540,245 @@ export function registerCompaniesCommand(root: Command): void {
     {
       mapsTo: 'GET /v1/companies/:id/jobs',
       examples: ['cavuno companies list-jobs k18acme... --status published'],
+    },
+  );
+
+  annotate(
+    companies
+      .command('list-plan-assignments')
+      .description(
+        'List the plans assigned to a company (active first, then expired and revoked).',
+      )
+      .argument('<id>', 'Company ID')
+      .option('--status <status>', 'Filter by status (active|expired|revoked)')
+      .option('--limit <n>', 'Page size 1-100 (default 50)', (v) =>
+        parseInt(v, 10),
+      )
+      .option('--cursor <cursor>', 'Cursor from a previous page')
+      .action(async function (this: Command, id: string) {
+        const opts = this.opts<{
+          status?: string;
+          limit?: number;
+          cursor?: string;
+        }>();
+        const r = unwrap(await getClient(this).listPlanAssignments(id, opts));
+        if (r.error) throw fromApiError(r.error, r.response);
+        print(r.data, getFormat(this));
+      }),
+    {
+      mapsTo: 'GET /v1/companies/:id/plan-assignments',
+      examples: [
+        'cavuno companies list-plan-assignments k18acme... --status active',
+      ],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      companies
+        .command('assign-plan')
+        .description(
+          'Assign a membership plan to a company at no charge. One membership per company; revoke the current one first.',
+        )
+        .argument('<id>', 'Company ID')
+        .requiredOption('--plan <planId>', 'Active membership plan ID')
+        .option(
+          '--expires-at <iso>',
+          'ISO-8601 time the assignment ends (default: no end)',
+        ),
+    ).action(async function (this: Command, id: string) {
+      const opts = this.opts<
+        IdempotencyOptions & { plan: string; expiresAt?: string }
+      >();
+      const r = unwrap(
+        await getClient(this).assignPlan(
+          id,
+          {
+            planId: opts.plan,
+            ...(opts.expiresAt !== undefined && { expiresAt: opts.expiresAt }),
+          },
+          resolveIdempotency(opts),
+        ),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'POST /v1/companies/:id/plan-assignments',
+      examples: [
+        'cavuno companies assign-plan k18acme... --plan k22gold...',
+        'cavuno companies assign-plan k18acme... --plan k22gold... --expires-at 2027-01-01T00:00:00Z',
+      ],
+    },
+  );
+
+  annotate(
+    withYesOption(
+      withIdempotencyOption(
+        companies
+          .command('revoke-plan')
+          .description(
+            "Revoke a company's plan assignment now. Does not cancel a recurring plan invoice.",
+          )
+          .argument('<id>', 'Company ID')
+          .argument('<assignmentId>', 'Plan assignment ID'),
+      ),
+    ).action(async function (this: Command, id: string, assignmentId: string) {
+      await confirmOrAbort({
+        message: `Revoke plan assignment ${assignmentId} from company ${id}? The company loses the plan's benefits now.`,
+        yes: this.optsWithGlobals<ConfirmOptions>().yes,
+      });
+      const opts = this.opts<IdempotencyOptions>();
+      const r = unwrap(
+        await getClient(this).revokePlanAssignment(
+          id,
+          assignmentId,
+          resolveIdempotency(opts),
+        ),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'POST /v1/companies/:id/plan-assignments/:assignmentId/revoke',
+      examples: ['cavuno companies revoke-plan k18acme... k33assign... --yes'],
+    },
+  );
+
+  annotate(
+    companies
+      .command('list-plan-invoices')
+      .description(
+        'List plan invoices issued to a company, newest first. A paid invoice names the assignment it created.',
+      )
+      .argument('<id>', 'Company ID')
+      .option('--limit <n>', 'Page size 1-100 (default 50)', (v) =>
+        parseInt(v, 10),
+      )
+      .option('--cursor <cursor>', 'Cursor from a previous page')
+      .action(async function (this: Command, id: string) {
+        const opts = this.opts<{ limit?: number; cursor?: string }>();
+        const r = unwrap(await getClient(this).listPlanInvoices(id, opts));
+        if (r.error) throw fromApiError(r.error, r.response);
+        print(r.data, getFormat(this));
+      }),
+    {
+      mapsTo: 'GET /v1/companies/:id/plan-invoices',
+      examples: ['cavuno companies list-plan-invoices k18acme...'],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      companies
+        .command('invoice-plan')
+        .description(
+          'Invoice a company for a membership plan through Stripe (due in 30 days). Prints the invoice link to share with the employer; the plan is assigned when it is paid.',
+        )
+        .argument('<id>', 'Company ID')
+        .requiredOption('--plan <planId>', 'Active membership plan ID')
+        .requiredOption('--email <email>', "Employer's billing email")
+        .option(
+          '--amount-cents <n>',
+          'Amount per invoice in minor units (only for a plan without a price)',
+          (v) => parseInt(v, 10),
+        )
+        .option(
+          '--currency <code>',
+          'ISO 4217 currency, with --amount-cents (e.g. usd)',
+        )
+        .option(
+          '--interval <interval>',
+          'Make it recur: month|year (not for a subscription plan with its own interval)',
+        )
+        .option(
+          '--interval-count <n>',
+          'Intervals between invoices, 1-12 (month + 3 = quarterly)',
+          (v) => parseInt(v, 10),
+        ),
+    ).action(async function (this: Command, id: string) {
+      const opts = this.opts<
+        IdempotencyOptions & {
+          plan: string;
+          email: string;
+          amountCents?: number;
+          currency?: string;
+          interval?: string;
+          intervalCount?: number;
+        }
+      >();
+      if (
+        opts.interval !== undefined &&
+        opts.interval !== 'month' &&
+        opts.interval !== 'year'
+      ) {
+        console.error('--interval: expected month or year');
+        process.exit(2);
+      }
+      const r = unwrap(
+        await getClient(this).invoicePlan(
+          id,
+          {
+            planId: opts.plan,
+            contactEmail: opts.email,
+            ...(opts.amountCents !== undefined && {
+              amountCents: opts.amountCents,
+            }),
+            ...(opts.currency !== undefined && { currency: opts.currency }),
+            ...(opts.interval !== undefined && {
+              billingInterval: opts.interval,
+            }),
+            ...(opts.intervalCount !== undefined && {
+              billingIntervalCount: opts.intervalCount,
+            }),
+          },
+          resolveIdempotency(opts),
+        ),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'POST /v1/companies/:id/plan-invoices',
+      examples: [
+        'cavuno companies invoice-plan k18acme... --plan k22gold... --email billing@acme.com',
+        'cavuno companies invoice-plan k18acme... --plan k22silver... --email billing@acme.com --amount-cents 49900 --currency usd --interval month --interval-count 3',
+      ],
+    },
+  );
+
+  annotate(
+    withYesOption(
+      withIdempotencyOption(
+        companies
+          .command('cancel-plan-invoice')
+          .description(
+            'Cancel a plan invoice awaiting payment: a recurring invoice stops, and the Stripe invoice is voided.',
+          )
+          .argument('<id>', 'Company ID')
+          .argument('<invoiceId>', 'Plan invoice ID'),
+      ),
+    ).action(async function (this: Command, id: string, invoiceId: string) {
+      await confirmOrAbort({
+        message: `Cancel plan invoice ${invoiceId} for company ${id}? The employer can no longer pay it.`,
+        yes: this.optsWithGlobals<ConfirmOptions>().yes,
+      });
+      const opts = this.opts<IdempotencyOptions>();
+      const r = unwrap(
+        await getClient(this).cancelPlanInvoice(
+          id,
+          invoiceId,
+          resolveIdempotency(opts),
+        ),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'POST /v1/companies/:id/plan-invoices/:invoiceId/cancel',
+      examples: [
+        'cavuno companies cancel-plan-invoice k18acme... k44invoice... --yes',
+      ],
     },
   );
 
