@@ -16,6 +16,7 @@ import { registerFeedbackCommand } from './commands/feedback.js';
 import { registerImportsCommand } from './commands/imports.js';
 import { registerIndexingCommand } from './commands/indexing.js';
 import { registerInvitationsCommand } from './commands/invitations.js';
+import { registerJobFeedsCommand } from './commands/job-feeds.js';
 import { registerJobsCommand, registerUsageCommand } from './commands/jobs.js';
 import { registerMarketingPermissionsCommand } from './commands/marketing-permissions.js';
 import { registerMeCommand } from './commands/me.js';
@@ -56,6 +57,7 @@ export const PUBLIC_GROUPS = [
   'transactions',
   'indexing',
   'imports',
+  'job-feeds',
   'backfill',
   'analytics',
   'paywall',
@@ -105,6 +107,7 @@ export function createCliProgram(version: string) {
   registerIndexingCommand(program);
   registerMediaCommand(program);
   registerImportsCommand(program);
+  registerJobFeedsCommand(program);
   registerBackfillCommand(program);
   registerAnalyticsCommand(program);
   registerPaywallCommand(program);
