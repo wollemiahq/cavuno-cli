@@ -3,6 +3,21 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.18.0 — 2026-10-20
+
+- **`cavuno job-feeds`** connects and manages recurring XML job feeds:
+  `list`, `get`, `create`, `update`, `delete`, `redetect-mapping` and `runs`.
+- **`cavuno companies`** assigns and invoices company plans:
+  `list-plan-assignments`, `assign-plan`, `revoke-plan`, `list-plan-invoices`,
+  `invoice-plan` and `cancel-plan-invoice`.
+- **`cavuno settings update`** sets the board's analytics tracking IDs:
+  `--ga4-measurement-id`, `--gtm-container-id`, `--meta-pixel-id`,
+  `--linkedin-partner-id` and the LinkedIn conversion ID flags. Pass `""` to
+  clear one.
+- When a request is refused because of the board's plan, the error adds an
+  `upgrade:` line naming the plan that unlocks it and the billing endpoint to
+  start the upgrade.
+
 ## 1.17.0 — 2026-10-19
 
 - **`cavuno email-domains`** manages the domain a board sends email from:

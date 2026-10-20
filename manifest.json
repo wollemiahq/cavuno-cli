@@ -1,5 +1,5 @@
 {
-  "version": "1.17.0",
+  "version": "1.18.0",
   "generatedAt": "2026-10-19T05:16:14.665Z",
   "groups": [
     {
@@ -1087,6 +1087,229 @@
           "mapsTo": "GET /v1/companies/:id/jobs"
         },
         {
+          "name": "list-plan-assignments",
+          "description": "List the plans assigned to a company (active first, then expired and revoked).",
+          "synopsis": "cavuno companies list-plan-assignments <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Filter by status (active|expired|revoked)",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Cursor from a previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list-plan-assignments k18acme... --status active"
+          ],
+          "mapsTo": "GET /v1/companies/:id/plan-assignments"
+        },
+        {
+          "name": "assign-plan",
+          "description": "Assign a membership plan to a company at no charge. One membership per company; revoke the current one first.",
+          "synopsis": "cavuno companies assign-plan <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--plan <planId>",
+              "description": "Active membership plan ID",
+              "required": true
+            },
+            {
+              "flags": "--expires-at <iso>",
+              "description": "ISO-8601 time the assignment ends (default: no end)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies assign-plan k18acme... --plan k22gold...",
+            "cavuno companies assign-plan k18acme... --plan k22gold... --expires-at 2027-01-01T00:00:00Z"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-assignments"
+        },
+        {
+          "name": "revoke-plan",
+          "description": "Revoke a company's plan assignment now. Does not cancel a recurring plan invoice.",
+          "synopsis": "cavuno companies revoke-plan <id> <assignmentId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "assignmentId",
+              "description": "Plan assignment ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies revoke-plan k18acme... k33assign... --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-assignments/:assignmentId/revoke"
+        },
+        {
+          "name": "list-plan-invoices",
+          "description": "List plan invoices issued to a company, newest first. A paid invoice names the assignment it created.",
+          "synopsis": "cavuno companies list-plan-invoices <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Cursor from a previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies list-plan-invoices k18acme..."
+          ],
+          "mapsTo": "GET /v1/companies/:id/plan-invoices"
+        },
+        {
+          "name": "invoice-plan",
+          "description": "Invoice a company for a membership plan through Stripe (due in 30 days). Prints the invoice link to share with the employer; the plan is assigned when it is paid.",
+          "synopsis": "cavuno companies invoice-plan <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--plan <planId>",
+              "description": "Active membership plan ID",
+              "required": true
+            },
+            {
+              "flags": "--email <email>",
+              "description": "Employer's billing email",
+              "required": true
+            },
+            {
+              "flags": "--amount-cents <n>",
+              "description": "Amount per invoice in minor units (only for a plan without a price)",
+              "required": false
+            },
+            {
+              "flags": "--currency <code>",
+              "description": "ISO 4217 currency, with --amount-cents (e.g. usd)",
+              "required": false
+            },
+            {
+              "flags": "--interval <interval>",
+              "description": "Make it recur: month|year (not for a subscription plan with its own interval)",
+              "required": false
+            },
+            {
+              "flags": "--interval-count <n>",
+              "description": "Intervals between invoices, 1-12 (month + 3 = quarterly)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies invoice-plan k18acme... --plan k22gold... --email billing@acme.com",
+            "cavuno companies invoice-plan k18acme... --plan k22silver... --email billing@acme.com --amount-cents 49900 --currency usd --interval month --interval-count 3"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-invoices"
+        },
+        {
+          "name": "cancel-plan-invoice",
+          "description": "Cancel a plan invoice awaiting payment: a recurring invoice stops, and the Stripe invoice is voided.",
+          "synopsis": "cavuno companies cancel-plan-invoice <id> <invoiceId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Company ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "invoiceId",
+              "description": "Plan invoice ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno companies cancel-plan-invoice k18acme... k44invoice... --yes"
+          ],
+          "mapsTo": "POST /v1/companies/:id/plan-invoices/:invoiceId/cancel"
+        },
+        {
           "name": "batch",
           "description": "Run a batch of company operations. Pass JSON via --file or stdin. Exit 0 on HTTP 200 even if some rows fail — inspect the body.",
           "synopsis": "cavuno companies batch [options]",
@@ -1832,6 +2055,51 @@
             {
               "flags": "--cookie-banner-manage-label <text>",
               "description": "Cookie banner manage/preferences label",
+              "required": false
+            },
+            {
+              "flags": "--ga4-measurement-id <id>",
+              "description": "Google Analytics 4 measurement ID (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--gtm-container-id <id>",
+              "description": "Google Tag Manager container ID (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--meta-pixel-id <id>",
+              "description": "Meta Pixel ID (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-partner-id <id>",
+              "description": "LinkedIn Insight Tag partner ID (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-conversion-sign-up-id <id>",
+              "description": "LinkedIn conversion ID for sign-ups (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-conversion-login-id <id>",
+              "description": "LinkedIn conversion ID for sign-ins (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-conversion-apply-click-id <id>",
+              "description": "LinkedIn conversion ID for Apply clicks (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-conversion-apply-submit-id <id>",
+              "description": "LinkedIn conversion ID for submitted applications (pass \"\" to clear)",
+              "required": false
+            },
+            {
+              "flags": "--linkedin-conversion-job-alert-subscribe-id <id>",
+              "description": "LinkedIn conversion ID for job alert sign-ups (pass \"\" to clear)",
               "required": false
             }
           ],
@@ -4274,6 +4542,237 @@
             "cavuno imports quota"
           ],
           "mapsTo": "GET /v1/imports/quota"
+        }
+      ]
+    },
+    {
+      "name": "job-feeds",
+      "description": "Recurring XML job feeds pulled from a URL on a schedule (connect, map, re-detect, runs).",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List job feeds (paginated, oldest first).",
+          "synopsis": "cavuno job-feeds list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-50 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds list"
+          ],
+          "mapsTo": "GET /v1/job-feeds"
+        },
+        {
+          "name": "get",
+          "description": "Fetch one job feed (schedule, last run, mapping review state).",
+          "synopsis": "cavuno job-feeds get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno job-feeds get k17feed"
+          ],
+          "mapsTo": "GET /v1/job-feeds/:id"
+        },
+        {
+          "name": "create",
+          "description": "Connect an XML feed URL. The URL is checked before it is saved; the first run detects the mapping.",
+          "synopsis": "cavuno job-feeds create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--url <url>",
+              "description": "The XML feed URL",
+              "required": true
+            },
+            {
+              "flags": "--name <name>",
+              "description": "Display name (defaults from the URL host)",
+              "required": false
+            },
+            {
+              "flags": "--interval-hours <hours>",
+              "description": "Hours between pulls: 1, 3, 6, 12 or 24 (default 6)",
+              "required": false
+            },
+            {
+              "flags": "--expire-missing <bool>",
+              "description": "Expire jobs missing from two runs in a row (default true)",
+              "required": false
+            },
+            {
+              "flags": "--job-limit <n|none>",
+              "description": "Most jobs this feed may publish at once",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds create --url https://ats.example.com/jobs.xml",
+            "cavuno job-feeds create --url https://ats.example.com/jobs.xml --interval-hours 12 --job-limit 500"
+          ],
+          "mapsTo": "POST /v1/job-feeds"
+        },
+        {
+          "name": "update",
+          "description": "Change the URL, name, schedule, enabled state, job limit, attribution or mapping.",
+          "synopsis": "cavuno job-feeds update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--url <url>",
+              "description": "New feed URL (checked before it is saved)",
+              "required": false
+            },
+            {
+              "flags": "--name <name>",
+              "description": "Display name",
+              "required": false
+            },
+            {
+              "flags": "--interval-hours <hours>",
+              "description": "Hours between pulls: 1, 3, 6, 12 or 24",
+              "required": false
+            },
+            {
+              "flags": "--enabled <bool>",
+              "description": "Pull on schedule (true) or pause the feed (false)",
+              "required": false
+            },
+            {
+              "flags": "--expire-missing <bool>",
+              "description": "Expire jobs missing from two runs in a row",
+              "required": false
+            },
+            {
+              "flags": "--job-limit <n|none>",
+              "description": "Most jobs this feed may publish at once; none clears it",
+              "required": false
+            },
+            {
+              "flags": "--apply-url-attribution <json>",
+              "description": "e.g. {\"mode\":\"inherit\"}, {\"mode\":\"off\"} or {\"mode\":\"append\",\"params\":[...]}",
+              "required": false
+            },
+            {
+              "flags": "--mapping <json>",
+              "description": "Replacement mapping: {\"fieldMappings\":[...],\"valueTransforms\":[...]}",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds update k17feed --enabled false",
+            "cavuno job-feeds update k17feed --url https://ats.example.com/v2.xml --interval-hours 24"
+          ],
+          "mapsTo": "PATCH /v1/job-feeds/:id"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a job feed. Jobs it already published stay published.",
+          "synopsis": "cavuno job-feeds delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds delete k17feed --yes"
+          ],
+          "mapsTo": "DELETE /v1/job-feeds/:id"
+        },
+        {
+          "name": "redetect-mapping",
+          "description": "Discard the mapping and detect a fresh one on the next run, which starts now.",
+          "synopsis": "cavuno job-feeds redetect-mapping <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds redetect-mapping k17feed"
+          ],
+          "mapsTo": "POST /v1/job-feeds/:id/redetect-mapping"
+        },
+        {
+          "name": "runs",
+          "description": "List a job feed's runs (most recent first).",
+          "synopsis": "cavuno job-feeds runs <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Job feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-50 (default 20)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno job-feeds runs k17feed --limit 5"
+          ],
+          "mapsTo": "GET /v1/job-feeds/:id/runs"
         }
       ]
     },
