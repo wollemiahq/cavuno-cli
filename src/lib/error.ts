@@ -101,6 +101,10 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   imports_unsupported_format: 2,
   imports_unsupported_type: 2,
   imports_payload_too_large: 2,
+  job_feeds_not_found: 4,
+  job_feeds_limit_reached: 5,
+  job_feeds_mapping_pending: 7,
+  job_feeds_url_rejected: 2,
   // sourcing
   sourcing_not_configured: 4,
   sourcing_exclusion_not_found: 4,
