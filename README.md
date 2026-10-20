@@ -52,6 +52,7 @@ cavuno settings     # Read and update board settings
 cavuno domains      # Custom domains + DNS verify
 cavuno email-domains  # Custom email sender domain + DNS verify
 cavuno imports      # Bulk-load jobs from CSV (upload → confirm → execute)
+cavuno job-feeds    # Recurring XML job feeds pulled from a URL on a schedule
 cavuno operations   # Poll / cancel async operations by ID
 cavuno subscribers  # Manage alert subscribers (list, export, import)
 cavuno taxonomies   # remote helpers + skills/categories/markets CRUD
@@ -156,6 +157,12 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies find-by-domain <domain>` | Resolve a company by website domain |
 | `cavuno companies find-or-create --name <n> [...]` | Resolve by domain or create |
 | `cavuno companies list-jobs <id>` | List jobs at a company |
+| `cavuno companies list-plan-assignments <id> [--status]` | List the plans assigned to a company (`plans.read`) |
+| `cavuno companies assign-plan <id> --plan <planId> [--expires-at]` | Assign a membership plan at no charge (`plans.manage`) |
+| `cavuno companies revoke-plan <id> <assignmentId>` | Revoke a company's plan assignment (`plans.manage`) |
+| `cavuno companies list-plan-invoices <id>` | List plan invoices issued to a company (`plans.read`) |
+| `cavuno companies invoice-plan <id> --plan <planId> --email <e> [...]` | Invoice a company for a membership plan through Stripe; prints the invoice link (`plans.manage`) |
+| `cavuno companies cancel-plan-invoice <id> <invoiceId>` | Cancel a plan invoice awaiting payment (`plans.manage`) |
 | `cavuno companies batch [--file ops.json]` | Run a batch of company operations |
 
 ### Blog
@@ -283,6 +290,26 @@ Bulk-load jobs from a CSV. The pipeline is two async steps: `create` uploads the
 # Upload, wait for discovery, then confirm the proposed mapping and wait for the import
 cavuno imports create ./jobs.csv --wait
 cavuno imports confirm imports_k25abc --wait
+```
+
+### Job feeds
+
+Connect a recurring XML job feed (an ATS or Indeed-style feed) by URL. Cavuno fetches the URL once to check it serves XML before saving it, then pulls it on a schedule. The first run detects the field mapping; until it finishes the feed is `pending_mapping` and `mapping` is `null`, so poll `get`.
+
+| Command | Description |
+|---|---|
+| `cavuno job-feeds list` | List job feeds |
+| `cavuno job-feeds get <id>` | Fetch one feed (schedule, last run, mapping review state) |
+| `cavuno job-feeds create --url <url>` | Connect a feed (`--name`, `--interval-hours`, `--expire-missing`, `--job-limit`) |
+| `cavuno job-feeds update <id>` | Change `--url`, `--name`, `--interval-hours`, `--enabled`, `--expire-missing`, `--job-limit`, `--apply-url-attribution <json>`, `--mapping <json>` |
+| `cavuno job-feeds delete <id>` | Delete a feed; its published jobs stay (`--yes` to skip the prompt) |
+| `cavuno job-feeds redetect-mapping <id>` | Discard the mapping and detect a fresh one on the next run |
+| `cavuno job-feeds runs <id>` | List a feed's runs with row counts and errors |
+
+```bash
+cavuno job-feeds create --url https://ats.example.com/jobs.xml --interval-hours 12
+cavuno job-feeds get k17feed
+cavuno job-feeds update k17feed --enabled false
 ```
 
 ### Operations

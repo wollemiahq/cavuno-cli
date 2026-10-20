@@ -95,6 +95,14 @@ export {
   type ImportUploadOptions,
 } from './imports.js';
 export {
+  createJobFeedsClient,
+  type JobFeedsClient,
+  type JobFeedListQuery,
+  type JobFeedRunListQuery,
+  type CreateJobFeedBody,
+  type UpdateJobFeedBody,
+} from './job-feeds.js';
+export {
   createMediaClient,
   type MediaClient,
   type MediaPurpose,
