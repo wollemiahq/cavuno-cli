@@ -156,6 +156,31 @@ describe('settings update CLI options', () => {
     });
   });
 
+  it('forwards analytics tracking ID flags, with "" clearing an ID', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'update',
+        '--ga4-measurement-id',
+        'G-ABC123XYZ',
+        '--linkedin-conversion-apply-submit-id',
+        '44444444',
+        '--meta-pixel-id',
+        '',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockUpdate.mock.calls[0]![0]).toEqual({
+      ga4MeasurementId: 'G-ABC123XYZ',
+      linkedinConversionApplySubmitId: '44444444',
+      metaPixelId: '',
+    });
+  });
+
   it('forwards update-adsense --google-consent-message as a boolean', async () => {
     mockUpdateAdsense.mockResolvedValue(
       success({ object: 'settings_adsense' }),
