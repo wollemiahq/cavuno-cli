@@ -4778,8 +4778,90 @@
     },
     {
       "name": "backfill",
-      "description": "Manage Backfill rules, company sources, and aggregate progress (dashboard-shaped Operator surface).",
+      "description": "Manage Backfill rules, company sources, Board-wide settings, and aggregate progress (dashboard-shaped Operator surface).",
       "commands": [
+        {
+          "name": "settings get",
+          "description": "Show the Board-wide Backfill settings.",
+          "synopsis": "cavuno backfill settings get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno backfill settings get"
+          ],
+          "mapsTo": "GET /v1/backfill/settings"
+        },
+        {
+          "name": "settings update",
+          "description": "Change one or more Board-wide Backfill settings. Omitted settings are unchanged.",
+          "synopsis": "cavuno backfill settings update [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--job-limit <n>",
+              "description": "Most Backfill jobs live at once (1-100000); pass an empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--max-job-age-days <n>",
+              "description": "Skip jobs posted more than N days ago (1-365); pass an empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--exclude-worldwide-remote",
+              "description": "Skip remote jobs open worldwide (expires those already live)",
+              "required": false
+            },
+            {
+              "flags": "--no-exclude-worldwide-remote",
+              "description": "Stop skipping remote jobs open worldwide",
+              "required": false
+            },
+            {
+              "flags": "--sponsored-jobs",
+              "description": "Include sponsored (pay-per-click) jobs",
+              "required": false
+            },
+            {
+              "flags": "--no-sponsored-jobs",
+              "description": "Stop including sponsored jobs",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill settings update --job-limit 2000 --max-job-age-days 30",
+            "cavuno backfill settings update --job-limit ''",
+            "cavuno backfill settings update --exclude-worldwide-remote --no-sponsored-jobs"
+          ],
+          "mapsTo": "PATCH /v1/backfill/settings"
+        },
+        {
+          "name": "blocked-jobs unblock-all",
+          "description": "Let Backfill import removed jobs again. Unblocks the first 200 now and the rest in the background.",
+          "synopsis": "cavuno backfill blocked-jobs unblock-all [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill blocked-jobs unblock-all --yes"
+          ],
+          "mapsTo": "POST /v1/backfill/blocked-jobs/unblock-all"
+        },
         {
           "name": "progress",
           "description": "Show aggregate Backfill progress for the Board (onboarding-shaped).",

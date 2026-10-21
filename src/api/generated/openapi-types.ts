@@ -123,6 +123,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/backfill/blocked-jobs/unblock-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unblock all removed Backfill jobs
+     * @description Let Backfill import jobs again that were removed from the Board (the dashboard "Unblock all" action). Unblocks the first batch of 200 before returning and the rest in background batches; `continuing` says whether any remain. Jobs removed after the request stay blocked. Nothing on the Board is deleted. Requires `backfill.manage` and an `Idempotency-Key` header.
+     */
+    post: operations['unblockAllBackfillBlockedJobs'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/backfill/companies': {
     parameters: {
       query?: never;
@@ -333,6 +353,30 @@ export interface paths {
      * @description Partially update a Backfill rule. Omitted fields keep their current values, matching the dashboard edit form. The resulting rule must retain at least one card or nonempty structured filter. Requires an `Idempotency-Key` header.
      */
     patch: operations['updateBackfillRule'];
+    trace?: never;
+  };
+  '/backfill/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Backfill settings
+     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the "Posted within" age filter, the worldwide-remote exclusion and the sponsored-jobs switch. Requires `backfill.read`.
+     */
+    get: operations['getBackfillSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Backfill settings
+     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `maxJobAgeDays` and `excludeWorldwideRemote` are saved together; `sponsoredJobsEnabled` is applied after them. Changing `sponsoredJobsEnabled` before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Clean-up of jobs already on the Board runs in the background. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
+     */
+    patch: operations['updateBackfillSettings'];
     trace?: never;
   };
   '/billing/checkout': {
@@ -4678,6 +4722,30 @@ export interface components {
       createdAt: string | null;
       updatedAt: string | null;
     };
+    BackfillSettings: {
+      /** @enum {string} */
+      object: 'backfill_settings';
+      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit: number | null;
+      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      maxJobAgeDays: number | null;
+      /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
+      excludeWorldwideRemote: boolean;
+      /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
+      sponsoredJobsEnabled: boolean;
+      /** @description Whether `sponsoredJobsEnabled` can be changed on this Board. `false` until Backfill is set up; a PATCH that changes it then returns `backfill_not_configured`. */
+      sponsoredJobsConfigurable: boolean;
+    };
+    BackfillUnblockAll: {
+      /** @enum {string} */
+      object: 'backfill_unblock_all';
+      /** @description Removed jobs Backfill was skipping when the request arrived. `null` while the Board count is still being built. */
+      blockedBefore: number | null;
+      /** @description Jobs unblocked by this request before it returned. */
+      unblocked: number;
+      /** @description True when more blocked jobs remain; they are unblocked in background batches shortly after the response. */
+      continuing: boolean;
+    };
     BatchRequestBody: {
       /** @description Array of sub-operations to execute. Each entry runs independently and reports its result on the corresponding entry of the response `data` array. Sub-operation `id` values must be unique within the batch. Up to 100 entries. */
       operations: (
@@ -8656,6 +8724,16 @@ export interface components {
         workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
       };
     };
+    UpdateBackfillSettingsBody: {
+      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit?: number | null;
+      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      maxJobAgeDays?: number | null;
+      /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
+      excludeWorldwideRemote?: boolean;
+      /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
+      sponsoredJobsEnabled?: boolean;
+    };
     UpdateBlogPostBody: {
       slug?: string;
       html?: string;
@@ -10635,6 +10713,35 @@ export interface operations {
       };
     };
   };
+  unblockAllBackfillBlockedJobs: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description How many jobs were unblocked so far. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillUnblockAll'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listBackfillCompanies: {
     parameters: {
       query: {
@@ -11059,6 +11166,68 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['BackfillRule'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getBackfillSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board-wide Backfill settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillSettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateBackfillSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateBackfillSettingsBody'];
+      };
+    };
+    responses: {
+      /** @description The Board-wide Backfill settings after the update. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillSettings'];
         };
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */

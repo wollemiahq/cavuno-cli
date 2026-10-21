@@ -46,6 +46,7 @@ cavuno employer-subscriptions  # List/get employer subscriptions
 cavuno transactions # Read the board transactions ledger
 cavuno coupons      # Manage coupons + promotion codes
 cavuno companies    # Manage companies (incl. batch)
+cavuno backfill     # Backfill rules, company sources, settings, and progress
 cavuno blog         # Manage blog posts, authors, and tags
 cavuno media        # Upload and fetch media assets
 cavuno settings     # Read and update board settings
@@ -164,6 +165,18 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies invoice-plan <id> --plan <planId> --email <e> [...]` | Invoice a company for a membership plan through Stripe; prints the invoice link (`plans.manage`) |
 | `cavuno companies cancel-plan-invoice <id> <invoiceId>` | Cancel a plan invoice awaiting payment (`plans.manage`) |
 | `cavuno companies batch [--file ops.json]` | Run a batch of company operations |
+
+### Backfill
+
+| Command | Description |
+|---|---|
+| `cavuno backfill progress` | Show aggregate Backfill progress |
+| `cavuno backfill rules list\|get\|create\|update\|remove` | Manage named Backfill rules |
+| `cavuno backfill companies list --state <state>` | List companies for one Backfill tab state |
+| `cavuno backfill companies start\|stop\|bulk-start\|bulk-stop\|match\|mark-no-match` | Manage Backfill company sources |
+| `cavuno backfill settings get` | Show the Board-wide Backfill settings |
+| `cavuno backfill settings update [...]` | Set `--job-limit`, `--max-job-age-days` (empty string clears), `--[no-]exclude-worldwide-remote`, `--[no-]sponsored-jobs` |
+| `cavuno backfill blocked-jobs unblock-all --yes` | Let Backfill import removed jobs again (drains in the background) |
 
 ### Blog
 
