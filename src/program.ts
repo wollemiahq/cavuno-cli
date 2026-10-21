@@ -8,6 +8,7 @@ import { registerBuilderCommand } from './commands/builder.js';
 import { registerCandidatesCommand } from './commands/candidates.js';
 import { registerCompaniesCommand } from './commands/companies.js';
 import { registerCouponsCommand } from './commands/coupons.js';
+import { registerDistributionCommand } from './commands/distribution.js';
 import { registerDomainsCommand } from './commands/domains.js';
 import { registerEmailDomainsCommand } from './commands/email-domains.js';
 import { registerEmployerSubscriptionsCommand } from './commands/employer-subscriptions.js';
@@ -66,6 +67,7 @@ export const PUBLIC_GROUPS = [
   'invitations',
   'subscribers',
   'redirects',
+  'distribution',
   'webhooks',
   'marketing-permissions',
   'feedback',
@@ -118,6 +120,7 @@ export function createCliProgram(version: string) {
   registerInvitationsCommand(program);
   registerSubscribersCommand(program);
   registerRedirectsCommand(program);
+  registerDistributionCommand(program);
   registerWebhooksCommand(program);
   registerMarketingPermissionsCommand(program);
   registerFeedbackCommand(program);
