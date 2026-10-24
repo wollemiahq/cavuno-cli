@@ -88,6 +88,13 @@ export {
   type RedirectBatchBody,
 } from './redirects.js';
 export {
+  createDistributionClient,
+  type DistributionClient,
+  type CreateDistributionFeedBody,
+  type UpdateDistributionFeedBody,
+  type UpdateDistributionSettingsBody,
+} from './distribution.js';
+export {
   createImportsClient,
   type ImportsClient,
   type ImportListQuery,

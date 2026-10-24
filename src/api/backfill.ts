@@ -10,7 +10,8 @@ import type { paths } from './generated/openapi-types.js';
 /**
  * Ergonomic facade for the v1 Backfill product resource.
  *
- * The public resource exposes product-level rules, company state, and progress.
+ * The public resource exposes product-level rules, company state, progress,
+ * and the Board-wide settings.
  * Provider-specific identifiers and implementation details never appear on the
  * wire.
  */
@@ -38,6 +39,9 @@ export type BulkBackfillCompaniesBody = JsonBody<
 >;
 export type MatchBackfillCompanyBody = JsonBody<
   paths['/backfill/companies/{companyId}/match']['post']
+>;
+export type UpdateBackfillSettingsBody = JsonBody<
+  paths['/backfill/settings']['patch']
 >;
 
 export function createBackfillClient(opts: CavunoClientOptions) {
@@ -122,6 +126,21 @@ export function createBackfillClient(opts: CavunoClientOptions) {
 
     // ── Progress ─────────────────────────────────────────────────────────
     getProgress: () => c.GET('/backfill/progress', {}),
+
+    // ── Board-wide settings ──────────────────────────────────────────────
+    getSettings: () => c.GET('/backfill/settings', {}),
+    updateSettings: (
+      body: UpdateBackfillSettingsBody,
+      idempotency?: IdempotencyOptions,
+    ) =>
+      c.PATCH('/backfill/settings', {
+        body,
+        ...(idempotency ? { headers: idem(idempotency) } : {}),
+      }),
+    unblockAllBlockedJobs: (idempotency: IdempotencyOptions) =>
+      c.POST('/backfill/blocked-jobs/unblock-all', {
+        headers: idem(idempotency),
+      }),
   };
 }
 
