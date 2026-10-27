@@ -4778,8 +4778,90 @@
     },
     {
       "name": "backfill",
-      "description": "Manage Backfill rules, company sources, and aggregate progress (dashboard-shaped Operator surface).",
+      "description": "Manage Backfill rules, company sources, Board-wide settings, and aggregate progress (dashboard-shaped Operator surface).",
       "commands": [
+        {
+          "name": "settings get",
+          "description": "Show the Board-wide Backfill settings.",
+          "synopsis": "cavuno backfill settings get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno backfill settings get"
+          ],
+          "mapsTo": "GET /v1/backfill/settings"
+        },
+        {
+          "name": "settings update",
+          "description": "Change one or more Board-wide Backfill settings. Omitted settings are unchanged.",
+          "synopsis": "cavuno backfill settings update [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--job-limit <n>",
+              "description": "Most Backfill jobs live at once (1-100000); pass an empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--max-job-age-days <n>",
+              "description": "Skip jobs posted more than N days ago (1-365); pass an empty string to clear",
+              "required": false
+            },
+            {
+              "flags": "--exclude-worldwide-remote",
+              "description": "Skip remote jobs open worldwide (expires those already live)",
+              "required": false
+            },
+            {
+              "flags": "--no-exclude-worldwide-remote",
+              "description": "Stop skipping remote jobs open worldwide",
+              "required": false
+            },
+            {
+              "flags": "--sponsored-jobs",
+              "description": "Include sponsored (pay-per-click) jobs",
+              "required": false
+            },
+            {
+              "flags": "--no-sponsored-jobs",
+              "description": "Stop including sponsored jobs",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill settings update --job-limit 2000 --max-job-age-days 30",
+            "cavuno backfill settings update --job-limit ''",
+            "cavuno backfill settings update --exclude-worldwide-remote --no-sponsored-jobs"
+          ],
+          "mapsTo": "PATCH /v1/backfill/settings"
+        },
+        {
+          "name": "blocked-jobs unblock-all",
+          "description": "Let Backfill import removed jobs again. Unblocks the first 200 now and the rest in the background.",
+          "synopsis": "cavuno backfill blocked-jobs unblock-all [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno backfill blocked-jobs unblock-all --yes"
+          ],
+          "mapsTo": "POST /v1/backfill/blocked-jobs/unblock-all"
+        },
         {
           "name": "progress",
           "description": "Show aggregate Backfill progress for the Board (onboarding-shaped).",
@@ -6157,6 +6239,215 @@
             "cavuno redirects batch --file ops.json"
           ],
           "mapsTo": "POST /v1/redirects/batch"
+        }
+      ]
+    },
+    {
+      "name": "distribution",
+      "description": "Publish jobs to job aggregators with XML feeds, and manage the Cavuno distribution opt-in.",
+      "commands": [
+        {
+          "name": "feeds list",
+          "description": "List XML feeds: one prebuilt feed per aggregator, then custom feeds.",
+          "synopsis": "cavuno distribution feeds list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno distribution feeds list --format table"
+          ],
+          "mapsTo": "GET /v1/distribution/feeds"
+        },
+        {
+          "name": "feeds get",
+          "description": "Show one XML feed.",
+          "synopsis": "cavuno distribution feeds get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno distribution feeds get k17abc"
+          ],
+          "mapsTo": "GET /v1/distribution/feeds/:id"
+        },
+        {
+          "name": "feeds create",
+          "description": "Create a custom XML feed.",
+          "synopsis": "cavuno distribution feeds create <name> [options]",
+          "arguments": [
+            {
+              "name": "name",
+              "description": "Feed name; its URL slug is derived from it",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--template <template>",
+              "description": "XML format: indeed, jooble, careerjet, jora, jobrapido, custom",
+              "required": true
+            },
+            {
+              "flags": "--source-rule <rule>",
+              "description": "own (board jobs only) or all (Backfill included)",
+              "required": false
+            },
+            {
+              "flags": "--filter <json>",
+              "description": "Job filter, e.g. '{\"remoteOptions\":[\"remote\"],\"featuredOnly\":true}'",
+              "required": false
+            },
+            {
+              "flags": "--custom-field-names <json>",
+              "description": "custom template only: element renames, e.g. '{\"title\":\"jobtitle\"}'",
+              "required": false
+            },
+            {
+              "flags": "--contact-email <email>",
+              "description": "indeed template only: <email> value",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno distribution feeds create \"Remote jobs\" --template jooble --filter '{\"remoteOptions\":[\"remote\"]}'",
+            "cavuno distribution feeds create \"Partner feed\" --template custom --custom-field-names '{\"title\":\"jobtitle\"}'"
+          ],
+          "mapsTo": "POST /v1/distribution/feeds"
+        },
+        {
+          "name": "feeds update",
+          "description": "Update an XML feed. Omitted options are unchanged; pass null to --filter or --custom-field-names to clear.",
+          "synopsis": "cavuno distribution feeds update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New name (the URL never changes)",
+              "required": false
+            },
+            {
+              "flags": "--template <template>",
+              "description": "XML format: indeed, jooble, careerjet, jora, jobrapido, custom",
+              "required": false
+            },
+            {
+              "flags": "--source-rule <rule>",
+              "description": "own (board jobs only) or all (Backfill included)",
+              "required": false
+            },
+            {
+              "flags": "--filter <json>",
+              "description": "Job filter, e.g. '{\"remoteOptions\":[\"remote\"],\"featuredOnly\":true}'",
+              "required": false
+            },
+            {
+              "flags": "--custom-field-names <json>",
+              "description": "custom template only: element renames, e.g. '{\"title\":\"jobtitle\"}'",
+              "required": false
+            },
+            {
+              "flags": "--contact-email <email>",
+              "description": "indeed template only: <email> value",
+              "required": false
+            },
+            {
+              "flags": "--clear-contact-email",
+              "description": "Remove the indeed contact email",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno distribution feeds update k17abc --contact-email jobs@example.com",
+            "cavuno distribution feeds update k17abc --filter null"
+          ],
+          "mapsTo": "PATCH /v1/distribution/feeds/:id"
+        },
+        {
+          "name": "feeds remove",
+          "description": "Delete a custom XML feed; its URL stops working.",
+          "synopsis": "cavuno distribution feeds remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Feed ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno distribution feeds remove k17abc --yes"
+          ],
+          "mapsTo": "DELETE /v1/distribution/feeds/:id"
+        },
+        {
+          "name": "origin get",
+          "description": "Show the feed origin and any moved origins.",
+          "synopsis": "cavuno distribution origin get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno distribution origin get"
+          ],
+          "mapsTo": "GET /v1/distribution/feed-origin"
+        },
+        {
+          "name": "origin acknowledge",
+          "description": "Mark moved feed URLs as resubmitted to the aggregators.",
+          "synopsis": "cavuno distribution origin acknowledge",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno distribution origin acknowledge"
+          ],
+          "mapsTo": "POST /v1/distribution/feed-origin/acknowledge"
+        },
+        {
+          "name": "settings get",
+          "description": "Show distribution settings.",
+          "synopsis": "cavuno distribution settings get",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno distribution settings get"
+          ],
+          "mapsTo": "GET /v1/distribution/settings"
+        },
+        {
+          "name": "settings update",
+          "description": "Switch Cavuno distribution on or off.",
+          "synopsis": "cavuno distribution settings update [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--cavuno-distribution <on|off>",
+              "description": "on or off",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno distribution settings update --cavuno-distribution off"
+          ],
+          "mapsTo": "PATCH /v1/distribution/settings"
         }
       ]
     },
