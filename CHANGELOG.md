@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.19.0 — 2026-10-27
+
+- **`cavuno backfill settings`** shows and updates the board-wide Backfill
+  settings: `--job-limit`, `--max-job-age-days`, `--[no-]exclude-worldwide-remote`
+  and `--[no-]sponsored-jobs`. `cavuno backfill blocked-jobs unblock-all --yes`
+  lets Backfill import removed jobs again.
+- **`cavuno distribution`** manages XML job feeds for aggregators and the
+  Cavuno distribution opt-in: `feeds list|get|create|update|remove`,
+  `origin get|acknowledge` and `settings get|update`.
+
 ## 1.18.0 — 2026-10-20
 
 - **`cavuno job-feeds`** connects and manages recurring XML job feeds:

@@ -146,6 +146,11 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   redirects_not_found: 4,
   redirects_from_path_taken: 7,
   redirects_invalid_status_code: 2,
+  // Distribution — XML feeds
+  distribution_feed_not_found: 4,
+  distribution_feed_invalid: 2,
+  distribution_feed_limit_reached: 7,
+  distribution_feed_prebuilt: 7,
   // WHK — webhooks
   webhooks_not_found: 4,
   webhooks_delivery_open: 7,
