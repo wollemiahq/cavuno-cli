@@ -123,6 +123,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/backfill/blocked-jobs/unblock-all': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unblock all removed Backfill jobs
+     * @description Let Backfill import jobs again that were removed from the Board (the dashboard "Unblock all" action). Unblocks the first batch of 200 before returning and the rest in background batches; `continuing` says whether any remain. Jobs removed after the request stay blocked. Nothing on the Board is deleted. Requires `backfill.manage` and an `Idempotency-Key` header.
+     */
+    post: operations['unblockAllBackfillBlockedJobs'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/backfill/companies': {
     parameters: {
       query?: never;
@@ -333,6 +353,30 @@ export interface paths {
      * @description Partially update a Backfill rule. Omitted fields keep their current values, matching the dashboard edit form. The resulting rule must retain at least one card or nonempty structured filter. Requires an `Idempotency-Key` header.
      */
     patch: operations['updateBackfillRule'];
+    trace?: never;
+  };
+  '/backfill/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Backfill settings
+     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the "Posted within" age filter, the worldwide-remote exclusion and the sponsored-jobs switch. Requires `backfill.read`.
+     */
+    get: operations['getBackfillSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Backfill settings
+     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `maxJobAgeDays` and `excludeWorldwideRemote` are saved together; `sponsoredJobsEnabled` is applied after them. Changing `sponsoredJobsEnabled` before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Clean-up of jobs already on the Board runs in the background. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
+     */
+    patch: operations['updateBackfillSettings'];
     trace?: never;
   };
   '/billing/checkout': {
@@ -1561,6 +1605,122 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/distribution/feed-origin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve the XML feed origin
+     * @description Where the feed URLs live, who serves them, and whether they moved after aggregators fetched them (for example after a custom domain change). Requires `settings.read`.
+     */
+    get: operations['getDistributionFeedOrigin'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/distribution/feed-origin/acknowledge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Acknowledge a moved XML feed origin
+     * @description Call after resubmitting the moved feed URLs to the aggregators: every moved feed takes the current origin and `changed` becomes false. A no-op when nothing moved. Requires `settings.manage`.
+     */
+    post: operations['acknowledgeDistributionFeedOrigin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/distribution/feeds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List XML feeds
+     * @description Returns the board's XML feeds of published jobs for job aggregators: one prebuilt feed per aggregator (created on first read), then custom feeds, newest first. At most 25 custom feeds, so the list is one page. Requires `settings.read`.
+     */
+    get: operations['listDistributionFeeds'];
+    put?: never;
+    /**
+     * Create a custom XML feed
+     * @description Creates a custom feed and starts its first build. The URL slug is derived from `name` and never changes. At most 25 custom feeds per board. Requires `settings.manage`.
+     */
+    post: operations['createDistributionFeed'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/distribution/feeds/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an XML feed
+     * @description Requires `settings.read`.
+     */
+    get: operations['getDistributionFeed'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a custom XML feed
+     * @description Deletes a custom feed and its file; its URL stops working. Prebuilt feeds cannot be deleted. Requires `settings.manage`.
+     */
+    delete: operations['deleteDistributionFeed'];
+    options?: never;
+    head?: never;
+    /**
+     * Update an XML feed
+     * @description Updates the fields passed; omitted fields are unchanged. The URL never changes. A built feed is rebuilt; a prebuilt feed that was never fetched builds on its first fetch. Requires `settings.manage`.
+     */
+    patch: operations['updateDistributionFeed'];
+    trace?: never;
+  };
+  '/distribution/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve distribution settings
+     * @description The Cavuno distribution opt-in. Requires `settings.read`.
+     */
+    get: operations['getDistributionSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update distribution settings
+     * @description Switches Cavuno distribution on or off; omitted fields are unchanged. Requires `settings.manage`.
+     */
+    patch: operations['updateDistributionSettings'];
     trace?: never;
   };
   '/domains': {
@@ -2902,18 +3062,18 @@ export interface paths {
     };
     /**
      * Retrieve a page intro
-     * @description Returns the intro written for one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Returns the intro and meta overrides written for one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     get: operations['getPageContent'];
     /**
      * Set a page intro
-     * @description Sets the intro of one category or location page; the last write wins. The page shows it on page 1 with no filters, and the board's public category and place resolutions return it as `introHtml`. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Sets the intro and meta overrides of one category or location page as a merge patch: omitted fields keep their value, `null` clears one, and the last write wins. The page shows them on page 1 with no filters, and the board's public category and place resolutions return them as `introHtml`, `metaTitle` and `metaDescription`. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     put: operations['updatePageContent'];
     post?: never;
     /**
      * Delete a page intro
-     * @description Removes the intro of one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Removes the intro and meta overrides of one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     delete: operations['deletePageContent'];
     options?: never;
@@ -4678,6 +4838,30 @@ export interface components {
       createdAt: string | null;
       updatedAt: string | null;
     };
+    BackfillSettings: {
+      /** @enum {string} */
+      object: 'backfill_settings';
+      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit: number | null;
+      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      maxJobAgeDays: number | null;
+      /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
+      excludeWorldwideRemote: boolean;
+      /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
+      sponsoredJobsEnabled: boolean;
+      /** @description Whether `sponsoredJobsEnabled` can be changed on this Board. `false` until Backfill is set up; a PATCH that changes it then returns `backfill_not_configured`. */
+      sponsoredJobsConfigurable: boolean;
+    };
+    BackfillUnblockAll: {
+      /** @enum {string} */
+      object: 'backfill_unblock_all';
+      /** @description Removed jobs Backfill was skipping when the request arrived. `null` while the Board count is still being built. */
+      blockedBefore: number | null;
+      /** @description Jobs unblocked by this request before it returned. */
+      unblocked: number;
+      /** @description True when more blocked jobs remain; they are unblocked in background batches shortly after the response. */
+      continuing: boolean;
+    };
     BatchRequestBody: {
       /** @description Array of sub-operations to execute. Each entry runs independently and reports its result on the corresponding entry of the response `data` array. Sub-operation `id` values must be unique within the batch. Up to 100 entries. */
       operations: (
@@ -5710,6 +5894,30 @@ export interface components {
       /** @description Where sign-in may complete while you test a self-hosted frontend: `http://localhost:<port>` (or `127.0.0.1` / `[::1]`), one exact `https://` origin such as a preview deployment, or `https://*.<domain>` under a domain verified on this board. Wildcards on shared hosting suffixes such as `vercel.app` are refused; register each preview URL instead. */
       origin: string;
     };
+    CreateDistributionFeedBody: {
+      /** @description The feed's name, at most 80 characters. A custom feed's URL slug is derived from it on create and never changes. */
+      name: string;
+      /**
+       * @description The XML format: one aggregator (`indeed`, `jooble`, `careerjet`, `jora`, `jobrapido`) or `custom`, whose element names you choose with `customFieldNames`.
+       * @enum {string}
+       */
+      template:
+        | 'indeed'
+        | 'jooble'
+        | 'careerjet'
+        | 'jora'
+        | 'jobrapido'
+        | 'custom';
+      /**
+       * @description Which published jobs the feed carries: `own` or `all` (Backfill included). Defaults to the template's default: `own` for `indeed`, `all` otherwise.
+       * @enum {string}
+       */
+      sourceRule?: 'own' | 'all';
+      filter?: components['schemas']['DistributionFeedFilter'];
+      customFieldNames?: components['schemas']['DistributionFeedCustomFieldNames'];
+      /** @description `indeed` template only: the contact address written into the feed as `<email>`. Feed URLs are public, so it is never filled in for you. Ignored for other templates. */
+      contactEmail?: string;
+    };
     CreateDomainBody: {
       /** @description Hostname to bind to this board, for example jobs.acme.com. Labels may contain letters, numbers, and hyphens, and may not start or end with a hyphen. The API normalizes accepted hostnames to lowercase before writing. */
       domain: string;
@@ -6190,6 +6398,153 @@ export interface components {
        */
       kind: 'loopback' | 'https' | 'wildcard';
       createdAt: string;
+    };
+    DistributionFeed: {
+      /** @description Unique identifier for the feed. */
+      id: string;
+      /** @enum {string} */
+      object: 'distribution_feed';
+      /**
+       * @description `prebuilt`: one per aggregator, present on every board, editable but not deletable. `custom`: created by you.
+       * @enum {string}
+       */
+      kind: 'prebuilt' | 'custom';
+      name: string;
+      /** @enum {string} */
+      template:
+        | 'indeed'
+        | 'jooble'
+        | 'careerjet'
+        | 'jora'
+        | 'jobrapido'
+        | 'custom';
+      /** @description The file name on the board host, `<slug>.xml`. Never changes. */
+      slug: string;
+      /** @description The public feed URL to submit to the aggregator, `<board origin>/feeds/<slug>.xml`. It holds no secret. `null` while the board has no public origin (an unpublished Builder board). */
+      url: string | null;
+      /** @description The aggregator's page on submitting a feed. `null` for `custom`. */
+      submitUrl: string | null;
+      /** @enum {string} */
+      sourceRule: 'own' | 'all';
+      filter: components['schemas']['DistributionFeedFilter'];
+      customFieldNames: components['schemas']['DistributionFeedCustomFieldNames'];
+      contactEmail: string | null;
+      /**
+       * @description `failed`: the last build failed. `needs_email`: an Indeed feed with no `contactEmail`. `not_fetched`: no aggregator has fetched the URL yet. `active`: fetched within 14 days, rebuilt as jobs change. `idle`: not fetched for 14 days, rebuilt on its next fetch. `external`: not fetched yet on a board whose frontend is hosted elsewhere (see `GET /v1/distribution/feed-origin`), which must serve `/feeds/<slug>.xml` first.
+       * @enum {string}
+       */
+      status:
+        | 'failed'
+        | 'needs_email'
+        | 'not_fetched'
+        | 'active'
+        | 'idle'
+        | 'external';
+      /** @description Jobs in the last built file; `null` until the first build. */
+      jobCount: number | null;
+      /** @description ISO 8601 datetime. */
+      lastBuiltAt: string | null;
+      /** @description When an aggregator last fetched the URL, recorded at most hourly. ISO 8601 datetime. */
+      lastFetchedAt: string | null;
+      /** @description ISO 8601 datetime. */
+      createdAt: string;
+      /** @description ISO 8601 datetime. */
+      updatedAt: string;
+    };
+    /** @description `custom` template only: element names that replace the defaults. A name starts with a letter or `_` and holds letters, digits, `-`, `_` or `.`; names that share a parent must differ. A blank name keeps the default. Ignored for other templates. */
+    DistributionFeedCustomFieldNames: {
+      /** @description Element name for `root` (default `source`). */
+      root?: string;
+      /** @description Element name for `publisher` (default `publisher`). */
+      publisher?: string;
+      /** @description Element name for `publisherurl` (default `publisherurl`). */
+      publisherurl?: string;
+      /** @description Element name for `lastbuilddate` (default `lastBuildDate`). */
+      lastbuilddate?: string;
+      /** @description Element name for `job` (default `job`). */
+      job?: string;
+      /** @description Element name for `referencenumber` (default `referencenumber`). */
+      referencenumber?: string;
+      /** @description Element name for `title` (default `title`). */
+      title?: string;
+      /** @description Element name for `url` (default `url`). */
+      url?: string;
+      /** @description Element name for `company` (default `company`). */
+      company?: string;
+      /** @description Element name for `date` (default `date`). */
+      date?: string;
+      /** @description Element name for `expirationdate` (default `expirationdate`). */
+      expirationdate?: string;
+      /** @description Element name for `description` (default `description`). */
+      description?: string;
+      /** @description Element name for `location` (default `location`). */
+      location?: string;
+      /** @description Element name for `city` (default `city`). */
+      city?: string;
+      /** @description Element name for `state` (default `state`). */
+      state?: string;
+      /** @description Element name for `country` (default `country`). */
+      country?: string;
+      /** @description Element name for `jobtype` (default `jobtype`). */
+      jobtype?: string;
+      /** @description Element name for `remotetype` (default `remotetype`). */
+      remotetype?: string;
+      /** @description Element name for `seniority` (default `seniority`). */
+      seniority?: string;
+      /** @description Element name for `category` (default `category`). */
+      category?: string;
+      /** @description Element name for `salary` (default `salary`). */
+      salary?: string;
+    } | null;
+    DistributionFeedFilter: {
+      /** @description Only jobs with one of these employment types. At most 50 values. */
+      employmentTypes?: (
+        | 'full_time'
+        | 'part_time'
+        | 'contract'
+        | 'internship'
+        | 'temporary'
+        | 'volunteer'
+        | 'other'
+      )[];
+      /** @description Only jobs with one of these workplace types. At most 50 values. */
+      remoteOptions?: ('on_site' | 'hybrid' | 'remote')[];
+      /** @description Only jobs with one of these seniority levels. At most 50 values. */
+      seniorityLevels?: (
+        | 'entry_level'
+        | 'associate'
+        | 'mid_level'
+        | 'senior'
+        | 'lead'
+        | 'principal'
+        | 'director'
+        | 'executive'
+      )[];
+      /** @description Only jobs with one of these category slugs (normalized the way category URLs are). At most 50 values. */
+      categories?: string[];
+      /** @description Only featured jobs. */
+      featuredOnly?: boolean;
+    } | null;
+    DistributionFeedOrigin: {
+      /** @enum {string} */
+      object: 'distribution_feed_origin';
+      /** @description The board's public origin that every feed URL is on; `null` while it has none. */
+      origin: string | null;
+      /**
+       * @description `cavuno`: Cavuno serves the feed URLs. `external`: the origin is your own frontend (a self-hosted domain or SDK site), which must serve `/feeds/<slug>.xml` before the URLs work.
+       * @enum {string}
+       */
+      hosting: 'cavuno' | 'external';
+      /** @description True when an aggregator first fetched some feed on another origin: the URLs it holds have moved. Resubmit them, then acknowledge. */
+      changed: boolean;
+      /** @description The origins aggregators fetched moved feeds on. */
+      previousOrigins: string[];
+    };
+    DistributionSettings: {
+      /** @enum {string} */
+      object: 'distribution_settings';
+      /** @description Whether Cavuno may share your published jobs through destinations it runs, such as community Slack and Discord channels and a board directory. On by default. */
+      cavunoDistributionEnabled: boolean;
     };
     Domain: {
       id: string;
@@ -7321,8 +7676,12 @@ export interface components {
       category: string | null;
       /** @description The place slug the page was addressed by. */
       place: string | null;
-      /** @description The intro markdown. */
+      /** @description The intro markdown; an empty string when the page has none. */
       intro: string;
+      /** @description The title override; `null` when the board template applies. */
+      metaTitle: string | null;
+      /** @description The meta description override; `null` when the board template applies. */
+      metaDescription: string | null;
       /** @enum {string} */
       source: 'human' | 'llm';
       updatedAt: string;
@@ -7655,8 +8014,12 @@ export interface components {
       }[];
     };
     PutPageContentBody: {
-      /** @description Markdown shown above the job list on page 1 of the page. Served as sanitized HTML. */
-      intro: string;
+      /** @description Markdown shown above the job list on page 1 of the page. Served as sanitized HTML. Omit to keep the current intro; `null` clears it. */
+      intro?: string | null;
+      /** @description The page's `<title>`, used as written in place of the board's title template. Omit to keep; `null` clears it and the template applies again. */
+      metaTitle?: string | null;
+      /** @description The page's meta description, used as written in place of the board's description template. Omit to keep; `null` clears it. */
+      metaDescription?: string | null;
       /**
        * @description `llm` marks an AI draft a person approved. Defaults to `human`.
        * @default human
@@ -8656,6 +9019,16 @@ export interface components {
         workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
       };
     };
+    UpdateBackfillSettingsBody: {
+      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit?: number | null;
+      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      maxJobAgeDays?: number | null;
+      /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
+      excludeWorldwideRemote?: boolean;
+      /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
+      sponsoredJobsEnabled?: boolean;
+    };
     UpdateBlogPostBody: {
       slug?: string;
       html?: string;
@@ -8739,6 +9112,107 @@ export interface components {
       archived?: boolean;
       /** @description Key of one of the `image` definitions to use as the logo; null clears it. Removing that definition clears it too. */
       logoFieldKey?: string | null;
+    };
+    UpdateDistributionFeedBody: {
+      /** @description The feed's name. A prebuilt feed keeps its aggregator's name. Renaming never changes the URL. */
+      name?: string;
+      /**
+       * @description The XML format. A prebuilt feed keeps its aggregator.
+       * @enum {string}
+       */
+      template?:
+        | 'indeed'
+        | 'jooble'
+        | 'careerjet'
+        | 'jora'
+        | 'jobrapido'
+        | 'custom';
+      /**
+       * @description Which published jobs the feed carries: `own` is the board's own jobs only; `all` adds Backfill jobs. Sponsored jobs are never included.
+       * @enum {string}
+       */
+      sourceRule?: 'own' | 'all';
+      /** @description Replaces the whole filter; `null` clears it. */
+      filter?: {
+        /** @description Only jobs with one of these employment types. At most 50 values. */
+        employmentTypes?: (
+          | 'full_time'
+          | 'part_time'
+          | 'contract'
+          | 'internship'
+          | 'temporary'
+          | 'volunteer'
+          | 'other'
+        )[];
+        /** @description Only jobs with one of these workplace types. At most 50 values. */
+        remoteOptions?: ('on_site' | 'hybrid' | 'remote')[];
+        /** @description Only jobs with one of these seniority levels. At most 50 values. */
+        seniorityLevels?: (
+          | 'entry_level'
+          | 'associate'
+          | 'mid_level'
+          | 'senior'
+          | 'lead'
+          | 'principal'
+          | 'director'
+          | 'executive'
+        )[];
+        /** @description Only jobs with one of these category slugs (normalized the way category URLs are). At most 50 values. */
+        categories?: string[];
+        /** @description Only featured jobs. */
+        featuredOnly?: boolean;
+      } | null;
+      /** @description Replaces every element rename; `null` restores the defaults. */
+      customFieldNames?: {
+        /** @description Element name for `root` (default `source`). */
+        root?: string;
+        /** @description Element name for `publisher` (default `publisher`). */
+        publisher?: string;
+        /** @description Element name for `publisherurl` (default `publisherurl`). */
+        publisherurl?: string;
+        /** @description Element name for `lastbuilddate` (default `lastBuildDate`). */
+        lastbuilddate?: string;
+        /** @description Element name for `job` (default `job`). */
+        job?: string;
+        /** @description Element name for `referencenumber` (default `referencenumber`). */
+        referencenumber?: string;
+        /** @description Element name for `title` (default `title`). */
+        title?: string;
+        /** @description Element name for `url` (default `url`). */
+        url?: string;
+        /** @description Element name for `company` (default `company`). */
+        company?: string;
+        /** @description Element name for `date` (default `date`). */
+        date?: string;
+        /** @description Element name for `expirationdate` (default `expirationdate`). */
+        expirationdate?: string;
+        /** @description Element name for `description` (default `description`). */
+        description?: string;
+        /** @description Element name for `location` (default `location`). */
+        location?: string;
+        /** @description Element name for `city` (default `city`). */
+        city?: string;
+        /** @description Element name for `state` (default `state`). */
+        state?: string;
+        /** @description Element name for `country` (default `country`). */
+        country?: string;
+        /** @description Element name for `jobtype` (default `jobtype`). */
+        jobtype?: string;
+        /** @description Element name for `remotetype` (default `remotetype`). */
+        remotetype?: string;
+        /** @description Element name for `seniority` (default `seniority`). */
+        seniority?: string;
+        /** @description Element name for `category` (default `category`). */
+        category?: string;
+        /** @description Element name for `salary` (default `salary`). */
+        salary?: string;
+      } | null;
+      /** @description `indeed` template only; `null` or blank clears it. */
+      contactEmail?: string | null;
+    };
+    UpdateDistributionSettingsBody: {
+      /** @description Let Cavuno share your published jobs through destinations it runs. */
+      cavunoDistributionEnabled?: boolean;
     };
     UpdateEmailDomainBody: {
       /** @description Display name recipients see in the From header. */
@@ -10635,6 +11109,35 @@ export interface operations {
       };
     };
   };
+  unblockAllBackfillBlockedJobs: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description How many jobs were unblocked so far. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillUnblockAll'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listBackfillCompanies: {
     parameters: {
       query: {
@@ -11059,6 +11562,68 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['BackfillRule'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getBackfillSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board-wide Backfill settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillSettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateBackfillSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateBackfillSettingsBody'];
+      };
+    };
+    responses: {
+      /** @description The Board-wide Backfill settings after the update. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillSettings'];
         };
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -14764,6 +15329,321 @@ export interface operations {
       };
     };
   };
+  getDistributionFeedOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionFeedOrigin'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  acknowledgeDistributionFeedOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionFeedOrigin'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listDistributionFeeds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/distribution/feeds */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['DistributionFeed'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createDistributionFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDistributionFeedBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionFeed'];
+        };
+      };
+      /** @description A field is invalid; `details.field` names it. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has the maximum number of custom feeds. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getDistributionFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The feed ID returned by the list or create endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionFeed'];
+        };
+      };
+      /** @description Feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteDistributionFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The feed ID returned by the list or create endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The feed is prebuilt. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateDistributionFeed: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The feed ID returned by the list or create endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateDistributionFeedBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionFeed'];
+        };
+      };
+      /** @description A field is invalid; `details.field` names it. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Feed not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getDistributionSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionSettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateDistributionSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateDistributionSettingsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DistributionSettings'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listDomains: {
     parameters: {
       query?: {
@@ -18401,7 +19281,7 @@ export interface operations {
           'application/json': components['schemas']['PageContent'];
         };
       };
-      /** @description Unknown page, or the page has no intro. */
+      /** @description Unknown page, or the page has no intro and no meta overrides. */
       404: {
         headers: {
           [name: string]: unknown;

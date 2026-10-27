@@ -46,6 +46,7 @@ cavuno employer-subscriptions  # List/get employer subscriptions
 cavuno transactions # Read the board transactions ledger
 cavuno coupons      # Manage coupons + promotion codes
 cavuno companies    # Manage companies (incl. batch)
+cavuno backfill     # Backfill rules, company sources, settings, and progress
 cavuno blog         # Manage blog posts, authors, and tags
 cavuno media        # Upload and fetch media assets
 cavuno settings     # Read and update board settings
@@ -165,6 +166,18 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno companies cancel-plan-invoice <id> <invoiceId>` | Cancel a plan invoice awaiting payment (`plans.manage`) |
 | `cavuno companies batch [--file ops.json]` | Run a batch of company operations |
 
+### Backfill
+
+| Command | Description |
+|---|---|
+| `cavuno backfill progress` | Show aggregate Backfill progress |
+| `cavuno backfill rules list\|get\|create\|update\|remove` | Manage named Backfill rules |
+| `cavuno backfill companies list --state <state>` | List companies for one Backfill tab state |
+| `cavuno backfill companies start\|stop\|bulk-start\|bulk-stop\|match\|mark-no-match` | Manage Backfill company sources |
+| `cavuno backfill settings get` | Show the Board-wide Backfill settings |
+| `cavuno backfill settings update [...]` | Set `--job-limit`, `--max-job-age-days` (empty string clears), `--[no-]exclude-worldwide-remote`, `--[no-]sponsored-jobs` |
+| `cavuno backfill blocked-jobs unblock-all --yes` | Let Backfill import removed jobs again (drains in the background) |
+
 ### Blog
 
 | Command | Description |
@@ -271,6 +284,31 @@ catalogue, payload shapes, and signature verification.
 cavuno redirects create /old-careers /jobs
 cavuno redirects list --search /old
 cavuno redirects remove k200abc --yes
+```
+
+### Distribution
+
+XML feeds of your published jobs for job aggregators, and the Cavuno
+distribution opt-in. Every board has one prebuilt feed per aggregator
+(Indeed, Jooble, Careerjet, Jora, Jobrapido); submit a feed's `url` to the
+aggregator.
+
+| Command | Description |
+|---|---|
+| `cavuno distribution feeds list` | List XML feeds, prebuilt first |
+| `cavuno distribution feeds get <id>` | Show one feed |
+| `cavuno distribution feeds create <name> --template <t>` | Create a custom feed (`--source-rule`, `--filter`, `--custom-field-names`, `--contact-email`) |
+| `cavuno distribution feeds update <id>` | Update a feed (`--name`, `--template`, `--source-rule`, `--filter`, `--custom-field-names`, `--contact-email`, `--clear-contact-email`) |
+| `cavuno distribution feeds remove <id>` | Delete a custom feed (`--yes`) |
+| `cavuno distribution origin get` | Show the feed origin and whether feed URLs moved |
+| `cavuno distribution origin acknowledge` | Mark moved feed URLs as resubmitted |
+| `cavuno distribution settings get` | Show the Cavuno distribution opt-in |
+| `cavuno distribution settings update --cavuno-distribution on\|off` | Switch Cavuno distribution on or off |
+
+```bash
+cavuno distribution feeds list --format table
+cavuno distribution feeds update k17abc --contact-email jobs@example.com
+cavuno distribution feeds create "Remote jobs" --template jooble --filter '{"remoteOptions":["remote"]}'
 ```
 
 ### Imports
