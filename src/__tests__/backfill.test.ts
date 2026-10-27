@@ -16,6 +16,9 @@ const bulkStopCompanies = vi.fn();
 const matchCompany = vi.fn();
 const markNoMatch = vi.fn();
 const getProgress = vi.fn();
+const getSettings = vi.fn();
+const updateSettings = vi.fn();
+const unblockAllBlockedJobs = vi.fn();
 
 vi.mock('../api/backfill.js', () => ({
   createBackfillClient: () => ({
@@ -32,6 +35,9 @@ vi.mock('../api/backfill.js', () => ({
     matchCompany,
     markNoMatch,
     getProgress,
+    getSettings,
+    updateSettings,
+    unblockAllBlockedJobs,
   }),
 }));
 
@@ -125,6 +131,30 @@ beforeEach(() => {
   });
   matchCompany.mockResolvedValue(companyOk);
   markNoMatch.mockResolvedValue(companyOk);
+  const settingsOk = {
+    data: {
+      object: 'backfill_settings',
+      jobLimit: null,
+      maxJobAgeDays: null,
+      excludeWorldwideRemote: false,
+      sponsoredJobsEnabled: false,
+      sponsoredJobsConfigurable: true,
+    },
+    error: undefined,
+    response: new Response(),
+  };
+  getSettings.mockResolvedValue(settingsOk);
+  updateSettings.mockResolvedValue(settingsOk);
+  unblockAllBlockedJobs.mockResolvedValue({
+    data: {
+      object: 'backfill_unblock_all',
+      blockedBefore: 3,
+      unblocked: 3,
+      continuing: false,
+    },
+    error: undefined,
+    response: new Response(),
+  });
 });
 
 afterEach(() => {
@@ -274,5 +304,94 @@ describe('cavuno backfill progress', () => {
       from: 'user',
     });
     expect(getProgress).toHaveBeenCalledOnce();
+  });
+});
+
+describe('cavuno backfill settings', () => {
+  it('reads the settings', async () => {
+    await buildProgram().parseAsync(['backfill', 'settings', 'get'], {
+      from: 'user',
+    });
+    expect(getSettings).toHaveBeenCalledOnce();
+  });
+
+  it('sends only the flags given', async () => {
+    await buildProgram().parseAsync(
+      [
+        'backfill',
+        'settings',
+        'update',
+        '--job-limit',
+        '2000',
+        '--no-sponsored-jobs',
+        '--idempotency-key',
+        'u1',
+      ],
+      { from: 'user' },
+    );
+    expect(updateSettings).toHaveBeenCalledWith(
+      { jobLimit: 2000, sponsoredJobsEnabled: false },
+      { idempotencyKey: 'u1' },
+    );
+  });
+
+  it('clears a number with an empty string and maps the switches', async () => {
+    await buildProgram().parseAsync(
+      [
+        'backfill',
+        'settings',
+        'update',
+        '--max-job-age-days',
+        '',
+        '--exclude-worldwide-remote',
+        '--sponsored-jobs',
+        '--idempotency-key',
+        'u2',
+      ],
+      { from: 'user' },
+    );
+    expect(updateSettings).toHaveBeenCalledWith(
+      {
+        maxJobAgeDays: null,
+        excludeWorldwideRemote: true,
+        sponsoredJobsEnabled: true,
+      },
+      { idempotencyKey: 'u2' },
+    );
+  });
+
+  it('exits 2 when no setting is given', async () => {
+    const exit = vi.spyOn(process, 'exit').mockImplementation(((
+      code?: number,
+    ) => {
+      throw new Error(`exit ${code}`);
+    }) as never);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await expect(
+      buildProgram().parseAsync(['backfill', 'settings', 'update'], {
+        from: 'user',
+      }),
+    ).rejects.toThrow('exit 2');
+    expect(exit).toHaveBeenCalledWith(2);
+    expect(updateSettings).not.toHaveBeenCalled();
+  });
+});
+
+describe('cavuno backfill blocked-jobs', () => {
+  it('unblocks all with --yes', async () => {
+    await buildProgram().parseAsync(
+      [
+        'backfill',
+        'blocked-jobs',
+        'unblock-all',
+        '--yes',
+        '--idempotency-key',
+        'b9',
+      ],
+      { from: 'user' },
+    );
+    expect(unblockAllBlockedJobs).toHaveBeenCalledWith({
+      idempotencyKey: 'b9',
+    });
   });
 });

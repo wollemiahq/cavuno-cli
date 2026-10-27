@@ -69,12 +69,160 @@ function parseCsvIds(flag: string) {
   };
 }
 
+/**
+ * Whole number, or an empty string to clear the setting. Returns `''` for
+ * "clear" (Commander turns a parser's `null` back into `''` anyway);
+ * `clearable` maps it to the API's `null`.
+ */
+function parseNullableInt(flag: string) {
+  return (raw: string): number | '' => {
+    if (raw.trim() === '') return '';
+    const value = Number(raw);
+    if (!Number.isInteger(value)) {
+      console.error(
+        `${flag}: expected a whole number, or an empty string to clear`,
+      );
+      process.exit(2);
+    }
+    return value;
+  };
+}
+
 export function registerBackfillCommand(root: Command): void {
   const backfill = root
     .command('backfill')
     .description(
-      'Manage Backfill rules, company sources, and aggregate progress (dashboard-shaped Operator surface).',
+      'Manage Backfill rules, company sources, Board-wide settings, and aggregate progress (dashboard-shaped Operator surface).',
     );
+
+  // ── settings ─────────────────────────────────────────────────────────────
+  const settings = backfill
+    .command('settings')
+    .description(
+      'Board-wide Backfill controls: job limit, posted-within days, worldwide-remote exclusion, sponsored jobs.',
+    );
+
+  annotate(
+    settings
+      .command('get')
+      .description('Show the Board-wide Backfill settings.')
+      .action(async function (this: Command) {
+        const r = unwrap(await getClient(this).getSettings());
+        if (r.error) throw fromApiError(r.error, r.response);
+        print(r.data, getFormat(this));
+      }),
+    {
+      mapsTo: 'GET /v1/backfill/settings',
+      examples: ['cavuno backfill settings get'],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      settings
+        .command('update')
+        .description(
+          'Change one or more Board-wide Backfill settings. Omitted settings are unchanged.',
+        )
+        .option(
+          '--job-limit <n>',
+          'Most Backfill jobs live at once (1-100000); pass an empty string to clear',
+          parseNullableInt('--job-limit'),
+        )
+        .option(
+          '--max-job-age-days <n>',
+          'Skip jobs posted more than N days ago (1-365); pass an empty string to clear',
+          parseNullableInt('--max-job-age-days'),
+        )
+        .option(
+          '--exclude-worldwide-remote',
+          'Skip remote jobs open worldwide (expires those already live)',
+        )
+        .option(
+          '--no-exclude-worldwide-remote',
+          'Stop skipping remote jobs open worldwide',
+        )
+        .option('--sponsored-jobs', 'Include sponsored (pay-per-click) jobs')
+        .option('--no-sponsored-jobs', 'Stop including sponsored jobs'),
+    ).action(async function (this: Command) {
+      const opts = this.opts<
+        IdempotencyOptions & {
+          jobLimit?: number | '';
+          maxJobAgeDays?: number | '';
+          excludeWorldwideRemote?: boolean;
+          sponsoredJobs?: boolean;
+        }
+      >();
+      const clearable = (value: number | '') => (value === '' ? null : value);
+      const body: {
+        jobLimit?: number | null;
+        maxJobAgeDays?: number | null;
+        excludeWorldwideRemote?: boolean;
+        sponsoredJobsEnabled?: boolean;
+      } = {};
+      if (opts.jobLimit !== undefined) body.jobLimit = clearable(opts.jobLimit);
+      if (opts.maxJobAgeDays !== undefined) {
+        body.maxJobAgeDays = clearable(opts.maxJobAgeDays);
+      }
+      if (opts.excludeWorldwideRemote !== undefined) {
+        body.excludeWorldwideRemote = opts.excludeWorldwideRemote;
+      }
+      if (opts.sponsoredJobs !== undefined) {
+        body.sponsoredJobsEnabled = opts.sponsoredJobs;
+      }
+      if (Object.keys(body).length === 0) {
+        console.error(
+          'Pass at least one of --job-limit, --max-job-age-days, --[no-]exclude-worldwide-remote, --[no-]sponsored-jobs',
+        );
+        process.exit(2);
+      }
+      const r = unwrap(
+        await getClient(this).updateSettings(body, resolveIdempotency(opts)),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'PATCH /v1/backfill/settings',
+      examples: [
+        'cavuno backfill settings update --job-limit 2000 --max-job-age-days 30',
+        `cavuno backfill settings update --job-limit ''`,
+        'cavuno backfill settings update --exclude-worldwide-remote --no-sponsored-jobs',
+      ],
+    },
+  );
+
+  // ── blocked jobs ─────────────────────────────────────────────────────────
+  const blockedJobs = backfill
+    .command('blocked-jobs')
+    .description('Removed jobs Backfill skips on this Board.');
+
+  annotate(
+    withYesOption(
+      withIdempotencyOption(
+        blockedJobs
+          .command('unblock-all')
+          .description(
+            'Let Backfill import removed jobs again. Unblocks the first 200 now and the rest in the background.',
+          ),
+      ),
+    ).action(async function (this: Command) {
+      const opts = this.opts<IdempotencyOptions & ConfirmOptions>();
+      await confirmOrAbort({
+        message: 'Unblock every removed job so Backfill can import them again?',
+        yes: opts.yes,
+      });
+      const r = unwrap(
+        await getClient(this).unblockAllBlockedJobs(resolveIdempotency(opts)),
+      );
+      if (r.error) throw fromApiError(r.error, r.response);
+      print(r.data, getFormat(this));
+    }),
+    {
+      mapsTo: 'POST /v1/backfill/blocked-jobs/unblock-all',
+      examples: ['cavuno backfill blocked-jobs unblock-all --yes'],
+    },
+  );
 
   // ── progress ─────────────────────────────────────────────────────────────
   annotate(
