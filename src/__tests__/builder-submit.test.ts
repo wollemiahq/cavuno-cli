@@ -57,6 +57,7 @@ describe('builder submit CLI', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     rmSync(directory, { recursive: true, force: true });
     if (previousKey === undefined) delete process.env.CAVUNO_API_KEY;
@@ -218,6 +219,86 @@ describe('builder submit CLI', () => {
     delete process.env.CAVUNO_API_KEY;
     await expect(run()).rejects.toThrow(/CAVUNO_API_KEY/);
     expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('polls /complete through a gateway timeout and a 202 until accepted', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'] });
+    vi.mocked(globalThis.fetch)
+      .mockImplementationOnce(async () =>
+        Response.json(
+          { operationId: 'operation_1', status: 'created' },
+          { status: 201 },
+        ),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json({ operationId: 'operation_1', status: 'uploaded' }),
+      )
+      .mockImplementationOnce(
+        async () => new Response('Gateway Timeout', { status: 504 }),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json(
+          { kind: 'in_progress' },
+          { status: 202, headers: { 'Retry-After': '5' } },
+        ),
+      );
+    const done = run();
+    await vi.runAllTimersAsync();
+    await done;
+    vi.useRealTimers();
+    const calls = vi.mocked(globalThis.fetch).mock.calls;
+    expect(calls).toHaveLength(5);
+    for (const call of calls.slice(2)) {
+      expect(call[0]).toMatch(/\/operation_1\/complete$/);
+      expect(call[1]!.headers).toMatchObject({ Prefer: 'respond-async' });
+    }
+    expect(
+      JSON.parse(
+        readFileSync(join(directory, '.git', 'cavuno-builder.json'), 'utf8'),
+      ),
+    ).toMatchObject({ baseVersionId: 'version_2' });
+  });
+
+  it('stops polling /complete after the deadline and says to submit again', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'] });
+    vi.mocked(globalThis.fetch).mockImplementation(async (url) =>
+      String(url).endsWith('/staged')
+        ? Response.json(
+            { operationId: 'operation_1', status: 'uploaded' },
+            { status: 201 },
+          )
+        : Response.json(
+            { kind: 'in_progress' },
+            { status: 202, headers: { 'Retry-After': '30' } },
+          ),
+    );
+    const done = run();
+    const assertion = expect(done).rejects.toMatchObject({
+      message: expect.stringMatching(
+        /did not finish within 10 minutes; run `npx cavuno@latest builder submit` again/,
+      ),
+      exitCode: 11,
+    });
+    await vi.runAllTimersAsync();
+    await assertion;
+    vi.useRealTimers();
+    expect(
+      JSON.parse(
+        readFileSync(join(directory, '.git', 'cavuno-builder.json'), 'utf8'),
+      ),
+    ).toMatchObject({ baseVersionId: 'version_1' });
+  });
+
+  it('ends on a 409 in_progress from the ledger instead of resubmitting', async () => {
+    vi.mocked(globalThis.fetch)
+      .mockImplementationOnce(async () =>
+        Response.json({ operationId: 'operation_1', status: 'uploaded' }),
+      )
+      .mockImplementationOnce(async () =>
+        Response.json({ kind: 'in_progress' }, { status: 409 }),
+      );
+    await expect(run()).rejects.toThrow(/Builder submit in_progress/);
+    expect(vi.mocked(globalThis.fetch).mock.calls).toHaveLength(2);
   });
 
   it('reports a stale base with the current version', async () => {

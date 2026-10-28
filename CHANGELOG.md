@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.19.1 — 2026-10-28
+
+- **`cavuno builder submit`** waits for a long submission to finish, for up
+  to 10 minutes, and reports its outcome instead of failing on a gateway
+  timeout.
+
 ## 1.19.0 — 2026-10-27
 
 - **`cavuno backfill settings`** shows and updates the board-wide Backfill
