@@ -202,6 +202,44 @@ async function waitForVersion(
   }
 }
 
+const SUBMIT_COMPLETE_TIMEOUT_MS = 10 * 60 * 1000;
+
+/**
+ * Ask the server to finish in the background (`Prefer: respond-async`) and
+ * poll `/complete` until it returns the stored outcome. A 202 or a gateway
+ * 502/503/504 means the work is still running.
+ */
+async function completeStagedSubmission(
+  url: string,
+  key: string,
+): Promise<{ response: Response; data: unknown }> {
+  const deadline = Date.now() + SUBMIT_COMPLETE_TIMEOUT_MS;
+  for (;;) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, Prefer: 'respond-async' },
+    });
+    const data: unknown = await response.json().catch(() => null);
+    const pending = [202, 502, 503, 504].includes(response.status);
+    if (!pending) return { response, data };
+    const retryAfter = Number(response.headers.get('retry-after'));
+    const waitMs =
+      Math.min(
+        30,
+        Math.max(
+          1,
+          Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : 5,
+        ),
+      ) * 1000;
+    if (Date.now() + waitMs > deadline)
+      throw new CliError(
+        `Builder submit did not finish within ${SUBMIT_COMPLETE_TIMEOUT_MS / 60_000} minutes; run \`npx cavuno@latest builder submit\` again to get the stored result.`,
+        11,
+      );
+    await new Promise((done) => setTimeout(done, waitMs));
+  }
+}
+
 async function versionAction(
   command: Command,
   directory: string,
@@ -586,11 +624,10 @@ export function registerBuilderCommand(root: Command): void {
             );
           }
         }
-        const response = await fetch(`${operationUrl}/complete`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${key}` },
-        });
-        const data: unknown = await response.json().catch(() => null);
+        const { response, data } = await completeStagedSubmission(
+          `${operationUrl}/complete`,
+          key,
+        );
         const kind =
           data && typeof data === 'object' && 'kind' in data
             ? (data as { kind: unknown }).kind
