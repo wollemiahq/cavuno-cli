@@ -51,6 +51,8 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   companies_duplicate_domain: 7,
   companies_duplicate_name: 7,
   companies_has_jobs: 7,
+  company_group_depth: 2,
+  company_group_account: 2,
   blog_post_not_found: 4,
   blog_author_not_found: 4,
   blog_tag_not_found: 4,
