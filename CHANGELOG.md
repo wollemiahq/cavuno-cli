@@ -3,6 +3,11 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.20.0 — 2026-11-03
+
+- Company group errors (`company_group_depth`, `company_group_account`) exit
+  with code 2, like other invalid input.
+
 ## 1.19.1 — 2026-10-28
 
 - **`cavuno builder submit`** waits for a long submission to finish, for up
