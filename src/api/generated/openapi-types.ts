@@ -63,6 +63,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/analytics/search-console/compare': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Compare Google Search Console performance between periods
+     * @description Compares the Board’s Google Search Console performance for a period with the previous period or the same dates a year earlier, grouped by query, page, or query and page. Both periods use finalized days only. Rows are joined across periods, then filtered, sorted and paged by Cavuno; the summary adds ungrouped totals, position buckets and new, lost, up and down counts. Enforces the Board’s stored reporting coverage.
+     */
+    post: operations['compareSearchConsole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/analytics/search-console/inspect': {
     parameters: {
       query?: never;
@@ -123,6 +143,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/applications/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get an application
+     * @description Returns one job application with the details the applicant submitted, the employer notes and the activity history. Requires `candidates.read`.
+     */
+    get: operations['getApplication'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an application
+     * @description Permanently deletes one job application, including the applicant's contact details, cover note, uploaded resume, employer notes and activity history. The candidate account and their other applications are kept. Requires `candidates.manage`; a signed-in member or an OAuth token also needs `candidates.delete`, which only owners and admins hold.
+     */
+    delete: operations['deleteApplication'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/audit-logs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List audit log entries
+     * @description Returns who changed what on your board, newest first: the same entries as the Audit log page in Settings, with the same filters. Use it to answer "what changed" and "who did it". The audit log is available on the Grow plan (last 90 days) and on Advanced and higher (full history). Requires the `audit.read` permission, which owners and admins hold.
+     */
+    get: operations['listAuditLogs'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/audit-logs/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an audit log entry
+     * @description Retrieves one audit log entry with the changed fields before and after the change, as the entry’s detail panel in Settings shows them. An entry older than the plan’s retention window is not found.
+     */
+    get: operations['getAuditLog'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/backfill/blocked-jobs/unblock-all': {
     parameters: {
       query?: never;
@@ -152,7 +236,7 @@ export interface paths {
     };
     /**
      * List Backfill companies
-     * @description List Cavuno companies for one Backfill dashboard tab state. Internal candidate IDs and scores are never returned. Candidates (index/name/website only) appear solely for `needs_match`.
+     * @description List Cavuno companies for one Backfill dashboard tab state. Internal candidate IDs and scores are never returned. Candidates (index/name/website only) appear solely for `needs_match`; `blockedAt` and `blockReason` solely for `blocked`.
      */
     get: operations['listBackfillCompanies'];
     put?: never;
@@ -283,6 +367,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/backfill/exclusions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Backfill exclusions
+     * @description Return what Backfill will not import on this Board, newest first: removed jobs it skips (type `job_url`) and excluded domains, companies, titles and URLs.
+     */
+    get: operations['listBackfillExclusions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/backfill/progress': {
     parameters: {
       query?: never;
@@ -364,7 +468,7 @@ export interface paths {
     };
     /**
      * Get Backfill settings
-     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the "Posted within" age filter, the worldwide-remote exclusion and the sponsored-jobs switch. Requires `backfill.read`.
+     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the "Posted within" age filter, the worldwide-remote exclusion, the pay requirement and the sponsored-jobs switch. Requires `backfill.read`.
      */
     get: operations['getBackfillSettings'];
     put?: never;
@@ -374,9 +478,69 @@ export interface paths {
     head?: never;
     /**
      * Update Backfill settings
-     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `maxJobAgeDays` and `excludeWorldwideRemote` are saved together; `sponsoredJobsEnabled` is applied after them. Changing `sponsoredJobsEnabled` before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Clean-up of jobs already on the Board runs in the background. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
+     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `maxJobAgeDays`, `excludeWorldwideRemote` and `requireSalary` are saved together; `sponsoredJobsEnabled` is applied after them. Changing `sponsoredJobsEnabled` before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Turning on `excludeWorldwideRemote` also cleans up matching jobs already on the Board, in the background; `requireSalary` changes only what Backfill imports next. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
      */
     patch: operations['updateBackfillSettings'];
+    trace?: never;
+  };
+  '/backfill/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Backfill status
+     * @description Return a snapshot of the Board’s Backfill state: whether it is on, how many rules and backfilling companies it has, the job limit, age limit and remote settings, the board context, the company source job filters, and the last completed sync, whose `totalActive` is the Backfill job count. Counts stop at a cap on large Boards; the matching `...IsLowerBound` field says when a count is a lower bound.
+     */
+    get: operations['getBackfillStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/backfill/sync-runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Backfill sync runs
+     * @description Return the Board’s completed Backfill syncs, most recent first, with the jobs and companies each one added.
+     */
+    get: operations['listBackfillSyncRuns'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/builder-credits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Builder credit history
+     * @description Returns the Board's Builder credit ledger: automatic top-up settings, the newest credit grants, and recent credit spend per day, month and billing period. Credit amounts are in tenths of a credit, like GET /usage, which carries the current balances.
+     */
+    get: operations['getBillingBuilderCredits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/billing/checkout': {
@@ -408,12 +572,16 @@ export interface paths {
     };
     /**
      * Get payment connection status
-     * @description Returns the Board's normalized payment connection readiness without provider identifiers or raw provider requirements.
+     * @description Returns the Board's payment connection readiness: whether payments and payouts are enabled, the connected Stripe account id, the tax collection status, and the names of any details Stripe still needs.
      */
     get: operations['getBillingConnect'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Disconnect the payment connection
+     * @description Disconnects the Board's payment account, as the dashboard's Disconnect action does. The Board stops taking payments through it straight away: paid plans can no longer be checked out and the job-seeker paywall is unpublished. Nothing changes inside the payment account itself: collected money, payouts, customers, and existing subscriptions stay there and keep renewing, but buyers lose the self-serve billing link on the Board until you reconnect. The synced tax status is cleared. Reconnect later with `POST /v1/billing/connect/onboarding-link`. Disconnecting a Board that is not connected succeeds. Sandbox boards use a platform-provisioned test connection and are refused with `sandbox_connect_managed` (409). Requires `plans.manage`.
+     */
+    delete: operations['disconnectBillingConnect'];
     options?: never;
     head?: never;
     patch?: never;
@@ -439,6 +607,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/billing/portal': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create a billing portal session
+     * @description Returns a hosted billing portal URL for the Board's own Cavuno subscription, the same portal the dashboard's Manage billing button opens. A person uses it to view invoices, update payment methods, and manage the subscription. Each call issues a fresh URL. Returns `billing_portal_unavailable` (409) when the Board has never subscribed; start a subscription with `POST /v1/billing/checkout` instead. Requires `billing.manage`.
+     */
+    post: operations['createBillingPortalSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/billing/subscription': {
     parameters: {
       query?: never;
@@ -451,6 +639,26 @@ export interface paths {
      * @description Returns the Board's Cavuno plan, status, renewal state, and included product capabilities. Provider identifiers are never returned.
      */
     get: operations['getBillingSubscription'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/tax': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get tax collection settings
+     * @description Returns the Board's tax collection settings, read live from its connected Stripe account: default tax behavior and tax code, head office country, and active tax registrations. Cavuno only reads these settings; change them in Stripe. When Stripe is not connected the response has `connected: false`.
+     */
+    get: operations['getBillingTax'];
     put?: never;
     post?: never;
     delete?: never;
@@ -853,6 +1061,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/candidates/verifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the board's candidate items by verification status
+     * @description The board's "Needs verification" queue: candidate items in one status (default `pending`), newest change first, cursor-paginated. Requires `candidates.read`.
+     */
+    get: operations['listCandidateItemVerificationQueue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/candidates/{id}': {
     parameters: {
       query?: never;
@@ -916,7 +1144,7 @@ export interface paths {
     put?: never;
     /**
      * Deactivate a candidate
-     * @description Disables sign-in, revokes all sessions, and hides the profile from talent surfaces. Profile and application history are preserved for a later reactivate. Idempotent: an already-deactivated candidate returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     * @description Disables sign-in, revokes all sessions, and hides the profile from talent surfaces. Profile and application history are preserved for a later reactivate. This operator deactivation is separate from the membership deactivation set by `POST /candidates/reconcile` with `active: false`: a reconcile with `active: true` never lifts it. Idempotent: a candidate already deactivated this way returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     post: operations['deactivateCandidate'];
     delete?: never;
@@ -978,7 +1206,7 @@ export interface paths {
     put?: never;
     /**
      * Reactivate a candidate
-     * @description Restores sign-in, session access, and talent-surface visibility for a previously deactivated candidate. Profile and application history were preserved by deactivate. Idempotent: an already-active candidate returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
+     * @description Lifts the operator deactivation set by `POST /candidates/{id}/deactivate` or the dashboard Ban, restoring sign-in, session access, and talent-surface visibility. It does not lift a membership deactivation: while `POST /candidates/reconcile` has the candidate at `active: false`, they stay deactivated and `deactivatedAt` stays set. Profile and application history were preserved by deactivate. Idempotent: a candidate with no operator deactivation returns 200 with the unchanged detail. Requires `candidates.manage`. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     post: operations['reactivateCandidate'];
     delete?: never;
@@ -1001,6 +1229,66 @@ export interface paths {
     get: operations['listCandidateResume'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/verifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a candidate's item verifications
+     * @description Every item on the candidate profile that has a verification status, with the staff note. Items without one are `unverified`. Requires `candidates.read`.
+     */
+    get: operations['listCandidateItemVerifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/verifications/{itemKey}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get one candidate item verification
+     * @description One item's verification and its `currentHash`, the value to send as `expectedHash` when you verify it. Requires `candidates.read`.
+     */
+    get: operations['getCandidateItemVerification'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/candidates/{id}/verifications/{itemKey}/decisions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide on a candidate item verification
+     * @description Verify, reject, ask for more information, mark as unable to verify, or revoke one item. Verify needs the `expectedHash` you reviewed; every other decision needs a `reasonCode`. The worker is emailed about the decision, except `unable_to_verify`. Read the result back with `GET /candidates/{id}/verifications/{itemKey}`. Requires `candidates.manage`.
+     */
+    post: operations['createCandidateItemVerificationDecision'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1105,6 +1393,26 @@ export interface paths {
      * @description Searches your companies using a free-text query. Results are returned sorted by creation date, with the most recently created companies appearing first.
      */
     post: operations['searchCompanies'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/verifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the board's company items by verification status
+     * @description The board's "Needs verification" queue: company items in one status (default `pending`), newest change first, cursor-paginated. Requires `companies.read`.
+     */
+    get: operations['listCompanyItemVerificationQueue'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1333,6 +1641,98 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/companies/{id}/routing-rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List routing rules for a company
+     * @description List a parent company's routing rules in order. Feed jobs synced to the parent go to the subsidiary of the first rule they match; a job matching no rule stays on the parent. Empty for a company without rules.
+     */
+    get: operations['listCompanyRoutingRules'];
+    put?: never;
+    /**
+     * Create a routing rule
+     * @description Route the parent company's feed jobs that match the conditions and location filter to a subsidiary. A target with no parent becomes a subsidiary of this company. Jobs moved to a company by hand are never routed. At most 50 rules per company. Requires an `Idempotency-Key` header.
+     */
+    post: operations['createCompanyRoutingRule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/routing-rules/order': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Reorder routing rules
+     * @description Set the order of a company's routing rules. A job goes to the first rule it matches. Requires an `Idempotency-Key` header.
+     */
+    put: operations['updateCompanyRoutingRuleOrder'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/routing-rules/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Preview a routing rule
+     * @description Read-only. Lists the parent company's published jobs a draft rule matches (the first 500 jobs), with why each matched, which are locked to their company, which an earlier rule already routes, and how many `moveExistingJobs` would move. A draft with no condition terms and no country matches nothing.
+     */
+    post: operations['previewCompanyRoutingRule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/routing-rules/{ruleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a routing rule
+     * @description Retrieve one routing rule of a parent company.
+     */
+    get: operations['getCompanyRoutingRule'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a routing rule
+     * @description Delete a routing rule. The target stays a subsidiary and keeps its jobs; new feed jobs stop being routed to it. Requires an `Idempotency-Key` header.
+     */
+    delete: operations['deleteCompanyRoutingRule'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a routing rule
+     * @description Partially update a routing rule. Omitted fields keep their values; the target cannot change (delete the rule and create one instead). Requires an `Idempotency-Key` header.
+     */
+    patch: operations['updateCompanyRoutingRule'];
+    trace?: never;
+  };
   '/companies/{id}/unblock': {
     parameters: {
       query?: never;
@@ -1347,6 +1747,66 @@ export interface paths {
      * @description Removes a company from the board-scoped blocklist. Does not republish jobs archived when the company was blocked. A company that had also been removed from the board comes back as an empty profile — it is visible again but its jobs are not restored, and the response reports `was_removed: true`. Idempotent: unblocking a company that is not blocked succeeds and reports `was_blocked: false`.
      */
     post: operations['createCompanyUnblock'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/verifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a company's item verifications
+     * @description Every item on the company profile that has a verification status, with the staff note. Items without one are `unverified`. Requires `companies.read`.
+     */
+    get: operations['listCompanyItemVerifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/verifications/{itemKey}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get one company item verification
+     * @description One item's verification and its `currentHash`, the value to send as `expectedHash` when you verify it. Requires `companies.read`.
+     */
+    get: operations['getCompanyItemVerification'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/{id}/verifications/{itemKey}/decisions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decide on a company item verification
+     * @description Verify, reject, ask for more information, mark as unable to verify, or revoke one item. Verify needs the `expectedHash` you reviewed; every other decision needs a `reasonCode`. The worker is emailed about the decision, except `unable_to_verify`. Read the result back with `GET /companies/{id}/verifications/{itemKey}`. Requires `companies.manage`.
+     */
+    post: operations['createCompanyItemVerificationDecision'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1417,7 +1877,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * List promotion codes
+     * @description Lists the promotion codes of one coupon, newest first, 100 per page, including inactive and expired codes, with how often each was redeemed.
+     */
+    get: operations['listPromotionCodes'];
     put?: never;
     /** Create a promotion code */
     post: operations['createCouponPromotionCode'];
@@ -1441,7 +1905,11 @@ export interface paths {
     get: operations['getCustomObjectRecord'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete a custom object record
+     * @description Permanently deletes a record, archived or not, with its uploaded files. The record is gone at once; its selections are removed from company and talent profiles in the background, and from a job when the job is next saved; reads leave it out meanwhile. To hide a record and keep its selections instead, archive it. A record of another account, or of a deleted type, is 404. Requires `settings.manage`.
+     */
+    delete: operations['deleteCustomObjectRecord'];
     options?: never;
     head?: never;
     /**
@@ -1489,12 +1957,16 @@ export interface paths {
     get: operations['getCustomObjectType'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete a custom object type
+     * @description Permanently deletes an archived type with all of its records and their uploaded files. The type is gone at once; its records are removed in the background. Archive the type first: an active type is refused with 409 `custom_objects_type_active`. A type that a job form field, company or talent profile field, or a reference field on another type still uses is refused with 409 `custom_objects_type_in_use`; the error message names those fields. Requires `settings.manage`.
+     */
+    delete: operations['deleteCustomObjectType'];
     options?: never;
     head?: never;
     /**
      * Update a custom object type
-     * @description Updates its name, field definitions, or archived state. Omitted fields are preserved. Existing field types are immutable. Requires `settings.manage`.
+     * @description Updates its name, field definitions, or archived state. Omitted fields are preserved. Existing field types are immutable. Archiving hides the job form, company profile and talent profile fields that use the type from forms, profiles and API reads until it is restored; their stored values are kept. Archiving is refused with 409 `custom_objects_type_in_use` while a reference field on another type uses it; the error message names those fields. Requires `settings.manage`.
      */
     patch: operations['updateCustomObjectType'];
     trace?: never;
@@ -1563,6 +2035,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/dashboard-links': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get dashboard links
+     * @description Return direct links to the Board’s dashboard pages (billing, domains, jobs, Backfill, website, indexing, team, email, Companion and more) so an agent can send a person straight to the right page, plus link templates for a single job, company or blog post. The `website` link opens the editor the Board currently uses.
+     */
+    get: operations['getDashboardLinks'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/development-origins': {
     parameters: {
       query?: never;
@@ -1594,7 +2086,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve a development origin
+     * @description Retrieves a development origin by ID, in the normalized form it was stored in.
+     */
+    get: operations['getDevelopmentOrigin'];
     put?: never;
     post?: never;
     /**
@@ -1765,6 +2261,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/domains/{id}/probe': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Probe a custom domain
+     * @description Requests a path on one of the Board's custom domains from Cavuno's servers and reports each response: status, redirect target, `Server` header, whether Cloudflare served it, and timing. Redirects are followed up to 5 times while they stay on the Board's own domains or its hosted address; a redirect anywhere else is reported but not followed. Response bodies are never read or returned. Limited to 10 probes per minute per Board.
+     */
+    get: operations['probeDomain'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/domains/{id}/verify': {
     parameters: {
       query?: never;
@@ -1851,6 +2367,74 @@ export interface paths {
      * @description Checks the domain’s DNS records now and returns the updated domain. Call it after publishing the records in `dnsRecords`; DNS changes can take a few minutes to propagate, so a `pending` or `failed` result right after publishing is normal. If `dnsRecords` was empty, this also retries setting the domain up with the email provider.
      */
     post: operations['verifyEmailDomain'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List email templates
+     * @description Returns every email your board sends that you can customize, one entry per type, whether or not you have customized it. Each entry lists the tokens you can use and the tokens the body must contain, so you can write a valid template. The list is short and returned in one page.
+     */
+    get: operations['listEmailTemplates'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-templates/{type}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an email template
+     * @description Retrieves the template in effect for one email type: your published version when `customized` is `true`, otherwise the default template that the dashboard editor starts from.
+     */
+    get: operations['getEmailTemplate'];
+    /**
+     * Publish an email template
+     * @description Publishes your version of an email, replacing any version published before. It is used for every email of this type sent from then on. Send all three fields. The template is checked the same way as in the dashboard editor: length limits, only the tokens listed for this type, and every required body token present.
+     */
+    put: operations['publishEmailTemplate'];
+    post?: never;
+    /**
+     * Reset an email template
+     * @description Deletes your published version so the default template is sent again. Succeeds when the email was not customized.
+     */
+    delete: operations['resetEmailTemplate'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-templates/{type}/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send a test email
+     * @description Sends the email in effect for this type, with sample values for its tokens and your board’s branding, to the email address of the member making the request (for an API key, the member who created it). Use it to check a template after publishing. A board can send 20 test emails an hour, shared with the dashboard editor.
+     */
+    post: operations['testEmailTemplate'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2017,6 +2601,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/employers/memberships/invites': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List company team invites
+     * @description Returns the invites sent to join company teams on your board, newest first. Filter by `status` and a single `companyId`. Requires `employers.read`.
+     */
+    get: operations['listEmployerMembershipInvites'];
+    put?: never;
+    /**
+     * Invite someone to a company team
+     * @description Emails an invite to join a company's team on your board, sent in your board's name. When the invitee accepts, they become an approved member of the company. A company can hold up to 50 pending invites, and each user can send up to 20 invites an hour. Requires `companies.manage`.
+     */
+    post: operations['createEmployerMembershipInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/memberships/invites/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a company team invite
+     * @description Returns one company team invite on your board. Requires `employers.read`.
+     */
+    get: operations['getEmployerMembershipInvite'];
+    put?: never;
+    post?: never;
+    /**
+     * Revoke a company team invite
+     * @description Revokes a pending invite so its link stops working. Returns the invite with `status: revoked`. Only a pending invite can be revoked. Requires `companies.manage`.
+     */
+    delete: operations['revokeEmployerMembershipInvite'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/memberships/invites/{id}/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resend a company team invite
+     * @description Replaces a pending invite with a fresh one to the same address and emails it. The old invite is revoked and its link stops working; the response is the new invite, with a new `id` and `expiresAt`. Resends count toward the hourly invite limit. Requires `companies.manage`.
+     */
+    post: operations['resendEmployerMembershipInvite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/employers/memberships/{id}': {
     parameters: {
       query?: never;
@@ -2031,10 +2683,18 @@ export interface paths {
     get: operations['getEmployersMembership'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Remove an employer from a company team
+     * @description Removes an approved member from the company team, including the company's only admin. The membership is kept with `status: rejected`, so a matching work email cannot restore access on its own, and the member's pending invites to the company are revoked. Send a new invite to restore access. Returns the updated membership. Requires `companies.manage`.
+     */
+    delete: operations['removeEmployerMembership'];
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Change an employer's company role
+     * @description Sets an approved member's role on the company team to `admin` or `member`. A company always keeps at least one admin, so demoting the last admin is refused: make someone else an admin first. Setting the role it already has changes nothing. Requires `companies.manage`.
+     */
+    patch: operations['updateEmployersMembership'];
     trace?: never;
   };
   '/employers/{id}': {
@@ -2225,6 +2885,198 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/inbox/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve inbox settings
+     * @description Returns whether the Inbox is on, the board’s receiving and forwarding addresses, and who replies are sent from.
+     */
+    get: operations['getInboxSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update inbox settings
+     * @description Turns the Inbox and the public Contact page on or off. Forwarding and custom receiving addresses are managed in the dashboard.
+     */
+    patch: operations['updateInboxSettings'];
+    trace?: never;
+  };
+  '/inbox/tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List inbox conversations
+     * @description Returns the board’s support conversations, newest activity first. Filter by status and queue, or search the conversation text. The `unread` flag and the `mine` queue are relative to you: the member behind the API key, OAuth grant or session.
+     */
+    get: operations['listInboxTickets'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an inbox conversation
+     * @description Retrieves a conversation with its latest 50 messages, oldest first. When `hasOlderMessages` is `true`, page through the rest of the history with `GET /v1/inbox/tickets/{id}/messages`.
+     */
+    get: operations['getInboxTicket'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an inbox conversation
+     * @description Permanently deletes a conversation, including every message, internal note and attachment. Use it to honor a requester’s deletion request. Works while Inbox is turned off. Replies already sent stay in the requester’s email inbox. Requires `inbox.manage`; a signed-in member or an OAuth token also needs `candidates.delete`, which only owners and admins hold.
+     */
+    delete: operations['deleteInboxTicket'];
+    options?: never;
+    head?: never;
+    /**
+     * Update an inbox conversation
+     * @description Changes a conversation’s status or assignee. Snoozing needs `snoozedUntil`; the conversation reopens at that time, or sooner if the requester writes back. Any parameters not provided are left unchanged.
+     */
+    patch: operations['updateInboxTicket'];
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/messages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List conversation messages
+     * @description Returns a conversation’s messages, newest first. Customer messages, replies and internal notes are included; canceled replies are left out.
+     */
+    get: operations['listInboxTicketMessages'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/messages/{messageId}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a pending reply
+     * @description Cancels a reply that is still inside its undo window, so it is never emailed. Only the member who sent the reply can cancel it. Canceling an already canceled reply succeeds.
+     */
+    post: operations['cancelInboxTicketReply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/messages/{messageId}/retry': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Retry a failed reply
+     * @description Sends a reply whose delivery failed again, with the same text, attachments and threading. Only replies with `deliveryStatus: "failed"` can be retried.
+     */
+    post: operations['retryInboxTicketReply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add an internal note
+     * @description Adds a plain-text internal note to the conversation. Notes are visible to your team only and are never emailed. Attachments are not supported here.
+     */
+    post: operations['createInboxTicketNote'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark an inbox conversation read
+     * @description Marks the conversation read for you (the acting member) and clears its Inbox notification. Other members’ read state is unchanged.
+     */
+    post: operations['markInboxTicketRead'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/tickets/{id}/reply': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reply to an inbox conversation
+     * @description Emails a plain-text reply to the requester from the board’s reply address, signed as you (the acting member). The reply waits out a short undo window first; cancel it within `undoUntil` with `POST /v1/inbox/tickets/{id}/messages/{messageId}/cancel`. Replying assigns an unassigned conversation to you and reopens a snoozed one. Attachments are not supported here; add them from the dashboard Inbox. Requires an `Idempotency-Key` header: a retry with the same key returns the first reply instead of emailing the requester again.
+     */
+    post: operations['replyToInboxTicket'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/integrations/indexing': {
     parameters: {
       query?: never;
@@ -2237,6 +3089,26 @@ export interface paths {
      * @description Returns the account's Google Indexing API and IndexNow configuration. The Google Indexing API notifies Google immediately when jobs are published or removed; your site is indexed by Google either way. Always returns a config (the Google Indexing API reads as disabled when never provisioned). Toggle it with `POST /v1/integrations/indexing/toggle-google-indexing-api`.
      */
     get: operations['getIntegrationsIndexing'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/integrations/indexing/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List indexing submissions
+     * @description Lists the Board's search-indexing submissions, newest first: each page URL sent to the Google Indexing API when a job, company or blog post is published or removed, with its state, retries and last error. Filter by `state` or by a page `url` to see why one page was not submitted.
+     */
+    get: operations['listIndexingSubmissions'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2384,7 +3256,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve an invitation
+     * @description Retrieves an invitation by ID. The accept token is not included; it is returned only when you create or renew an invitation.
+     */
+    get: operations['getInvitation'];
     put?: never;
     post?: never;
     /**
@@ -2617,6 +3493,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/jobs/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get job statistics
+     * @description Return statistics about the Board’s published jobs: the exact published count against the plan limit, jobs per country, jobs per work arrangement, and how many jobs have no employment type, which Google for Jobs reads from the job’s structured data. The per-job statistics read up to 5,000 jobs; `sample` says whether they cover every published job.
+     */
+    get: operations['getJobStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/jobs/{id}': {
     parameters: {
       query?: never;
@@ -2643,6 +3539,26 @@ export interface paths {
      * @description Updates the specified job by setting the values of the parameters passed. Any parameters not provided will be left unchanged. Pass `expiresAt: null` to clear the explicit expiry. An ordinary published job then receives the board's `defaultJobDurationDays` from its publication time (30 days when unset); drafts and sponsored jobs may remain without an expiry.
      */
     patch: operations['updateJob'];
+    trace?: never;
+  };
+  '/jobs/{id}/applications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List applications for a job
+     * @description Returns the applications made to one job, newest first. Requires `candidates.read`.
+     */
+    get: operations['listJobApplications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/jobs/{id}/duplicate': {
@@ -3062,7 +3978,7 @@ export interface paths {
     };
     /**
      * Retrieve a page intro
-     * @description Returns the intro and meta overrides written for one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Returns the intro and meta overrides written for one category or location page, with their placeholders filled, and as written in the `*Template` fields. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     get: operations['getPageContent'];
     /**
@@ -3134,15 +4050,35 @@ export interface paths {
     };
     /**
      * List employer plans
-     * @description Returns the account's employer plans (the plans a board operator sells to employers), each with its single price and feature values.
+     * @description Returns the account's employer plans (the plans a board operator sells to employers), each with its single price and feature values. Digital products are plans of purpose `digital_product`, with their product fields under `digitalProduct`.
      */
     get: operations['listPlans'];
     put?: never;
     /**
      * Create an employer plan
-     * @description Creates plan metadata only. Set the price with PUT /v1/plans/:id/price after the Board payment connection is ready.
+     * @description Creates plan metadata only. Set the price with PUT /v1/plans/:id/price after the Board payment connection is ready. A digital product (purpose `digital_product`) is created with its price and product fields in `digitalProduct`; add its files with /v1/plans/{id}/files.
      */
     post: operations['createPlan'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/reorder': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reorder employer plans
+     * @description Atomically sets `displayOrder` for every non-archived plan of one purpose. Send the complete set: a request that leaves a plan out, names a plan twice, or repeats a `displayOrder` is rejected and nothing changes. An unknown, archived, or other-purpose plan ID returns 404. Requires `plans.manage`.
+     */
+    post: operations['reorderPlans'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3197,6 +4133,94 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/plans/{id}/files': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a digital product's files
+     * @description The product's files and links in order, with state, size, page count and checksum. Deleted files are left out.
+     */
+    get: operations['listPlanFiles'];
+    put?: never;
+    /**
+     * Add a link to a digital product
+     * @description Adds a link deliverable at the end of the product. A link is ready at once. Upload files with POST /v1/plans/{id}/files/uploads.
+     */
+    post: operations['createPlanFileLink'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/files/uploads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a file upload
+     * @description Reserves a new file (state `uploading`) and returns presigned URLs: one PUT for a small file, or one per part of a multipart upload. Send the bytes, then call POST /v1/plans/{id}/files/uploads/{uploadId}/complete. To replace an existing file instead, pass this upload to PATCH /v1/plans/{id}/files/{fileId} as `replaceWithUploadId` before completing it.
+     */
+    post: operations['createPlanFileUpload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/files/uploads/{uploadId}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Complete a file upload
+     * @description Finishes the upload once every byte was sent. The file enters `checking` (a replacement leaves the file `ready` with its current version) and becomes `ready`, `flagged` or `blocked` when the checks finish. An upload whose bytes are not the declared size is stopped.
+     */
+    post: operations['completePlanFileUpload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/files/{fileId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete a digital product file
+     * @description Deletes a file or link for everyone, earlier buyers included. The stored file is removed after a grace period. A listed product keeps at least one ready file or link: unlist it first to delete its last one.
+     */
+    delete: operations['deletePlanFile'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a digital product file
+     * @description Rename or describe a file or link (and change a link URL), disable or enable it, move it, or replace its content with an upload (`replaceWithUploadId`, `notifyBuyers`). Applied in that order, all or nothing.
+     */
+    patch: operations['updatePlanFile'];
+    trace?: never;
+  };
   '/plans/{id}/price': {
     parameters: {
       query?: never;
@@ -3207,7 +4231,7 @@ export interface paths {
     get?: never;
     /**
      * Set the plan price
-     * @description Upserts the single checkout price for the plan. Requires a ready Board payment connection and an Idempotency-Key header.
+     * @description Upserts the single checkout price for the plan. Requires a ready Board payment connection and an Idempotency-Key header. On a digital product this sets a fixed price of `amountCents` (above zero), switching a free or pay-what-you-want product to fixed; no payment connection is needed, because its Stripe product and price are made at checkout. To make a product free or pay what you want, PATCH /v1/plans/{id} with `digitalProduct.pricing`.
      */
     put: operations['updatePlanPrice'];
     post?: never;
@@ -3215,6 +4239,166 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/purchases': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a digital product's sales
+     * @description The buyers of a digital product, newest first: email, amount, answers, downloads used and access status. Cursor-paginated.
+     */
+    get: operations['listPlanPurchases'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/purchases/{purchaseId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Correct a digital product buyer's email
+     * @description Corrects a mistyped buyer email on a sale, and on its transaction. Browsers confirmed against the old email are asked again; stamped PDFs are made again with the new address. Returns the sale. Needs `plans.manage` and `billing.read` (the response is the sale with the buyer email and answers).
+     */
+    patch: operations['updatePlanPurchase'];
+    trace?: never;
+  };
+  '/plans/{id}/purchases/{purchaseId}/downloads/reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reset a digital product buyer's downloads
+     * @description Gives the buyer their downloads back: every file, or one with `fileId`. Returns the sale. Needs `plans.manage` and `billing.read` (the response is the sale with the buyer email and answers).
+     */
+    post: operations['resetPlanPurchaseDownloads'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/purchases/{purchaseId}/remove-access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * End a free digital product claim's access
+     * @description Ends access to a free claim (status `free` to `access_removed`): the download page and links stop working and the claim leaves the sales count. Ending access that is already ended changes nothing. A paid sale's access is on its transaction. Returns the sale. Needs `plans.manage` and `billing.read` (the response is the sale with the buyer email and answers).
+     */
+    post: operations['removePlanPurchaseAccess'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/purchases/{purchaseId}/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resend a digital product buyer's download link
+     * @description Emails the buyer their download link again. Refused while the sale is unpaid or after access was removed. Returns the sale. Needs `plans.manage` and `billing.read` (the response is the sale with the buyer email and answers).
+     */
+    post: operations['resendPlanPurchaseDelivery'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/purchases/{purchaseId}/restore-access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore a free digital product claim's access
+     * @description Gives a free claim its access back (status `access_removed` to `free`) and counts it in sales again. Restoring access that is live changes nothing. Returns the sale. Needs `plans.manage` and `billing.read` (the response is the sale with the buyer email and answers).
+     */
+    post: operations['restorePlanPurchaseAccess'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List a digital product's reviews
+     * @description The product's reviews, hidden ones included, newest first. Cursor-paginated.
+     */
+    get: operations['listPlanReviews'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/plans/{id}/reviews/{reviewId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Reply to or hide a review
+     * @description Set or remove your reply, and hide or show the review.
+     */
+    patch: operations['updatePlanReview'];
     trace?: never;
   };
   '/redirects': {
@@ -3268,7 +4452,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve a redirect rule
+     * @description Retrieves a redirect rule by ID. Use it to read back a redirect you created or updated.
+     */
+    get: operations['getRedirect'];
     put?: never;
     post?: never;
     /**
@@ -3440,7 +4628,7 @@ export interface paths {
     head?: never;
     /**
      * Update board settings
-     * @description Updates typed board settings by setting the values supplied. Omitted values remain unchanged; settings outside this allowlist use their dedicated product endpoint.
+     * @description Updates typed board settings by setting the values supplied. Omitted values remain unchanged; settings outside this allowlist use their dedicated product endpoint. On a site built with the AI website builder, `language` and `interfaceLocales` are applied asynchronously: the request starts a translation of your site, the response reports it in `languageChange`, and `config` shows the new values once the translated site is live.
      */
     patch: operations['updateSettings'];
     trace?: never;
@@ -3462,6 +4650,30 @@ export interface paths {
      * @description Replaces the AdSense configuration for your board with the supplied values.
      */
     put: operations['updateAdsenseSettings'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/checkout-fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve checkout fields
+     * @description Retrieves the buyer details your board collects when employers pay: phone number, contact person and custom fields in Stripe Checkout and on invoices, and whether buyers get a paid invoice. A board that never configured them collects nothing extra.
+     */
+    get: operations['getCheckoutFields'];
+    /**
+     * Replace checkout fields
+     * @description Replaces the buyer details your board collects when employers pay. Send the whole configuration: custom fields you leave out are removed. Fields already on past orders are unaffected.
+     */
+    put: operations['replaceCheckoutFields'];
     post?: never;
     delete?: never;
     options?: never;
@@ -3543,10 +4755,30 @@ export interface paths {
     get?: never;
     /**
      * Replace custom job field definitions
-     * @description Whole-array replace of the board's custom job field definitions (`jobFormConfig.customFields` only: other job-form keys are untouched). Array order is display order. Empty array removes all fields. Content validation rejects empty labels, duplicate keys, optionless selects, inverted number bounds, and cap breaches (400). Changing `type` on an existing key is rejected (422 `settings_custom_field_type_immutable`); delete the field and recreate it. Renaming a key is delete+add and orphans per-job values under the old key. A field sent without `visibility` keeps its current visibility. The key of a deleted private field cannot be used for a new field (400), so its saved answers stay private. Response shape matches `GET /v1/settings/job-form`.
+     * @description Whole-array replace of the board's custom job field definitions (`jobFormConfig.customFields` only: other job-form keys are untouched). Array order is display order. Empty array removes all fields. Content validation rejects empty labels, duplicate keys, optionless selects, inverted number bounds, and cap breaches (400). Changing `type` on an existing key is rejected (422 `settings_custom_field_type_immutable`); delete the field and recreate it. Renaming a key is delete+add and orphans per-job values under the old key. A field sent without `visibility` keeps its current visibility, and one sent without `aiFill`, `aiInstructions` or `aiAlwaysAnswer` keeps its current AI fill settings. The key of a deleted private field cannot be used for a new field (400), so its saved answers stay private. Response shape matches `GET /v1/settings/job-form`.
      */
     put: operations['updateJobFormCustomFields'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/job-form/custom-fields/ai-fill': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Fill custom fields on live jobs with AI
+     * @description Starts a background run that fills the named custom fields on the board's live jobs with AI, from each job's title, description and company. Each field must have `aiFill` on (`PUT /v1/settings/job-form/custom-fields`). Only empty values are filled: a value already set is kept. One run per board at a time (409 `settings_ai_fill_running`). Every fill counts toward the board's daily AI fill allowance (5,000 jobs).
+     */
+    post: operations['startJobFormCustomFieldAiFill'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3586,15 +4818,35 @@ export interface paths {
     };
     /**
      * List profile custom-field definitions
-     * @description Lists candidate or company profile field definitions in display order. Includes private definitions. Requires `settings.read`.
+     * @description Lists candidate or company profile field definitions in display order. Includes private definitions and, on company fields, the AI fill settings. Requires `settings.read`.
      */
     get: operations['listProfileFieldDefinitions'];
     /**
      * Replace profile custom-field definitions
-     * @description Replaces candidate or company definitions wholesale. Array order is display order. Existing field types are immutable. Requires `settings.manage`.
+     * @description Replaces candidate or company definitions wholesale. Array order is display order. Existing field types are immutable. A company field sent without `aiFill`, `aiInstructions` or `aiAlwaysAnswer` keeps its current AI fill settings; candidate fields take none of them (400). Requires `settings.manage`.
      */
     put: operations['replaceProfileFieldDefinitions'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/settings/profile-fields/{entity}/ai-fill': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Fill company fields on existing companies with AI
+     * @description Starts a background run that fills the named company fields on the board's companies with AI, from each company's name, website, summary, markets and description. Only companies with a description are filled. Each field must have `aiFill` on (`PUT /v1/settings/profile-fields/company`). Only empty values are filled: a value already set is kept. One company run per board at a time (409 `settings_ai_fill_running`). Every fill counts toward the board's daily AI fill allowance (5,000, shared with job AI fill); the run stops when the allowance is used up. `entity` must be `company`.
+     */
+    post: operations['startCompanyProfileFieldAiFill'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3873,6 +5125,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/subscribers/{id}/resend-confirmation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resend a confirmation email
+     * @description Emails a fresh confirmation link to a subscriber who has not confirmed their email yet. You can send one every two minutes per subscriber. Requires `alerts.manage`.
+     */
+    post: operations['resendSubscriberConfirmation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/subscribers/{id}/resubscribe': {
     parameters: {
       query?: never;
@@ -3928,6 +5200,26 @@ export interface paths {
     put?: never;
     /** Create a category */
     post: operations['createTaxonomiesCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/categories/merges/{mergeId}/undo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Undo a category merge
+     * @description Recreates the merged category with its slug, name, aliases and translations and subcategories, and retags the jobs the merge retagged. Available for 30 days, unless the surviving category has since been renamed, deleted or merged with another.
+     */
+    post: operations['undoTaxonomiesCategoryMerge'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4003,11 +5295,55 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve a category alias
+     * @description Checks that `alias` is an alias of the category and returns the category, in the same shape as the add aliases response. The alias is normalized to a slug before matching, as it is when you remove one.
+     */
+    get: operations['getTaxonomiesCategoryAlias'];
     put?: never;
     post?: never;
     /** Remove a category alias */
     delete: operations['deleteTaxonomiesCategoryAlias'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/categories/{id}/merge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Merge a category
+     * @description Merges this category into `intoId`: its jobs, aliases, translations and subcategories move to the surviving category, and this category is deleted. Jobs are retagged in the background. Undo is available for 30 days once `undo.status` is `ready`. A category cannot be merged into itself or into one of its subcategories.
+     */
+    post: operations['mergeTaxonomiesCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/categories/{id}/merge-preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview a category merge
+     * @description Counts what merging this category into `intoId` would change. Writes nothing.
+     */
+    get: operations['previewTaxonomiesCategoryMerge'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -4086,7 +5422,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve a market alias
+     * @description Checks that `alias` is an alias of the market and returns the market, in the same shape as the add aliases response. The alias is normalized to a slug before matching, as it is when you remove one.
+     */
+    get: operations['getTaxonomiesMarketAlias'];
     put?: never;
     post?: never;
     /** Remove a market alias */
@@ -4136,6 +5476,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/taxonomies/rules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List taxonomy rules
+     * @description One type of rule for one taxonomy. Rules never rewrite search queries. A page may be short while `hasMore` is true: keep paging until it is false.
+     */
+    get: operations['listTaxonomiesRules'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/rules/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a taxonomy rule
+     * @description Removes a same as, ignore or keep separate rule. Jobs already tagged keep their tags; the rule stops applying to new tags. A merge is undone with its undo endpoint instead.
+     */
+    delete: operations['deleteTaxonomiesRule'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve taxonomy settings
+     * @description What automatic tagging does with a tag that doesn't match your list, and what each list means, for categories, skills and markets.
+     */
+    get: operations['getTaxonomiesSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update taxonomy settings
+     * @description Sets `unmatchedTagMode` and `listDescription` for the taxonomies you pass. With `ask`, tags that match no term wait in `GET /v1/taxonomies/suggestions` instead of being added.
+     */
+    patch: operations['updateTaxonomiesSettings'];
+    trace?: never;
+  };
   '/taxonomies/skills': {
     parameters: {
       query?: never;
@@ -4151,6 +5555,26 @@ export interface paths {
     put?: never;
     /** Create a skill */
     post: operations['createTaxonomiesSkill'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/skills/merges/{mergeId}/undo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Undo a skill merge
+     * @description Recreates the merged skill with its slug, name, aliases and translations, and retags the jobs the merge retagged. Available for 30 days, unless the surviving skill has since been renamed, deleted or merged with another.
+     */
+    post: operations['undoTaxonomiesSkillMerge'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4209,11 +5633,95 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Retrieve a skill alias
+     * @description Checks that `alias` is an alias of the skill and returns the skill, in the same shape as the add aliases response. The alias is normalized to a slug before matching, as it is when you remove one.
+     */
+    get: operations['getTaxonomiesSkillAlias'];
     put?: never;
     post?: never;
     /** Remove a skill alias */
     delete: operations['deleteTaxonomiesSkillAlias'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/skills/{id}/merge': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Merge a skill
+     * @description Merges this skill into `intoId`: its jobs, aliases and translations move to the surviving skill, and this skill is deleted. Jobs are retagged in the background. Undo is available for 30 days once `undo.status` is `ready`.
+     */
+    post: operations['mergeTaxonomiesSkill'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/skills/{id}/merge-preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview a skill merge
+     * @description Counts what merging this skill into `intoId` would change. Writes nothing.
+     */
+    get: operations['previewTaxonomiesSkillMerge'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List taxonomy suggestions
+     * @description Tags waiting for an answer (`type=unmatched`) or terms suggested for merging (`type=duplicate`), newest first.
+     */
+    get: operations['listTaxonomiesSuggestions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/taxonomies/suggestions/{id}/answer': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Answer a taxonomy suggestion
+     * @description Answers one suggestion. The answer is kept as a rule (see `GET /v1/taxonomies/rules`) and applies to tags that arrive later.
+     */
+    post: operations['answerTaxonomiesSuggestion'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -4253,6 +5761,106 @@ export interface paths {
     get: operations['getTransaction'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/transactions/{id}/refunds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Refund a transaction
+     * @description Refunds a paid sale in full or in part on the board's connected Stripe account, and records whether the buyer keeps what it granted. Send an `Idempotency-Key`: it becomes the Stripe idempotency key, so a retry creates the refund once. Without one, each call is a new refund (never more than is left). Returns the updated transaction. Needs `plans.manage`, the permission the dashboard checks, and `billing.read`, since the response is the transaction with the customer email.
+     */
+    post: operations['refundTransaction'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/transactions/{id}/remove-access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove a transaction's access
+     * @description Revokes what a one-time sale granted (job post credits, a membership, an access pass, a digital product download) without refunding. Removing access that is already removed changes nothing. Returns the updated transaction. Needs `plans.manage`, the permission the dashboard checks, and `billing.read`, since the response is the transaction with the customer email.
+     */
+    post: operations['removeTransactionAccess'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/transactions/{id}/resend-invoice': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resend an invoice email
+     * @description Emails the invoice for an open job posting invoice to its customer again, with the same branded email as the first one. The email is sent in the background: a `202` means it was queued. Requires `plans.manage`.
+     */
+    post: operations['resendTransactionInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/transactions/{id}/restore-access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore a transaction's access
+     * @description Gives back what a one-time sale granted after it was removed, whether a refund, a dispute or the operator removed it. Restoring access that is live changes nothing. Refused while the payment has an open or lost dispute. Returns the updated transaction. Needs `plans.manage`, the permission the dashboard checks, and `billing.read`, since the response is the transaction with the customer email.
+     */
+    post: operations['restoreTransactionAccess'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/transactions/{id}/void-invoice': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Void an invoice
+     * @description Voids an open job posting invoice so it can no longer be paid. When the job was set to publish on payment, its unpublished draft is archived; when it was published on issue, the job is moved back to draft. This cannot be undone. Requires `plans.manage`.
+     */
+    post: operations['voidTransactionInvoice'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4478,7 +6086,7 @@ export interface components {
       /** @description Stripe recurring.interval_count. Null/omitted means 1. Quarterly is month × 3. */
       billingIntervalCount: number | null;
       /**
-       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), or contact-led employer_service / job_seeker_service catalogue rows.
+       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), contact-led employer_service / job_seeker_service catalogue rows, or a digital_product (a downloadable file or link sold from its own product page; its product fields are under `digitalProduct`).
        * @enum {string}
        */
       purpose:
@@ -4487,7 +6095,8 @@ export interface components {
         | 'membership'
         | 'job_seeker'
         | 'employer_service'
-        | 'job_seeker_service';
+        | 'job_seeker_service'
+        | 'digital_product';
       isPublic: boolean;
       isRecommended: boolean;
       isArchived: boolean;
@@ -4505,6 +6114,7 @@ export interface components {
       ctaDestination: string | null;
       price: components['schemas']['PlanPrice'];
       features: components['schemas']['PlanFeature'][];
+      digitalProduct: components['schemas']['PlanDigitalProduct'];
     };
     /** @description Deprecated. Prefer plans with purpose employer_service and pricingMode contact. */
     AdminSalesLedPlan: {
@@ -4749,6 +6359,20 @@ export interface components {
       /** @description Metric value for the day, or null when a lagging provider has not reported yet. */
       value: number | null;
     };
+    AnswerTaxonomySuggestionBody: {
+      /**
+       * @description The taxonomy: `category`, `skill` or `market`.
+       * @enum {string}
+       */
+      kind: 'category' | 'skill' | 'market';
+      /**
+       * @description Unmatched: `add` creates the tag as a term, `map` tags it as the existing term `termId` from now on, `ignore` stops it coming back. Both `add` and `map` tag the jobs that waited on it. Duplicate: `merge` merges each term into `into` (each merge can be undone for 30 days), `keep_separate` stops the pair being suggested.
+       * @enum {string}
+       */
+      action: 'add' | 'map' | 'ignore' | 'merge' | 'keep_separate';
+      /** @description Required for `map`: the term to tag the tag as. */
+      termId?: string;
+    };
     /** @description Query parameters appended to outbound apply URLs. Absent means the default `ref={{boardHost}}`. */
     ApplyUrlAttribution:
       | {
@@ -4763,6 +6387,48 @@ export interface components {
     ApplyUrlParamTemplate: {
       key: string;
       valueTemplate: string;
+    };
+    AuditLogEntry: {
+      /** @description Unique identifier for the entry. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'audit_log';
+      /** @description When the change was made. ISO 8601 datetime. */
+      createdAt: string;
+      /**
+       * @description Who made the change: `user_session` (a team member in the dashboard), `api_key` (an API key), `oauth_token` (an app or agent connected with OAuth), `board_user` (a job seeker or employer on your board), `system` (Cavuno on your behalf) or `companion` (Cavuno Companion, acting for a team member with their permission).
+       * @enum {string}
+       */
+      actorType:
+        | 'user_session'
+        | 'api_key'
+        | 'oauth_token'
+        | 'board_user'
+        | 'system'
+        | 'companion';
+      /** @description Who made the change, as shown on the Audit log page: a member’s name or email, an API key’s name, or an app’s name. */
+      actorLabel: string;
+      /** @description What was done, as a stable machine-readable name such as `jobs.create` or `settings.update`. */
+      action: string;
+      /** @description The action in plain English, such as "Created a job". */
+      summary: string;
+      /** @description The kind of record that changed, such as `job`, `company` or `settings`. */
+      resourceType: string;
+      /** @description ID of the record that changed, or `null` when the change has no single record. */
+      resourceId: string | null;
+      /** @description IP address the change was made from, or `null` when unknown. */
+      ipAddress: string | null;
+    };
+    AuditLogEntryDetail: components['schemas']['AuditLogEntry'] & {
+      /** @description Browser or client that made the change, or `null` when unknown. */
+      userAgent: string | null;
+      /** @description The changed fields before the change, as a JSON string, or `null` (for example on create). Secrets are replaced with `[REDACTED]`; a value over 4 KB is cut short and ends with `…[truncated]`. */
+      before: string | null;
+      /** @description The changed fields after the change, as a JSON string, or `null` (for example on delete). Same redaction and size rules as `before`. */
+      after: string | null;
     };
     BackfillBulkItemResult: {
       companyId: string;
@@ -4785,8 +6451,30 @@ export interface components {
       name: string;
       website: string | null;
       /** @enum {string} */
-      state: 'backfilling' | 'available' | 'needs_match' | 'not_backfilling';
+      state:
+        | 'backfilling'
+        | 'available'
+        | 'needs_match'
+        | 'not_backfilling'
+        | 'blocked';
       candidates?: components['schemas']['BackfillMatchCandidate'][];
+      /** @description When the company was blocked from Backfill (ISO 8601). Present only for `blocked`. */
+      blockedAt?: string;
+      /** @description Reason recorded when the company was blocked, or null. Present only for `blocked`. */
+      blockReason?: string | null;
+    };
+    BackfillExclusion: {
+      id: string;
+      /** @enum {string} */
+      object: 'backfill_exclusion';
+      /** @description What the pattern matches: `job_url` (one removed job), `domain`, `company`, `title` or `url`. */
+      type: string;
+      /** @description The value Backfill will not import. */
+      pattern: string;
+      /** @description Why the exclusion exists, for example `user_deleted`, `user_archived`, `review_rejected`, `review_expired` or `source_ended` for a removed job. Null when none was recorded. */
+      reason: string | null;
+      /** @description When the exclusion was added (ISO 8601). */
+      createdAt: string;
     };
     BackfillMatchCandidate: {
       index: number;
@@ -4835,6 +6523,8 @@ export interface components {
         employmentTypes?: string[];
         workplaceTypes?: string[];
       };
+      /** @description Most jobs from this rule live on the Board at once, counting published jobs and jobs awaiting approval (1–100,000). `null` means no rule limit; the Board's Backfill limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit: number | null;
       createdAt: string | null;
       updatedAt: string | null;
     };
@@ -4843,14 +6533,83 @@ export interface components {
       object: 'backfill_settings';
       /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
       jobLimit: number | null;
-      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      /** @description "Posted within": Backfill imports a job only if it was posted within this many days at the time it is imported (1–365); imported jobs then stay as they age. `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that were too old when imported and deletes those awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
       maxJobAgeDays: number | null;
       /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
       excludeWorldwideRemote: boolean;
+      /** @description When `true`, Backfill skips jobs that don't list pay (no `salaryMin` or `salaryMax` above 0), including relisted and sponsored jobs. Jobs already on your Board are not changed. Defaults to `false`. */
+      requireSalary: boolean;
       /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
       sponsoredJobsEnabled: boolean;
       /** @description Whether `sponsoredJobsEnabled` can be changed on this Board. `false` until Backfill is set up; a PATCH that changes it then returns `backfill_not_configured`. */
       sponsoredJobsConfigurable: boolean;
+    };
+    BackfillStatus: {
+      /** @enum {string} */
+      object: 'backfill_status';
+      /** @description True when Backfill has been set up for the Board. */
+      configured: boolean;
+      /** @description True when Backfill is switched on and importing jobs. */
+      active: boolean;
+      /** @description Named Backfill rules (target roles) on the Board. */
+      targetRoleRuleCount: number;
+      /** @description True when `targetRoleRuleCount` stopped at its cap and the Board has more rules. */
+      targetRoleRuleCountIsLowerBound: boolean;
+      /** @description Backfilling companies that are not blocked or removed, as the dashboard's Backfilling tab shows them. */
+      backfillingCompanyCount: number;
+      /** @description True when `backfillingCompanyCount` is a lower bound: counting stopped at its cap or after scanning its maximum number of rows. */
+      backfillingCompanyCountIsLowerBound: boolean;
+      /** @description The board context from Backfill settings: a description of the Board that Backfill uses to keep only relevant jobs. Null when not set. */
+      boardContext: string | null;
+      /** @description Job filters from Backfill settings that apply to company sources. An omitted key means no filter on it. Null when Backfill is not set up. Each rule carries its own filters on GET /backfill/rules. */
+      companyFilters: {
+        /** @description ISO 3166-1 alpha-2 country codes jobs must be in. */
+        countries?: string[];
+        /** @description ISO 3166-2 subdivision codes jobs must be in. */
+        subdivisions?: string[];
+        /** @description Seniority levels jobs must have. */
+        seniorities?: string[];
+        /** @description Employment types jobs must have. */
+        employmentTypes?: string[];
+        /** @description Work arrangements jobs must have: remote, hybrid, onsite. */
+        workplaceTypes?: string[];
+      } | null;
+      /** @description Most published Backfill jobs the Board allows. Null when only the plan limit applies. */
+      jobLimit: number | null;
+      /** @description Backfill skips jobs first published more than this many days ago. Null when there is no age limit. */
+      maxAgeDays: number | null;
+      /** @description True when Backfill skips jobs that are remote worldwide. */
+      excludeWorldwideRemote: boolean;
+      /** @description The most recent completed sync, or null when none is recorded. Its `totalActive` is the Board’s Backfill job count as of that sync. GET /backfill/sync-runs lists earlier ones. */
+      lastSync: {
+        /** @description When the last sync finished (ISO 8601). */
+        completedAt: string;
+        /** @description Jobs the last sync added. */
+        jobsCreated: number;
+        /** @description Active Backfill jobs on the Board after that sync: the Board’s Backfill job count as of then. */
+        totalActive: number;
+      } | null;
+      /** @description Companies blocked from Backfill. Null while the count is being prepared. */
+      blockedCompanyCount: number | null;
+      /** @description Removed jobs that Backfill will not import again. Null while the count is being prepared. */
+      removedJobExclusionCount: number | null;
+    };
+    BackfillSyncRun: {
+      id: string;
+      /** @enum {string} */
+      object: 'backfill_sync_run';
+      /** @description When the sync finished (ISO 8601). */
+      completedAt: string;
+      /** @description Jobs the sync added to the Board. */
+      jobsCreated: number;
+      /** @description Previously expired jobs the sync published again. */
+      jobsRepublished: number;
+      /** @description Companies the sync added to the Board. */
+      companiesCreated: number;
+      /** @description Active Backfill jobs on the Board when the sync finished. */
+      totalActive: number;
+      /** @description How long the sync took in milliseconds, when recorded. */
+      durationMs: number | null;
     };
     BackfillUnblockAll: {
       /** @enum {string} */
@@ -4887,6 +6646,15 @@ export interface components {
             resourceId: string;
           }
       )[];
+    };
+    BillingBuilderCredits: {
+      /** @enum {string} */
+      object: 'billing_builder_credits';
+      autoTopup: components['schemas']['BuilderCreditAutoTopup'];
+      /** @description The 20 newest credit grants (refreshes and purchases), newest first. */
+      grants: components['schemas']['BuilderCreditGrant'][];
+      /** @description Recent credit spend: up to 14 days, 6 months and 6 billing periods, each newest first. */
+      usagePeriods: components['schemas']['BuilderCreditUsagePeriod'][];
     };
     BillingCheckout: {
       /** @enum {string} */
@@ -4937,6 +6705,20 @@ export interface components {
       payoutsEnabled: boolean;
       detailsSubmitted: boolean;
       actionRequired: boolean;
+      /** @description The Board's connected Stripe account id (`acct_...`), or null when Stripe is not connected. Use it to find the account in the Stripe Dashboard. */
+      stripeAccountId: string | null;
+      /**
+       * @description `active`: Stripe Tax is set up and checkouts collect tax. `pending`: Stripe Tax setup was started but is not finished. Null when tax collection was never set up. Details are on GET /billing/tax.
+       * @enum {string|null}
+       */
+      taxCollectionStatus: 'active' | 'pending' | null;
+      /** @description What Stripe still needs from the account holder, as requirement names only. Null when Stripe is not connected. */
+      requirements: {
+        /** @description Names of the details Stripe needs now to keep the account enabled, for example `external_account`. */
+        currentlyDue: string[];
+        /** @description Names of the details whose deadline has passed. Payments or payouts stay paused until they are provided. */
+        pastDue: string[];
+      } | null;
     };
     BillingConnectOnboardingLink: {
       /** @enum {string} */
@@ -4956,6 +6738,15 @@ export interface components {
       /** @enum {string} */
       type: 'hosted_checkout';
     };
+    BillingPortalSession: {
+      /** @enum {string} */
+      object: 'billing_portal_session';
+      /**
+       * Format: uri
+       * @description Short-lived hosted billing portal URL. Hand it to a human straight away; request a new one if it expires.
+       */
+      url: string;
+    };
     BillingSubscription: {
       /** @enum {string} */
       object: 'billing_subscription';
@@ -4973,6 +6764,38 @@ export interface components {
         canRemoveBranding: boolean;
         apiAccess: boolean;
       };
+    };
+    BillingTax: {
+      /** @enum {string} */
+      object: 'billing_tax';
+      /** @description Whether the Board has a connected Stripe account. When false, every other field is null. */
+      connected: boolean;
+      /**
+       * @description `active`: checkouts collect tax. `pending`: setup was started but is not finished. Null when tax collection was never set up.
+       * @enum {string|null}
+       */
+      taxCollectionStatus: 'active' | 'pending' | null;
+      /** @description Whether the Stripe account is in live mode. False for a test account. Null when Stripe is not connected. */
+      livemode: boolean | null;
+      /**
+       * @description Whether prices include tax by default: `inclusive`, `exclusive`, or `inferred_by_currency`. Null when not set or when Stripe could not be reached.
+       * @enum {string|null}
+       */
+      taxBehavior: 'inferred_by_currency' | 'inclusive' | 'exclusive' | null;
+      /** @description Default Stripe product tax code, for example `txcd_10000000`. `txcd_00000000` means nontaxable. Null when not set or when Stripe could not be reached. */
+      taxCode: string | null;
+      /** @description Name of the default tax code, or null. */
+      taxCodeName: string | null;
+      /** @description Two-letter ISO country code of the head office address set in Stripe Tax, or null. */
+      headOfficeCountry: string | null;
+      /** @description Active tax registrations, up to 100. An empty list means no registrations, so no tax is collected anywhere. Null when Stripe is not connected or the list could not be loaded. */
+      registrations: components['schemas']['BillingTaxRegistration'][] | null;
+    };
+    BillingTaxRegistration: {
+      /** @description Two-letter ISO country code of the tax registration. */
+      country: string;
+      /** @description Stripe registration type for the country, for example `standard`, `oss_union`, `oss_non_union` or `ioss`. */
+      type: string;
     };
     BillingUpgrade: {
       /** @enum {string} */
@@ -5153,6 +6976,191 @@ export interface components {
       /** @description Time at which the tag was last updated, or `null` if it has never been updated. ISO 8601 datetime. */
       updatedAt: string | null;
     };
+    /** @description Board theme: color mode, light and dark color tokens (hex), and fonts. Replaces the whole theme. Refused with 409 on a site built with the AI website builder, where the theme is edited in the builder; sending the current theme changes nothing. */
+    BoardThemeConfig: {
+      /** @enum {string} */
+      mode: 'light' | 'dark' | 'system';
+      designSystem: {
+        /** @enum {string} */
+        schemeId:
+          | 'obsidian'
+          | 'slate'
+          | 'sand'
+          | 'coral'
+          | 'indigo'
+          | 'emerald'
+          | 'charcoal'
+          | 'custom';
+        colors: {
+          light: {
+            brandColor: string;
+            buttonPrimary: string;
+            buttonPrimaryText: string;
+            buttonDanger: string;
+            background: string;
+            surfaceBackground: string;
+            mutedBackground: string;
+            highlightBackground: string;
+            text: string;
+            textSubtle?: string;
+            textMuted: string;
+            textDisabled?: string;
+            textError: string;
+            border: string;
+            contrastBackground: string;
+            contrastText: string;
+          };
+          dark: {
+            brandColor: string;
+            buttonPrimary: string;
+            buttonPrimaryText: string;
+            buttonDanger: string;
+            background: string;
+            surfaceBackground: string;
+            mutedBackground: string;
+            highlightBackground: string;
+            text: string;
+            textSubtle?: string;
+            textMuted: string;
+            textDisabled?: string;
+            textError: string;
+            border: string;
+            contrastBackground: string;
+            contrastText: string;
+          };
+        };
+        typography: {
+          /** @enum {string} */
+          fontSans:
+            | 'be-vietnam-pro'
+            | 'inter'
+            | 'plus-jakarta-sans'
+            | 'dm-sans'
+            | 'public-sans'
+            | 'figtree'
+            | 'work-sans'
+            | 'open-sans'
+            | 'poppins'
+            | 'hind'
+            | 'lexend'
+            | 'fira-sans'
+            | 'manrope'
+            | 'source-sans-pro'
+            | 'outfit'
+            | 'space-grotesk'
+            | 'geist'
+            | 'source-serif-4'
+            | 'lora'
+            | 'crimson-pro';
+          /** @enum {string|null} */
+          fontHeading:
+            | 'be-vietnam-pro'
+            | 'inter'
+            | 'plus-jakarta-sans'
+            | 'dm-sans'
+            | 'public-sans'
+            | 'figtree'
+            | 'work-sans'
+            | 'open-sans'
+            | 'poppins'
+            | 'hind'
+            | 'lexend'
+            | 'fira-sans'
+            | 'manrope'
+            | 'source-sans-pro'
+            | 'outfit'
+            | 'space-grotesk'
+            | 'geist'
+            | 'source-serif-4'
+            | 'lora'
+            | 'crimson-pro'
+            | null;
+        };
+      };
+    };
+    BoardThemeConfigView: {
+      mode: string;
+      designSystem: {
+        schemeId: string;
+        colors: {
+          light: {
+            brandColor: string;
+            buttonPrimary: string;
+            buttonPrimaryText: string;
+            buttonDanger: string;
+            background: string;
+            surfaceBackground: string;
+            mutedBackground: string;
+            highlightBackground: string;
+            text: string;
+            textSubtle?: string;
+            textMuted: string;
+            textDisabled?: string;
+            textError: string;
+            border: string;
+            contrastBackground: string;
+            contrastText: string;
+          };
+          dark: {
+            brandColor: string;
+            buttonPrimary: string;
+            buttonPrimaryText: string;
+            buttonDanger: string;
+            background: string;
+            surfaceBackground: string;
+            mutedBackground: string;
+            highlightBackground: string;
+            text: string;
+            textSubtle?: string;
+            textMuted: string;
+            textDisabled?: string;
+            textError: string;
+            border: string;
+            contrastBackground: string;
+            contrastText: string;
+          };
+        };
+        typography: {
+          fontSans: string;
+          fontHeading: string | null;
+        };
+      };
+    };
+    BuilderCreditAutoTopup: {
+      /** @description Whether automatic top-ups are offered at all. When false, no automatic top-up runs, whatever `enabled` says. */
+      available: boolean;
+      /** @description Whether the Board's plan allows buying credits. When false, no automatic top-up runs, whatever `enabled` says. */
+      canTopUp: boolean;
+      /** @description Whether the Board opted in to automatic credit top-ups. False when it never did. Top-ups only run when `available` and `canTopUp` are also true. */
+      enabled: boolean;
+      /** @description Credits bought by each automatic top-up. In tenths of a credit, like GET /usage (10 is one credit). */
+      packTenths: number;
+      /** @description Most that automatic top-ups may spend in one UTC month, in US cents. Null means no cap. */
+      monthlyCapUsdCents: number | null;
+      /** @description Why automatic top-ups are paused, as `{code}|{month}` (for example a declined card), or null. A pause only lasts for the month it names. */
+      disabledReason: string | null;
+      /** @description ISO-8601 time a person on the Board opted in to automatic top-ups, or null when they never did. */
+      consentedAt: string | null;
+    };
+    BuilderCreditGrant: {
+      /**
+       * @description `refresh`: a one-time refresh of the plan allowance. `topup`: credits a person bought. `auto-topup`: credits bought automatically.
+       * @enum {string}
+       */
+      source: 'refresh' | 'topup' | 'auto-topup';
+      /** @description Credits granted. In tenths of a credit, like GET /usage (10 is one credit). */
+      tenths: number;
+      /** @description Credits of this grant not yet spent. In tenths of a credit, like GET /usage (10 is one credit). */
+      remainingTenths: number;
+      /** @description Credits taken back after a refund or a lost dispute. In tenths of a credit, like GET /usage (10 is one credit). */
+      refundedTenths: number;
+      /** @description Price paid for a purchase, in US cents. Null for a refresh, which is free. */
+      priceUsdCents: number | null;
+      /** @description ISO-8601 time the grant was created. */
+      createdAt: string;
+      /** @description ISO-8601 time the unspent credits expire, or null when they never expire (purchases). */
+      expiresAt: string | null;
+    };
     /** @description Builder credit usage in tenths of a credit for the current day and billing period, plus spendable granted credits. */
     BuilderCreditUsage: {
       daily: {
@@ -5169,6 +7177,19 @@ export interface components {
         resetsAtMs: number;
       };
       grantedTenths: number;
+    };
+    BuilderCreditUsagePeriod: {
+      /**
+       * @description Window the counter covers: a UTC day, a UTC month, or the billing period of the plan.
+       * @enum {string}
+       */
+      kind: 'day' | 'month' | 'billing';
+      /** @description Stable key of the window, in the same form as the `periodKey` fields of GET /usage. */
+      periodKey: string;
+      /** @description Credits spent in the window. In tenths of a credit, like GET /usage (10 is one credit). */
+      usedTenths: number;
+      /** @description Metered Builder chat runs counted in the window. */
+      runCount: number;
     };
     BuiltInSignInMethods: {
       /** @description Email and password. */
@@ -5216,7 +7237,7 @@ export interface components {
     CandidateDetail: components['schemas']['Candidate'] & {
       /**
        * Format: date-time
-       * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Reactivate restores sign-in and talent-surface visibility; the candidate signs in again to establish a new session.
+       * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Sign-in returns once neither an operator deactivation nor a membership deactivation (`POST /candidates/reconcile` with `active: false`) is in effect; the candidate then signs in again to establish a new session.
        */
       deactivatedAt: string | null;
       profile: components['schemas']['AdminCandidateProfile'];
@@ -5480,6 +7501,40 @@ export interface components {
       createdAt: string;
       children?: unknown[];
     };
+    CheckoutFields: {
+      /** @enum {string} */
+      object: 'settings_checkout_fields';
+      phone: {
+        /** @enum {string} */
+        mode: 'off' | 'on';
+      };
+      contactPerson: {
+        /** @enum {string} */
+        mode: 'off' | 'on';
+        required: boolean;
+        printOnInvoice: boolean;
+      };
+      customFields: {
+        key: string;
+        label: string;
+        /** @enum {string} */
+        type: 'text' | 'numeric' | 'dropdown';
+        required: boolean;
+        dropdownOptions:
+          | {
+              label: string;
+              value: string;
+            }[]
+          | null;
+        channels: {
+          /** @description Collect the field in Stripe Checkout. */
+          checkout: boolean;
+          /** @description Print the field on invoices. */
+          invoice: boolean;
+        };
+      }[];
+      paidInvoicesEnabled: boolean;
+    };
     CollectionMediaFieldDefinition: {
       key: string;
       label: string;
@@ -5605,6 +7660,100 @@ export interface components {
       /** @description ISO-8601 time of the last change. */
       updatedAt: string;
     };
+    /** @description Why the job matched. */
+    CompanyRoutingMatchReason:
+      | {
+          /** @enum {string} */
+          kind: 'condition';
+          /** @enum {string} */
+          field: 'application_url' | 'title';
+          term: string;
+        }
+      | {
+          /** @enum {string} */
+          kind: 'all_conditions';
+        }
+      | {
+          /** @enum {string} */
+          kind: 'location';
+          placeName?: string;
+        }
+      | unknown;
+    CompanyRoutingRule: {
+      /** @description The routing rule id. */
+      id: string;
+      /** @enum {string} */
+      object: 'company_routing_rule';
+      /** @description The company whose feed jobs the rule routes. */
+      parentCompanyId: string;
+      /** @description The subsidiary that receives matching jobs. */
+      targetCompanyId: string;
+      /** @description Order within the parent, ascending. The first match wins. */
+      position: number;
+      /** @enum {string} */
+      matchMode: 'any' | 'all';
+      conditions: {
+        /** @enum {string} */
+        field: 'application_url' | 'title';
+        /** @enum {string} */
+        operator: 'contains_any' | 'contains_all';
+        terms: string[];
+      }[];
+      filters: {
+        countries: string[];
+        subdivisions: string[];
+      };
+      createdAt: string;
+      updatedAt: string;
+    };
+    CompanyRoutingRuleCondition: {
+      /**
+       * @description The job field the terms are looked for in.
+       * @enum {string}
+       */
+      field: 'application_url' | 'title';
+      /**
+       * @description `contains_any`: the field contains one of the terms. `contains_all`: it contains every term. Case-insensitive substring match.
+       * @enum {string}
+       */
+      operator: 'contains_any' | 'contains_all';
+      /** @description Terms to look for (at most 20, each up to 200 characters). Trimmed; blank and duplicate terms are dropped. */
+      terms: string[];
+    };
+    /** @description Location filter. A job with no location matches no location filter. */
+    CompanyRoutingRuleFilters: {
+      /** @description ISO 3166-1 alpha-2 country codes (at most 50). A job matches when one of its locations is in a listed country. Empty: no location filter. */
+      countries?: string[];
+      /** @description ISO 3166-2 region codes such as `AU-WA` (at most 100), each inside a listed country. A country with picked regions matches only jobs in those regions. */
+      subdivisions?: string[];
+    };
+    CompanyRoutingRulePreview: {
+      /** @enum {string} */
+      object: 'company_routing_rule_preview';
+      /** @description The parent's published jobs the draft rule matches. */
+      jobs: {
+        /** @description The job id. */
+        id: string;
+        title: string;
+        locationLabel: string | null;
+        /** @description Moved to its company by hand: listed, never moved by a rule. */
+        companyLocked: boolean;
+        reason: components['schemas']['CompanyRoutingMatchReason'];
+        /** @description An earlier rule that already routes this job. */
+        claimedBy: {
+          ruleId: string;
+          targetName: string;
+        } | null;
+      }[];
+      /** @description Matched jobs `moveExistingJobs` would move: not locked and not claimed by an earlier rule. */
+      moveCount: number;
+      /** @description True when the parent has more than 500 published jobs; only the first 500 were checked. */
+      truncated: boolean;
+    };
+    CompanyRoutingRuleSaveResult: components['schemas']['CompanyRoutingRule'] & {
+      /** @description Jobs moved to the subsidiary by `moveExistingJobs` (counted from the first 500 published jobs; the rest move in the background). 0 when not requested. */
+      movedJobCount: number;
+    };
     CompanySummary: {
       /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the company endpoints (e.g. `GET /v1/companies/{id}`). */
       id: string;
@@ -5619,7 +7768,7 @@ export interface components {
       slug: string;
       /** @description Public company website URL, or `null` if not set. */
       website: string | null;
-      /** @description URL of the company logo, or `null` if no logo is set. */
+      /** @description URL of the company logo, or `null` if no logo is set. A subsidiary with no logo of its own returns its parent company's logo. */
       logoUrl: string | null;
       /** @description One-line summary of the company, or `null` if not set. */
       summary: string | null;
@@ -5639,6 +7788,8 @@ export interface components {
       updatedAt: string | null;
       /** @description Public Company lifecycle revision. Historical rows may be 0 until rollout backfill. */
       revision: number;
+      /** @description The `id` of the company this company is a subsidiary of, or `null` for a top-level company. List a company's subsidiaries with `GET /v1/companies?parentCompanyId={id}`. */
+      parentCompanyId: string | null;
       /** @description Public + admin URLs for this company. `public` may be `null` if the company lacks a slug. */
       links: components['schemas']['ResourceLinks'] & {
         /**
@@ -5763,6 +7914,15 @@ export interface components {
         )[];
         workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
       };
+      /** @description Most jobs from this rule live on the Board at once, counting published jobs and jobs awaiting approval (1–100,000). `null` means no rule limit; the Board's Backfill limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit?: number | null;
+    };
+    CreateBillingPortalSessionBody: {
+      /**
+       * Format: uri
+       * @description Where to send the person when they leave the portal. Must be an https URL on the Cavuno dashboard origin. Defaults to the Board billing settings page in the dashboard.
+       */
+      returnUrl?: string;
     };
     CreateBlogPostBody: {
       slug?: string;
@@ -5820,6 +7980,8 @@ export interface components {
       instagramUrl?: string | null;
       /** @description Canonical market slugs assigned to the company. Pass an empty array to clear all markets. */
       markets?: string[];
+      /** @description Makes this company a subsidiary of another company in the same account: the parent company's `id`. Groups are one level deep, so the parent cannot itself be a subsidiary, and a company with subsidiaries cannot get a parent. A subsidiary may use its parent's website domain (or a path on it); it is then not filled in automatically from the website, and shows the parent's logo until it has its own. Changing it changes the public company page, so confirm with the operator first. `null` or `""` means not set. */
+      parentCompanyId?: string | null;
       /** @description The company's display name. */
       name: string;
       /** @description URL-friendly slug for the company. Auto-generated from `name` when omitted. */
@@ -5853,6 +8015,20 @@ export interface components {
       billingInterval?: 'month' | 'year';
       /** @description Intervals between invoices (default 1; `month` with 3 is quarterly). Needs `billingInterval`. */
       billingIntervalCount?: number;
+    };
+    CreateCompanyRoutingRuleBody: {
+      /** @description The subsidiary that receives matching jobs. A company with no parent is made a subsidiary of this company. It must not have subsidiaries of its own or a routing rule already. */
+      targetCompanyId: string;
+      /**
+       * @description `any` (default): a job matches when one condition matches. `all`: every condition must match.
+       * @enum {string}
+       */
+      matchMode?: 'any' | 'all';
+      /** @description Conditions on the job (at most 20), combined by `matchMode`. A condition left without terms is dropped. Empty: every job passes the conditions. */
+      conditions?: components['schemas']['CompanyRoutingRuleCondition'][];
+      filters?: components['schemas']['CompanyRoutingRuleFilters'];
+      /** @description When true, also moves the parent's published jobs the rule matches now (not jobs moved by hand, nor jobs an earlier rule matches) to the subsidiary. Default false: the rule applies to jobs synced from now on. */
+      moveExistingJobs?: boolean;
     };
     CreateCouponBody: {
       name: string;
@@ -5932,6 +8108,16 @@ export interface components {
       /** @description Mailbox before the `@`, for example `info` or `hello`. Defaults to `info`. Normalized to lowercase. */
       senderLocalPart?: string;
     };
+    CreateEmployerMembershipInviteBody: {
+      /** @description The company to invite to. */
+      companyId: string;
+      /** @description The address to invite. Lowercased and trimmed before use. */
+      email: string;
+    };
+    CreateInboxTicketNoteBody: {
+      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+      body: string;
+    };
     CreateInvitationBody: {
       /**
        * Format: email
@@ -5983,6 +8169,8 @@ export interface components {
           | 'country'
           | 'custom';
         value: string;
+        /** @description Ignored on input. Job reads add it to some entries; send it back or leave it out. */
+        code?: string;
       }[];
       /** @description Where remote candidates must be timezone-compatible. Each entry mirrors the `remotePermits` shape (`world_region`, `continent`, `region`, `subregion`, `country`) plus `timezone` (specific IANA name with optional `plusMinus` ±N hours expansion) and `all` (every timezone: equivalent of `worldwide` for permits). The canonical `{type, value}` set is published at `GET /v1/taxonomies/remote-timezones`. **When omitted on POST**, the server auto-derives this from `remotePermits` (or `[{all,all}]` if neither was provided). **PATCH never auto-re-derives**: once set, only an explicit replacement updates the stored value, even when `remotePermits` changes. Pass `[]` to clear an existing constraint. */
       remoteTimezones?: {
@@ -6073,7 +8261,7 @@ export interface components {
       customFieldValues?: {
         [key: string]: string | string[] | boolean | number | unknown;
       };
-      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. */
+      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. Keys for fields whose collection is archived are ignored, and their stored selections are kept. */
       collectionValues?: {
         [key: string]: string[] | unknown;
       };
@@ -6137,7 +8325,7 @@ export interface components {
       billingInterval?: 'day' | 'week' | 'month' | 'year';
       billingIntervalCount?: number;
       /**
-       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), or contact-led employer_service / job_seeker_service catalogue rows.
+       * @description What the plan entitles: job-posting, talent-access, membership (employer membership), job-seeker (candidate paywall), contact-led employer_service / job_seeker_service catalogue rows, or a digital_product (a downloadable file or link sold from its own product page; its product fields are under `digitalProduct`).
        * @enum {string}
        */
       purpose?:
@@ -6146,7 +8334,8 @@ export interface components {
         | 'membership'
         | 'job_seeker'
         | 'employer_service'
-        | 'job_seeker_service';
+        | 'job_seeker_service'
+        | 'digital_product';
       /** @description Whether the plan is publicly listed. Defaults to false. */
       isPublic?: boolean;
       isRecommended?: boolean;
@@ -6162,6 +8351,45 @@ export interface components {
       ctaText?: string;
       /** @description CTA target for a contact plan. Must be an https, mailto:, or tel: URL. */
       ctaDestination?: string;
+      digitalProduct?: components['schemas']['CreatePlanDigitalProductInput'];
+    };
+    /** @description Required when `purpose` is `digital_product`, and only then. `kind` is then `free` for free pricing and `one_time` otherwise. The product starts unlisted (`isPublic` false); with `isPublic: true` it is listed automatically once its first file or link is ready, and `digitalProduct.listingPending` is true until then. */
+    CreatePlanDigitalProductInput: {
+      pricing: components['schemas']['PlanDigitalProductPricingInput'];
+      /** @description Product page URL word: lowercase letters, numbers and hyphens. Generated from the name on create when omitted. */
+      slug?: string;
+      summary?: string | null;
+      /** @description Formatted description as HTML, up to 50,000 characters. Sanitized on save: headings (`h2`, `h3`), paragraphs, bold, italic, underline, strikethrough, lists, quotes, dividers, links and images uploaded as this board's product images (from the dashboard's product editor) are kept; everything else is removed. When it has text, its plain text replaces the plan's `description`. `null` clears it and keeps `description`; sending only the plan's `description` also clears it. */
+      descriptionHtml?: string | null;
+      details?: components['schemas']['PlanDigitalProductDetailInput'][] | null;
+      /** @description Media ids of this board; the cover first. */
+      images?: string[] | null;
+      thankYouMessage?: string | null;
+      refundPolicy?: string | null;
+      downloadCap?: number;
+      /** @description Turning it on stamps the existing sales in the background. */
+      stampPdfs?: boolean;
+      ratingsEnabled?: boolean;
+      salesLimit?: number | null;
+      /** @description Show the number of sales on the product page. Off by default. */
+      showSalesCount?: boolean;
+      /** @description E-book or e-publication: books, newspapers, magazines, sheet music or maps delivered as files. Sets the product's Stripe tax code to `txcd_10302000` (digital books) instead of the one picked from its files. Some countries charge a lower VAT rate on these; it applies when the board collects tax with Stripe Tax. */
+      isEbook?: boolean;
+      questions?: components['schemas']['PlanDigitalProductQuestion'][] | null;
+    };
+    CreatePlanFileLinkBody: {
+      displayName: string;
+      /** @description An https URL. */
+      url: string;
+      description?: string;
+    };
+    CreatePlanFileUploadBody: {
+      /** @description The uploaded file's own name, kept as metadata (`fileName`). Its extension completes the download name when `displayName` has none. */
+      fileName: string;
+      /** @description Exact size in bytes; up to 500 MB. */
+      sizeBytes: number;
+      /** @description Name shown to buyers and used as the download name; `fileName` when omitted. Kept when the content is replaced. */
+      displayName?: string;
     };
     CreatePromotionCodeBody: {
       code: string;
@@ -6298,12 +8526,16 @@ export interface components {
         | 'company.created'
         | 'company.updated'
         | 'company.deleted'
+        | 'company.verification.updated'
         | 'candidate.created'
         | 'candidate.updated'
         | 'candidate.deleted'
         | 'candidate.profile.updated'
+        | 'candidate.verification.updated'
         | 'marketing_permission.granted'
         | 'marketing_permission.withdrawn'
+        | 'digital_product.purchased'
+        | 'digital_product.refunded'
       )[];
     };
     CustomFieldDefinition: {
@@ -6385,6 +8617,60 @@ export interface components {
       logoFieldKey: string | null;
       /** Format: date-time */
       createdAt: string;
+    };
+    DashboardLinks: {
+      /** @enum {string} */
+      object: 'dashboard_links';
+      /** @description The Board’s dashboard home. Null when the account has no dashboard, in which case `links` is empty. */
+      baseUrl: string | null;
+      /** @description Direct links to the Board’s main dashboard pages. */
+      links: {
+        /** @description Stable snake_case key, for example `billing`, `backfill`, `indexing` or `website`. New keys may be added. */
+        key: string;
+        /** @description What the page is for, in a few words. */
+        label: string;
+        /** @description Direct link to the dashboard page. */
+        url: string;
+      }[];
+      /** @description Link templates for a single record’s dashboard page. Replace `{id}` with an id from a `/v1` response; never with a guessed one. */
+      recordLinks: {
+        /** @description Stable snake_case record kind, for example `job`, `company` or `blog_post`. New keys may be added. */
+        key: string;
+        /** @description Which page this is, in a few words. */
+        label: string;
+        /** @description Link to one record’s dashboard page, with `{id}` in place of the record’s id: the same id its `/v1` operations take. */
+        urlTemplate: string;
+      }[];
+      /** @description The Cavuno API reference documentation. */
+      apiReferenceUrl: string;
+    };
+    DecideItemVerificationBody: {
+      /**
+       * @description `verify` the details you reviewed; `reject` details that are wrong; `needs_info` to ask the worker for more; `unable_to_verify` when they could not be checked (not the worker’s fault); `revoke` a verified item.
+       * @enum {string}
+       */
+      decision:
+        | 'verify'
+        | 'reject'
+        | 'needs_info'
+        | 'unable_to_verify'
+        | 'revoke';
+      /**
+       * @description Required for every decision except `verify`.
+       * @enum {string}
+       */
+      reasonCode?:
+        | 'details_mismatch'
+        | 'not_found_in_register'
+        | 'document_unreadable'
+        | 'document_expired'
+        | 'suspected_fraud'
+        | 'issuer_unreachable'
+        | 'other';
+      /** @description Staff-only note, up to 2,000 characters. */
+      note?: string;
+      /** @description Required for `verify`: the `currentHash` you read with the item. Refused with 409 when the item changed since. */
+      expectedHash?: string;
     };
     DevelopmentOrigin: {
       id: string;
@@ -6566,6 +8852,55 @@ export interface components {
       isPrimary: boolean;
       createdAt: string | null;
     };
+    DomainProbe: {
+      /** @enum {string} */
+      object: 'domain_probe';
+      domainId: string;
+      /** @description The first URL requested. */
+      url: string;
+      /**
+       * @description `ok`: the last response was not an error. `http_error`: it was 4xx or 5xx. `redirected_off_board`: a redirect left the Board domains, so it was reported but not followed. `too_many_redirects`: more than 5 redirects. `network_error`: DNS, connection or TLS failure. `timeout`: no response in time. `blocked`: the domain resolves to a private network address.
+       * @enum {string}
+       */
+      outcome:
+        | 'ok'
+        | 'http_error'
+        | 'redirected_off_board'
+        | 'too_many_redirects'
+        | 'network_error'
+        | 'timeout'
+        | 'blocked';
+      /** @description The last URL requested. Its hop holds the final response. */
+      finalUrl: string | null;
+      /** @description HTTP status of the last response, or null. */
+      finalStatus: number | null;
+      /** @description Each request made, in order. Response bodies are never read. */
+      hops: components['schemas']['DomainProbeHop'][];
+      totalDurationMs: number;
+    };
+    DomainProbeHop: {
+      /** @description URL requested in this hop. */
+      url: string;
+      /**
+       * @description HEAD first; GET when the server does not support HEAD (405 or 501).
+       * @enum {string}
+       */
+      method: 'HEAD' | 'GET';
+      /** @description HTTP status code, or null when no response arrived. */
+      status: number | null;
+      /** @description The `Location` header of a redirect, as sent. */
+      location: string | null;
+      /** @description The `Server` header, if any. */
+      server: string | null;
+      /** @description Whether the response came through Cloudflare (a `cf-ray` header or `Server: cloudflare`). */
+      servedByCloudflare: boolean;
+      /** @description The `cf-ray` header, useful when contacting support. */
+      cfRay: string | null;
+      /** @description Time to response headers, in milliseconds. */
+      durationMs: number;
+      /** @description Why no response arrived, for example `ENOTFOUND`, `ECONNREFUSED`, `CERT_HAS_EXPIRED` or a timeout. Null when a response arrived. */
+      error: string | null;
+    };
     DomainVerificationInstructions: {
       /** @enum {string} */
       method: 'txt';
@@ -6618,6 +8953,76 @@ export interface components {
       /** @description Last check of this record: `pending`, `verified`, or `failed`. */
       status: string;
     };
+    EmailTemplate: {
+      /** @description Unique identifier for the email template. Same as `type`. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_template';
+      /** @description The email template type. */
+      type: string;
+      /** @description Display name of the email. */
+      name: string;
+      /** @description When the email is sent. */
+      description: string;
+      /** @description Whether the board has published its own version. When `false`, the default template is sent. */
+      customized: boolean;
+      /** @description Time the customized version was last published, or `null` when the default is in use. ISO 8601 datetime. */
+      publishedAt: string | null;
+      /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
+      subjectTokens: string[];
+      /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
+      bodyTokens: string[];
+      /** @description Tokens `bodyHtml` must contain, without braces. A publish without them is rejected. */
+      requiredBodyTokens: string[];
+      /** @description Subject line in effect, with tokens unexpanded. */
+      subject: string;
+      /** @description Inbox preview text in effect, with tokens unexpanded. */
+      previewText: string;
+      /** @description Body HTML in effect, with tokens unexpanded. Edit it and send it back with the publish endpoint. */
+      bodyHtml: string;
+    };
+    EmailTemplateSummary: {
+      /** @description Unique identifier for the email template. Same as `type`. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_template';
+      /** @description The email template type. */
+      type: string;
+      /** @description Display name of the email. */
+      name: string;
+      /** @description When the email is sent. */
+      description: string;
+      /** @description Whether the board has published its own version. When `false`, the default template is sent. */
+      customized: boolean;
+      /** @description Time the customized version was last published, or `null` when the default is in use. ISO 8601 datetime. */
+      publishedAt: string | null;
+      /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
+      subjectTokens: string[];
+      /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
+      bodyTokens: string[];
+      /** @description Tokens `bodyHtml` must contain, without braces. A publish without them is rejected. */
+      requiredBodyTokens: string[];
+    };
+    EmailTemplateTest: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_template_test';
+      /** @description The email template type that was sent. */
+      type: string;
+      /**
+       * @description Always `true` when the test was sent.
+       * @enum {boolean}
+       */
+      sent: true;
+    };
     Employer: {
       /** @description Unique identifier for the employer. */
       id: string;
@@ -6665,8 +9070,31 @@ export interface components {
       /** @description How the membership was approved (`domain_match` | `work_email_verification` | `admin` | `owner_creation`), or `null`. */
       approvalSource: string | null;
       status: string;
+      /**
+       * @description The employer's role on the company team: `admin` manages the team and company profile, `member` does not. `null` unless `status` is `approved`.
+       * @enum {string|null}
+       */
+      role: 'admin' | 'member' | null;
       /** @description ISO-8601 timestamp the membership was created. */
       joinedAt: string;
+    };
+    EmployerMembershipInvite: {
+      id: string;
+      /** @enum {string} */
+      object: 'employer_membership_invite';
+      companyId: string;
+      companyName: string;
+      /** @description The invited address, lowercased and trimmed. */
+      email: string;
+      /**
+       * @description `pending` until the invitee accepts (`accepted`) or the invite is revoked or replaced by a resend (`revoked`). A `pending` invite past `expiresAt` can no longer be accepted; resend it to issue a fresh link.
+       * @enum {string}
+       */
+      status: 'pending' | 'accepted' | 'revoked';
+      /** @description ISO-8601 timestamp the invite was sent. */
+      createdAt: string;
+      /** @description ISO-8601 timestamp after which the invite link stops working. */
+      expiresAt: string;
     };
     EmployerPendingClaim: {
       membershipId: string;
@@ -6881,6 +9309,142 @@ export interface components {
       limit: number;
       resetAt: string;
     };
+    InboxMessage: {
+      /** @description Unique identifier for the message. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'inbox_message';
+      /** @description The conversation this message belongs to. */
+      ticketId: string;
+      /**
+       * @description `customer` is a message from the requester, `reply` an emailed answer from your team and `note` an internal note the requester never sees.
+       * @enum {string}
+       */
+      kind: 'customer' | 'reply' | 'note';
+      /** @description Display name of the author. */
+      authorName: string;
+      /** @description User ID of the member who wrote a reply or note. `null` for customer messages. */
+      authorUserId: string | null;
+      /** @description The message text. */
+      body: string;
+      /**
+       * @description `text` for plain text. `markdown` when an incoming HTML email was converted to Markdown.
+       * @enum {string}
+       */
+      bodyFormat: 'text' | 'markdown';
+      /** @description Attachment details. Download attachments from the dashboard Inbox. */
+      attachments: {
+        /** @description File name. */
+        fileName: string;
+        /** @description MIME type. */
+        contentType: string;
+        /** @description Size in bytes. */
+        size: number;
+      }[];
+      /**
+       * @description Email delivery state of a reply: `queued` (waiting out the undo window or being handed to the mail provider), `sent`, `delivered`, `failed` or `canceled`. `null` for customer messages and notes.
+       * @enum {string|null}
+       */
+      deliveryStatus:
+        | 'queued'
+        | 'sent'
+        | 'delivered'
+        | 'failed'
+        | 'canceled'
+        | null;
+      /** @description Until when a queued reply can still be canceled, or `null`. ISO 8601 datetime. */
+      undoUntil: string | null;
+      /** @description Time at which the message was created. ISO 8601 datetime. */
+      createdAt: string;
+    };
+    InboxSettings: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'inbox_settings';
+      /** @description Whether the Inbox and the public Contact page are on. */
+      contactEnabled: boolean;
+      /** @description The address that receives support email for the board, or `null` until it is ready. */
+      receivingAddress: string | null;
+      /**
+       * @description Setup state of the receiving address.
+       * @enum {string}
+       */
+      provisioningState: 'ready' | 'pending' | 'failed' | 'not_started';
+      /** @description Forwarding from an existing support address. */
+      forwarding: {
+        /** @description Your existing support address that forwards to the receiving address, or `null`. */
+        address: string | null;
+        /** @description When forwarding was confirmed working, or `null`. ISO 8601 datetime. */
+        verifiedAt: string | null;
+      };
+      /** @description A receiving address on your own email domain, or `null` when none is set up. */
+      customReceivingAddress: string | null;
+      /** @description DNS status of the custom receiving address, or `null`. */
+      customReceivingMxStatus: string | null;
+      /** @description Who replies appear to come from. */
+      replySender: {
+        /** @description Sender name replies are signed with. */
+        name: string;
+        /** @description Address replies are sent from. */
+        address: string;
+      };
+      /** @description The default sender address used when no verified email domain is set up. */
+      platformSenderAddress: string;
+      /** @description Whether your plan allows sending from your own email domain. */
+      canUseCustomSender: boolean;
+      /** @description Your verified sending domain, or `null`. */
+      verifiedSenderDomain: string | null;
+    };
+    InboxTicket: {
+      /** @description Unique identifier for the conversation. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'inbox_ticket';
+      /** @description The conversation subject. */
+      subject: string;
+      /** @description The person who started the conversation. */
+      requester: {
+        /** @description Name the requester gave. */
+        name: string;
+        /** @description Email address replies are sent to. */
+        email: string;
+      };
+      /**
+       * @description Conversation status. One of `open`, `snoozed` or `closed`.
+       * @enum {string}
+       */
+      status: 'open' | 'snoozed' | 'closed';
+      /** @description When a snoozed conversation reopens, or `null`. ISO 8601 datetime. */
+      snoozedUntil: string | null;
+      /** @description User ID of the assigned member, or `null`. */
+      assigneeUserId: string | null;
+      /** @description Whether the conversation has customer messages you (the acting member) have not read. */
+      unread: boolean;
+      /** @description A short plain-text preview of the latest message. */
+      lastMessagePreview: string;
+      /** @description Time of the latest message. ISO 8601 datetime. */
+      lastMessageAt: string;
+      /** @description Time of the latest customer message. ISO 8601 datetime. */
+      lastCustomerMessageAt: string;
+      /** @description Time at which the conversation was created. ISO 8601 datetime. */
+      createdAt: string;
+    };
+    InboxTicketDetail: components['schemas']['InboxTicket'] & {
+      /** @description The latest messages (up to 50), oldest first. Canceled replies are left out. */
+      messages: components['schemas']['InboxMessage'][];
+      /** @description Whether earlier messages exist. Page through them with `GET /v1/inbox/tickets/{id}/messages`. */
+      hasOlderMessages: boolean;
+      /** @description Pass as `cursor` to `GET /v1/inbox/tickets/{id}/messages` to continue after the embedded messages, or `null`. */
+      olderMessagesCursor: string | null;
+    };
     IndexingConfig: {
       /** @enum {string} */
       id: 'indexing_config';
@@ -6896,6 +9460,41 @@ export interface components {
       lastRunAt: string | null;
       /** @description The last recorded Google Indexing API error message, or null. */
       lastError: string | null;
+      /** @description Google Indexing API submissions allowed per day, or null when setup has not started. */
+      dailyQuota: number | null;
+      /** @description Google Indexing API submissions used since the last quota reset, or null when setup has not started. Jobs published after the quota runs out wait for the reset. */
+      quotaUsedToday: number | null;
+      /** @description ISO-8601 time the daily quota was last reset, or null. */
+      quotaResetAt: string | null;
+      /** @description The Board's Google service account email, or null before provisioning finishes. It must be added as an Owner of the Search Console property before the Google Indexing API can be enabled. */
+      serviceAccountEmail: string | null;
+      /** @description Whether Google confirmed that the service account is an Owner of the Search Console property. */
+      searchConsoleVerified: boolean;
+    };
+    IndexingSubmission: {
+      id: string;
+      /** @enum {string} */
+      object: 'indexing_submission';
+      /** @description The page path as submitted, relative to the Board's domain, for example `/companies/acme/jobs/engineer`. */
+      url: string;
+      /** @description What the page shows: `job`, `company` or `blog`. */
+      entityType: string;
+      /** @description `url_updated`: the page was published or changed. `url_deleted`: the page was removed. */
+      action: string;
+      /** @description `pending`: waiting to be sent. `submitted`: Google accepted it. `error`: the last attempt failed and will be retried. `failed`: retries ran out. `skipped`: not sent, for example because indexing is off. */
+      state: string;
+      /** @description Failed attempts so far. */
+      retryCount: number;
+      /** @description Whether the URL was also sent to IndexNow (Bing, Yandex). */
+      indexNowSubmitted: boolean;
+      /** @description Error message of the last failed attempt, or null. */
+      error: string | null;
+      /** @description ISO-8601 time the submission was queued. */
+      createdAt: string;
+      /** @description ISO-8601 time Google accepted it, or null. */
+      submittedAt: string | null;
+      /** @description ISO-8601 time of the next retry, or null when it is due now or will not be retried. */
+      nextAttemptAt: string | null;
     };
     IndexingToggleBody: {
       /** @description Whether to enable the toggle. */
@@ -6941,6 +9540,136 @@ export interface components {
       /** @description The full URL a recipient uses to accept the invitation. */
       acceptUrl: string;
     };
+    ItemVerification: {
+      id: string;
+      /** @enum {string} */
+      object: 'item_verification';
+      itemKey: string;
+      /**
+       * @description `changed`: a checked field was edited after verification. `lapsed`: past its expiry or re-check date (see `lapseReason`).
+       * @enum {string}
+       */
+      status:
+        | 'unverified'
+        | 'pending'
+        | 'needs_info'
+        | 'verified'
+        | 'rejected'
+        | 'unable_to_verify'
+        | 'changed'
+        | 'lapsed'
+        | 'revoked';
+      /** @enum {string|null} */
+      lapseReason: 'expired' | 'recheck_due' | null;
+      /**
+       * @description Why the last team decision went the way it did.
+       * @enum {string|null}
+       */
+      reasonCode:
+        | 'details_mismatch'
+        | 'not_found_in_register'
+        | 'document_unreadable'
+        | 'document_expired'
+        | 'suspected_fraud'
+        | 'issuer_unreachable'
+        | 'other'
+        | null;
+      /** Format: date-time */
+      verifiedAt: string | null;
+      /**
+       * Format: date-time
+       * @description When a verified item lapses. `null` when it never does.
+       */
+      expiresAt: string | null;
+      hasProof: boolean;
+      /** @description The email domain the worker confirmed, while verified by email domain; otherwise `null`. Show it with the item: the item's name is what the worker typed. */
+      verifiedDomain: string | null;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    /** @description Present on a public profile read when this entry is verified. */
+    ItemVerificationBadge: {
+      /**
+       * @description The item was verified by the board.
+       * @enum {string}
+       */
+      status: 'verified';
+      /** @description The email domain the worker confirmed, when it was verified by email domain; otherwise `null`. Show it with the badge: the item's name is what the worker typed. */
+      verifiedDomain: string | null;
+    };
+    /** @description Item verification (each filled-in entry, or the selection when the field has no repeatable entries, is verified on its own). Absent means off. */
+    ItemVerificationConfig: {
+      /** @description Keys of this field's `valueDefinitions` or `entryDefinitions` the verification covers. Editing any of them, or changing the selected entry, removes verification. */
+      checkedFieldKeys: string[];
+      /** @description How long a verification holds. */
+      validity:
+        | {
+            /**
+             * @description Never lapses.
+             * @enum {string}
+             */
+            kind: 'never';
+          }
+        | {
+            /**
+             * @description Lapses after the date in one of the item’s fields.
+             * @enum {string}
+             */
+            kind: 'expiry_field';
+            /** @description A `date` field of this definition; the verification holds through that day (UTC). */
+            fieldKey: string;
+          }
+        | {
+            /**
+             * @description Lapses a number of months after it was verified.
+             * @enum {string}
+             */
+            kind: 'recheck';
+            /** @description Months between checks, 1 to 120. */
+            months: number;
+          };
+      /**
+       * @description `team`: the board team verifies in the dashboard or through the Operator API. `email_domain`: the worker confirms an address at the item’s domain.
+       * @enum {string}
+       */
+      verifiedBy: 'team' | 'email_domain';
+      /** @description Required when `verifiedBy` is `email_domain`; absent otherwise. */
+      domainSource?:
+        | {
+            /**
+             * @description Take the domain from one of the item’s fields.
+             * @enum {string}
+             */
+            from: 'field';
+            /** @description A `url` or `short_text` field of this definition holding the website. */
+            fieldKey: string;
+          }
+        | {
+            /**
+             * @description Accept any of a fixed list of domains.
+             * @enum {string}
+             */
+            from: 'list';
+            /** @description Bare domains, for example `example.org`. Subdomains also pass. */
+            domains: string[];
+          };
+      /** @description Unverified items show "Not verified" to employers and staff. Nothing is blocked. */
+      required: boolean;
+    };
+    ItemVerificationItem: {
+      /** @enum {string} */
+      object: 'item_verification_item';
+      itemKey: string;
+      /** @description A hash of the item's checked fields as they are now. Pass it as `expectedHash` to verify what you reviewed. */
+      currentHash: string;
+      verification: components['schemas']['TeamItemVerification'] & unknown;
+    };
+    ItemVerificationQueueEntry: components['schemas']['TeamItemVerification'] & {
+      /** @description The candidate the item belongs to, on a candidate queue. */
+      candidateId: string | null;
+      /** @description The company the item belongs to, on a company queue. */
+      companyId: string | null;
+    };
     Job: components['schemas']['JobSummary'] & {
       /** @description Public + admin URLs for this job. `public` may be `null` if the job lacks a slug or company-slug. */
       links?: components['schemas']['ResourceLinks'] & {
@@ -6960,6 +9689,8 @@ export interface components {
       remotePermits: {
         type: string;
         value: string;
+        /** @description UN M.49 area code of a `continent`, `region` or `subregion` entry (e.g. `"150"` for Europe, `"019"` for the Americas, `"155"` for Western Europe). It is a code `Intl.DisplayNames` with `type: "region"` accepts, so a client can name the area in any language: `new Intl.DisplayNames(["de"], { type: "region" }).of("150")` is `"Europa"`. Absent for areas without a standard code (e.g. "Central Europe"), for `world_region` and `custom` entries, and for `country` and `subdivision` entries, whose `value` is already an ISO 3166-1 alpha-2 or ISO 3166-2 code. */
+        code?: string;
       }[];
       /** @description Read-only: derived from `remotePermits`. `true` only when the authored selection is a single `{type:"worldwide"}` entry. */
       remoteWorldwide: boolean | null;
@@ -7212,7 +9943,7 @@ export interface components {
         allowedCountries?: string[];
       };
       /** @description Board-defined custom field definitions, in display order. Read these to learn which `customFieldValues` keys, types, and option keys a job accepts on POST/PATCH /v1/jobs. */
-      customFields?: components['schemas']['CustomFieldDefinition'][];
+      customFields?: components['schemas']['OperatorCustomFieldDefinition'][];
       /** @description Collection-reference job fields, in display order. Values are stored separately in each job collectionValues bag. */
       collectionFields?: components['schemas']['JobCollectionFieldDefinition'][];
     };
@@ -7226,9 +9957,24 @@ export interface components {
       /** @description `false` when posters can no longer pick this type (jobs that use it keep its label). Absent means offered. */
       offered?: boolean;
     };
+    JobFormCustomFieldAiFillBody: {
+      /** @description Keys of custom fields with `aiFill` on to fill on the board’s live jobs. Only jobs with no value for a field get one; values already set are kept. */
+      fieldKeys: string[];
+    };
+    JobFormCustomFieldAiFillRun: {
+      /** @description Identifier of the fill run. */
+      runId: string;
+      /**
+       * @description `running` right after it starts; jobs are filled in the background.
+       * @enum {string}
+       */
+      status: 'running' | 'done' | 'failed';
+      /** @description The custom field keys the run fills. */
+      fieldKeys: string[];
+    };
     JobFormCustomFieldsBody: {
       /** @description Full replacement list of custom field definitions, in display order. Empty array removes all. Changing `type` on an existing `key` is rejected (422); delete + recreate instead. Renaming a key is delete+add and orphans per-job values under the old key. */
-      customFields: components['schemas']['CustomFieldDefinition'][];
+      customFields: components['schemas']['OperatorCustomFieldDefinition'][];
     };
     JobOfficeLocation: {
       /** @description ISO 3166-1 alpha-2 country code, or `null` if the location was not resolved. */
@@ -7263,6 +10009,45 @@ export interface components {
           /** @description ISO 3166-1 alpha-2 country code OR recognized country name/alias. Aliases are normalized to canonical alpha-2 server-side (e.g. `US`, `USA`, `United States` → `US`; `UK`, `GB`, `United Kingdom` → `GB`). */
           country: string;
         };
+    JobStats: {
+      /** @enum {string} */
+      object: 'job_stats';
+      /** @description Published jobs on the Board. Always exact. */
+      publishedCount: number;
+      /** @description Most published jobs the plan allows. Null when the plan is unlimited. */
+      activeJobLimit: number | null;
+      /** @description Published jobs per country, largest first, up to 100 countries. Jobs without a location are not counted. Null while the Board’s location counts are being rebuilt. */
+      byCountry:
+        | {
+            /** @description ISO 3166-1 alpha-2 country code. */
+            countryCode: string;
+            /** @description Country name. */
+            name: string;
+            /** @description Published jobs located in the country. */
+            count: number;
+          }[]
+        | null;
+      /** @description Scanned published jobs per work arrangement, largest first. Covers the jobs counted in `sample.scanned`. */
+      byRemoteOption: {
+        /** @description Work arrangement, for example `remote`, `hybrid` or `onsite`. Null when the job has none. */
+        remoteOption: string | null;
+        count: number;
+      }[];
+      /** @description Scanned published jobs with no employment type. Google for Jobs uses `employmentType` in the job’s structured data, and Search Console reports jobs that omit it. A job with a custom employment type is not missing one. Covers the jobs counted in `sample.scanned`. */
+      missingEmploymentTypeCount: number;
+      /** @description Up to 5 published jobs with no employment type. */
+      missingEmploymentTypeExamples: {
+        id: string;
+        title: string;
+      }[];
+      /** @description How much of the Board the per-job statistics cover. */
+      sample: {
+        /** @description Published jobs read to compute `byRemoteOption` and `missingEmploymentTypeCount`. */
+        scanned: number;
+        /** @description True when every published job was read. When false, those two fields describe only the first `scanned` jobs. */
+        complete: boolean;
+      };
+    };
     JobSummary: {
       /** @description Unique identifier for the object. Use this value as the `{id}` path parameter for the job endpoints (e.g. `GET /v1/jobs/{id}`). */
       id: string;
@@ -7365,11 +10150,27 @@ export interface components {
       customFieldValues: {
         [key: string]: string | string[] | boolean | number;
       };
-      /** @description Operator-facing collection record IDs keyed by job collection field. Always an object; values are arrays even for single-select fields. */
+      /** @description Operator-facing collection record IDs keyed by job collection field. Always an object; values are arrays even for single-select fields. Fields whose collection is archived are omitted. */
       collectionValues: {
         [key: string]: string[];
       };
+      /** @description Present only while the job has no company: the company the job's source names, which isn't on your board yet. Read-only. Publishing the job (`POST /jobs/{id}/publish`) adds this company to your board, or uses an existing company with the same website. To publish under a different company, set `companyId` first with `PATCH /jobs/{id}`. `null` when the job has a company. */
+      proposedCompany: {
+        /** @description Name of the proposed company. */
+        name: string;
+        /** @description Website URL of the proposed company, or `null` if the source gives none. */
+        website: string | null;
+      } | null;
+      /** @description `true` once an operator has changed the job's company (in the dashboard or with `companyId` on `PATCH /jobs/{id}`). A locked job keeps its company when the job's source refreshes or republishes it, even when the source names another company. Read-only. */
+      companyLocked: boolean;
       links: components['schemas']['AdminOnlyResourceLinks'];
+    };
+    MarkInboxTicketReadBody: {
+      /**
+       * Format: date-time
+       * @description Mark messages up to this time as read. Defaults to the conversation’s latest message. Cannot be later than the latest message. ISO 8601 datetime.
+       */
+      through?: string;
     };
     Market: {
       id: string;
@@ -7498,6 +10299,10 @@ export interface components {
       /** @description Whether the member is the account primary owner. */
       isPrimaryOwner: boolean;
     };
+    MergeTaxonomyBody: {
+      /** @description The id of the term that survives the merge. */
+      intoId: string;
+    };
     /** @description Error envelope, populated once the operation reaches `failed`. `null` otherwise. */
     OperationErrorEnvelope: {
       /** @description Machine-readable error code. */
@@ -7608,6 +10413,137 @@ export interface components {
         scopes: string[] | null;
       };
     };
+    OperatorApplication: {
+      /** @description Unique identifier for the application. */
+      id: string;
+      /**
+       * @description String representing the object's type.
+       * @enum {string}
+       */
+      object: 'application';
+      /** @description The job the application was made to. */
+      jobId: string;
+      /** @description The candidate who applied while signed in, or `null` for a guest application. */
+      candidateId: string | null;
+      /** @description Whether the applicant applied without a candidate account. */
+      isGuest: boolean;
+      /** @description The applicant's name, as submitted. */
+      name: string | null;
+      /** @description The applicant's email address, as submitted. */
+      email: string | null;
+      /** @description The application's pipeline stage value: a system stage (for example `review` or `hired`) or a custom stage id. */
+      stage: string;
+      /** @description The stage name the employer sees in their pipeline. */
+      stageLabel: string;
+      /** @description How the application was created. */
+      source: string;
+      /** @description Whether a resume was uploaded with the application. */
+      hasResume: boolean;
+      /** @description ISO-8601 timestamp of when the application was submitted. */
+      appliedAt: string;
+    };
+    OperatorApplicationDetail: components['schemas']['OperatorApplication'] & {
+      /** @description The applicant's headline, as submitted. */
+      headline: string | null;
+      /** @description The applicant's location, as submitted. */
+      location: string | null;
+      /** @description The cover note submitted with the application. */
+      coverNote: string | null;
+      /** @description ISO-8601 timestamp of the last change to the application. */
+      updatedAt: string;
+      /** @description The resume uploaded with the application, or `null`. */
+      resume: {
+        /** @description Uploaded file name. */
+        filename: string | null;
+        /** @description MIME type of the file. */
+        contentType: string | null;
+        /** @description Size of the file in bytes. */
+        sizeBytes: number | null;
+      } | null;
+      /** @description The job the application was made to. */
+      job: {
+        /** @description The job id. */
+        id: string;
+        /** @description The job title. */
+        title: string | null;
+        /** @description The name of the company that owns the application. */
+        companyName: string | null;
+      };
+      /** @description Employer notes on the application, newest first (up to 100). */
+      notes: {
+        /** @description The note id. */
+        id: string;
+        /** @description The note text. */
+        body: string;
+        /** @description Display name of the employer who wrote the note. */
+        authorName: string | null;
+        /** @description The employer company the note belongs to. */
+        companyName: string | null;
+        /** @description ISO-8601 timestamp of the note. */
+        createdAt: string;
+      }[];
+      /** @description Activity history of the application, newest first (up to 100). */
+      activities: {
+        /** @description The activity id. */
+        id: string;
+        /** @description The kind of event. */
+        type: string;
+        /** @description Stage value before a stage move. */
+        fromStage: string | null;
+        /** @description Stage name before a stage move. */
+        fromStageLabel: string | null;
+        /** @description Stage value after a stage move. */
+        toStage: string | null;
+        /** @description Stage name after a stage move. */
+        toStageLabel: string | null;
+        /** @description ISO-8601 timestamp of the event. */
+        createdAt: string;
+      }[];
+    };
+    OperatorCustomFieldDefinition: components['schemas']['CustomFieldDefinition'] & {
+      /** @description When true, AI fills this field on new jobs from the job's title, description and company, only when the job has no value for it. A value a person set is never overwritten. False: off. Omitted on an existing field keeps its current setting; absent on a new field: off. Fill existing live jobs with `POST /v1/settings/job-form/custom-fields/ai-fill`. */
+      aiFill?: boolean;
+      /** @description Optional guidance for AI fill on this field (at most 1000 characters), such as which option to pick when the posting says X. Trimmed; empty removes it. Omitted on an existing field keeps the current instructions. */
+      aiInstructions?: string;
+      /** @description When true, AI fill always gives this field an answer, picking the closest one when the job does not say. False (the default): AI fill leaves the field empty when the job does not say. Only used while `aiFill` is on; `required` does not affect AI fill. Omitted on an existing field keeps its current setting. */
+      aiAlwaysAnswer?: boolean;
+    };
+    OperatorProfileCustomFieldDefinition: {
+      key: string;
+      label: string;
+      helpText?: string;
+      /** @enum {string} */
+      type:
+        | 'short_text'
+        | 'long_text'
+        | 'rich_text'
+        | 'single_select'
+        | 'multi_select'
+        | 'boolean'
+        | 'number'
+        | 'date'
+        | 'url'
+        | 'email'
+        | 'phone'
+        | 'image_gallery'
+        | 'file';
+      required: boolean;
+      /** @enum {string} */
+      visibility: 'private' | 'public';
+      editableByOwner: boolean;
+      options?: {
+        key: string;
+        label: string;
+      }[];
+      min?: number;
+      max?: number;
+      /** @description Company fields only. When true, AI fills this field on a company that has no value for it, from the company's name, website, summary, markets and description: when the company is created with a description and when enrichment writes one. A value a person set is never overwritten. Allowed on `short_text`, `long_text`, `rich_text`, `single_select`, `multi_select`, `boolean` and `number` fields. False: off. Omitted on an existing field keeps its current setting; absent on a new field: off. Fill existing companies with `POST /v1/settings/profile-fields/company/ai-fill`. Rejected (400) on candidate fields. */
+      aiFill?: boolean;
+      /** @description Company fields only. Optional guidance for AI fill on this field (at most 1000 characters), such as which option to pick when the description says X. Trimmed; empty removes it. Omitted on an existing field keeps the current instructions. Rejected (400) on candidate fields. */
+      aiInstructions?: string;
+      /** @description Company fields only. When true, AI fill always gives this field an answer, picking the closest one when the company profile does not say. False (the default): AI fill leaves the field empty when the profile does not say. Only used while `aiFill` is on; `required` does not affect AI fill. Omitted on an existing field keeps its current setting. Rejected (400) on candidate fields. */
+      aiAlwaysAnswer?: boolean;
+    };
     OperatorSettingsConfig: {
       passwordProtectionEnabled?: boolean;
       jobAlertsEnabled?: boolean;
@@ -7616,6 +10552,10 @@ export interface components {
       candidatesEnabled?: boolean;
       employersEnabled?: boolean;
       blogEnabled?: boolean;
+      /**
+       * @deprecated
+       * @description Deprecated: current headless sites publish the Impressum page when they have Impressum content of their own and ignore this setting. Still accepted and returned, honoured by hosted boards, and reported as `features.impressum` on the board context for older sites.
+       */
       impressumEnabled?: boolean;
       requireApprovalFreeJobs?: boolean;
       postingRequiresMembership?: boolean;
@@ -7645,6 +10585,8 @@ export interface components {
       companyFacebookUrl?: string | null;
       companyLinkedinUrl?: string | null;
       companyInstagramUrl?: string | null;
+      companyTiktokUrl?: string | null;
+      companyYoutubeUrl?: string | null;
       ga4MeasurementId?: string | null;
       gtmContainerId?: string | null;
       metaPixelId?: string | null;
@@ -7667,7 +10609,53 @@ export interface components {
         | 'hidden'
         | 'logged_in_only'
         | 'public';
+      /** @description Whether the board team verifies candidate experience (company name and website). Absent means `false`. */
+      experienceVerificationEnabled?: boolean;
+      /** @description Whether the board team verifies candidate education (school name and website). Absent means `false`. */
+      educationVerificationEnabled?: boolean;
       signInMethods: components['schemas']['SignInMethods'];
+      /** @description Absent means `true`. */
+      employerCompanyDeletionEnabled?: boolean;
+      /** @enum {string} */
+      talentAccessModel?: 'paid_messaging' | 'paid_unlocks_and_messaging';
+      /**
+       * @description Board language. Absent means `en`.
+       * @enum {string}
+       */
+      language?:
+        | 'en'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'pt'
+        | 'nl'
+        | 'it'
+        | 'sv'
+        | 'da'
+        | 'nb'
+        | 'fi'
+        | 'pl'
+        | 'cs'
+        | 'ja'
+        | 'ko'
+        | 'zh'
+        | 'hi'
+        | 'tr'
+        | 'ru';
+      /** @description Secondary languages the live site serves besides `language` (sites built with the AI website builder only). Absent until the site is first published. */
+      interfaceLocales?: string[];
+      /** @description ISO 4217 currency of salary pages and salary amounts. Absent means `USD`. */
+      salaryCurrency?: string;
+      themeConfig?: components['schemas']['BoardThemeConfigView'];
+      emailPoweredByText?: string;
+      emailManagePreferencesLabel?: string;
+      emailUnsubscribeLabel?: string;
+      customLinks?: {
+        id: string;
+        label: string;
+        url: string;
+        iconName?: string;
+      }[];
     };
     PageContent: {
       /** @enum {string} */
@@ -7676,12 +10664,18 @@ export interface components {
       category: string | null;
       /** @description The place slug the page was addressed by. */
       place: string | null;
-      /** @description The intro markdown; an empty string when the page has none. */
+      /** @description The intro markdown with its placeholders filled; an empty string when the page has none. */
       intro: string;
-      /** @description The title override; `null` when the board template applies. */
+      /** @description The title override with its placeholders filled; `null` when the board template applies. */
       metaTitle: string | null;
-      /** @description The meta description override; `null` when the board template applies. */
+      /** @description The meta description override with its placeholders filled; `null` when the board template applies. */
       metaDescription: string | null;
+      /** @description The intro markdown as written, placeholders included. Send this back in `intro` to keep them. */
+      introTemplate: string;
+      /** @description The title override as written, placeholders included. */
+      metaTitleTemplate: string | null;
+      /** @description The meta description override as written, placeholders included. */
+      metaDescriptionTemplate: string | null;
       /** @enum {string} */
       source: 'human' | 'llm';
       updatedAt: string;
@@ -7720,7 +10714,10 @@ export interface components {
       employersEnabled?: boolean;
       /** @description Whether the public blog is exposed. */
       blogEnabled?: boolean;
-      /** @description Whether the legal Impressum page is exposed (required in some jurisdictions). */
+      /**
+       * @deprecated
+       * @description Deprecated: current headless sites publish the Impressum page when they have Impressum content of their own and ignore this setting. Still accepted and returned, honoured by hosted boards, and reported as `features.impressum` on the board context for older sites.
+       */
       impressumEnabled?: boolean;
       /** @description Whether jobs posted by employers from the free tier require admin approval before they appear on the public board. */
       requireApprovalFreeJobs?: boolean;
@@ -7756,6 +10753,10 @@ export interface components {
         | 'hidden'
         | 'logged_in_only'
         | 'public';
+      /** @description Whether the board team verifies candidate experience. Each experience entry gets a verification status covering its company name and website; changing either removes it. Decide items with `POST /v1/candidates/{id}/verifications/{itemKey}/decisions`. */
+      experienceVerificationEnabled?: boolean;
+      /** @description Whether the board team verifies candidate education. Each education entry gets a verification status covering its school name and website; changing either removes it. Decide items with `POST /v1/candidates/{id}/verifications/{itemKey}/decisions`. */
+      educationVerificationEnabled?: boolean;
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
       /** @description Title shown on the cookie consent banner. 1–200 characters. */
@@ -7788,6 +10789,10 @@ export interface components {
       companyLinkedinUrl?: string | '' | unknown;
       /** @description Company Instagram handle or profile URL. Pass `null` to clear. */
       companyInstagramUrl?: string | '' | unknown;
+      /** @description Company TikTok handle or profile URL, stored as `https://www.tiktok.com/@handle`. Pass `null` to clear. */
+      companyTiktokUrl?: string | '' | unknown;
+      /** @description Company YouTube channel: an `@handle` or a channel URL (`/@handle`, `/channel/UC…`, `/c/name`, `/user/name`); video links are refused. Pass `null` to clear. */
+      companyYoutubeUrl?: string | '' | unknown;
       /** @description Google Analytics 4 measurement ID (for example `G-XXXXXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
       ga4MeasurementId?: string | null;
       /** @description Google Tag Manager container ID (for example `GTM-XXXXXXX`) loaded on the public board. Letters, digits, `-` and `_`, up to 120 characters. Pass `null` or an empty string to clear. */
@@ -7814,6 +10819,189 @@ export interface components {
        */
       passwordProtectionMessage?: string | '' | unknown;
       signInMethods?: components['schemas']['SignInMethodsPatch'];
+      /** @description Whether employers can delete their company from the board. Absent board config defaults to `true`. */
+      employerCompanyDeletionEnabled?: boolean;
+      /**
+       * @description `paid_messaging`: employers browse full candidate profiles and spend credits only to message. `paid_unlocks_and_messaging`: employers spend credits to unlock a profile before messaging. Changing the model, or first setting `paid_messaging`, is refused with 409 `settings_talent_access_model_locked` while an active plan includes candidate database credits; archive those plans first.
+       * @enum {string}
+       */
+      talentAccessModel?: 'paid_messaging' | 'paid_unlocks_and_messaging';
+      /**
+       * @description Board language. On a hosted board the new language applies immediately. On a site built with the AI website builder the language lives in the site code: a change starts a translation of your site that is published when it is ready (usually a few minutes), so `config.language` keeps the current value and the response carries the pending `languageChange`. Sending the current language changes nothing.
+       * @enum {string}
+       */
+      language?:
+        | 'en'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'pt'
+        | 'nl'
+        | 'it'
+        | 'sv'
+        | 'da'
+        | 'nb'
+        | 'fi'
+        | 'pl'
+        | 'cs'
+        | 'ja'
+        | 'ko'
+        | 'zh'
+        | 'hi'
+        | 'tr'
+        | 'ru';
+      /** @description Sites built with the AI website builder only: the whole set of secondary languages the site serves besides `language`, up to 3 (a set already larger may shrink but not grow). A change starts a translation that is published when it is ready, reported in `languageChange`; `config.interfaceLocales` updates once it is live. Sending the current set changes nothing. Refused with 409 `settings_language_change_refused` on a hosted board, before the site's first publish, or while another language change is in progress — including a language change in the same request. */
+      interfaceLocales?: (
+        | 'en'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'pt'
+        | 'nl'
+        | 'it'
+        | 'sv'
+        | 'da'
+        | 'nb'
+        | 'fi'
+        | 'pl'
+        | 'cs'
+        | 'ja'
+        | 'ko'
+        | 'zh'
+        | 'hi'
+        | 'tr'
+        | 'ru'
+      )[];
+      /** @description ISO 4217 code the board’s salary pages and salary amounts are shown in. A currency without a current exchange rate is refused with 400. */
+      salaryCurrency?: string;
+      themeConfig?: components['schemas']['BoardThemeConfig'];
+      /** @description “Powered by” text in the footer of the board’s emails, up to 80 characters. Must contain the word `Cavuno` (linked to cavuno.com) while `showCavunoBranding` is on. */
+      emailPoweredByText?: string;
+      /** @description Label of the manage-preferences link in marketing email footers, up to 60 characters. An empty string resets it to `Manage preferences`. */
+      emailManagePreferencesLabel?: string;
+      /** @description Label of the unsubscribe link in marketing email footers, up to 60 characters. An empty string resets it to `Unsubscribe`. */
+      emailUnsubscribeLabel?: string;
+      /** @description Custom links shown in email footers, in order (up to 50). Replaces the whole list. Rows with neither a label nor a URL are dropped; a row needs both, and an unsafe URL is refused. Refused with 409 while the site is moving to the AI website builder; sending the current list changes nothing. */
+      customLinks?: components['schemas']['SettingsCustomLink'][];
+    };
+    /** @description The product fields when `purpose` is `digital_product`; otherwise null. A digital product has `kind` `free` or `one_time`, and its `price` is the fixed price or the pay-what-you-want minimum (null when free). */
+    PlanDigitalProduct: {
+      /** @description The product page URL word, unique on the board. */
+      slug: string;
+      pricing: components['schemas']['PlanDigitalProductPricing'];
+      /** @description The "You'll get…" line on the product page. */
+      summary: string | null;
+      /** @description The formatted product description as sanitized HTML; the plan's `description` holds its plain text. Null when the product has only a plain description. */
+      descriptionHtml: string | null;
+      /** @description Facts box rows, at most 12. */
+      details: components['schemas']['PlanDigitalProductDetail'][];
+      /** @description Media ids (from POST /v1/media/upload): the cover first, then the gallery; at most 8. */
+      images: string[];
+      thankYouMessage: string | null;
+      refundPolicy: string | null;
+      /** @description Downloads per file per purchase (1 to 1000). */
+      downloadCap: number;
+      /** @description Stamp each buyer's PDFs with their email address. */
+      stampPdfs: boolean;
+      ratingsEnabled: boolean;
+      /** @description Most sales allowed; null means no limit. */
+      salesLimit: number | null;
+      /** @description Sales so far (read only). */
+      salesCount: number;
+      /** @description Show the number of sales on the product page. */
+      showSalesCount: boolean;
+      /** @description E-book or e-publication: books, newspapers, magazines, sheet music or maps delivered as files. Sets the product's Stripe tax code to `txcd_10302000` (digital books) instead of the one picked from its files. Some countries charge a lower VAT rate on these; it applies when the board collects tax with Stripe Tax. */
+      isEbook: boolean;
+      /** @description Questions buyers answer before checkout, at most 10. */
+      questions: components['schemas']['PlanDigitalProductQuestion'][];
+      /** @description Cavuno took the product down: it cannot be sold or listed (read only). */
+      takenDown: boolean;
+      /** @description Listing was asked for (`isPublic: true`) before the product had a ready file or link: `isPublic` stays false and the product is listed automatically when its first file or link is ready. False once listed, unlisted, archived or taken down (read only). */
+      listingPending?: boolean;
+    } | null;
+    /** @description A facts box row: `text` shows `value`; `check` (yes/no) shows a tick or a cross. */
+    PlanDigitalProductDetail:
+      | {
+          /** @enum {string} */
+          kind: 'text';
+          /** @description Up to 60 characters. */
+          label: string;
+          /** @description Up to 200 characters. */
+          value: string;
+        }
+      | {
+          /** @enum {string} */
+          kind: 'check';
+          /** @description Up to 60 characters. */
+          label: string;
+          /** @description `true` shows a tick, `false` a cross. */
+          checked: boolean;
+        };
+    PlanDigitalProductDetailInput: {
+      /**
+       * @description `text` (default) shows `value`; `check` is a yes/no row shown as a tick or a cross.
+       * @enum {string}
+       */
+      kind?: 'text' | 'check';
+      /** @description Up to 60 characters. */
+      label: string;
+      /** @description Text rows only, and required there: up to 200 characters. */
+      value?: string;
+      /** @description Yes/no rows only, and required there. */
+      checked?: boolean;
+    };
+    PlanDigitalProductPricing:
+      | {
+          /** @enum {string} */
+          kind: 'free';
+        }
+      | {
+          /** @enum {string} */
+          kind: 'fixed';
+          currency: string;
+          amountCents: number;
+        }
+      | {
+          /** @enum {string} */
+          kind: 'pay_what_you_want';
+          currency: string;
+          minimumCents: number;
+          suggestedCents: number | null;
+        };
+    /** @description How the product is priced: free, a fixed price, or pay what you want with a minimum. */
+    PlanDigitalProductPricingInput:
+      | {
+          /** @enum {string} */
+          kind: 'free';
+        }
+      | {
+          /** @enum {string} */
+          kind: 'fixed';
+          /** @description ISO 4217 currency code. Stored lowercase. */
+          currency: string;
+          /** @description Price in the smallest currency unit, above zero. */
+          amountCents: number;
+        }
+      | {
+          /** @enum {string} */
+          kind: 'pay_what_you_want';
+          /** @description ISO 4217 currency code. Stored lowercase. */
+          currency: string;
+          /** @description Lowest amount a buyer can pay; 0 lets them pay nothing. */
+          minimumCents: number;
+          /** @description Amount filled in at checkout; at or above the minimum. */
+          suggestedCents?: number;
+        };
+    PlanDigitalProductQuestion: {
+      /** @description Stable id you choose, so answers keep pointing at a reworded question. */
+      id: string;
+      /** @enum {string} */
+      kind: 'text' | 'checkbox' | 'dropdown';
+      /** @description Up to 200 characters. */
+      label: string;
+      required: boolean;
+      /** @description Dropdown only: 1 to 20 different options. */
+      options?: string[];
     };
     PlanFeature: {
       /**
@@ -7847,6 +11035,97 @@ export interface components {
         | 'talent.messages_sent';
       value: string;
     };
+    PlanFile: {
+      /** @description The file id. */
+      id: string;
+      /** @enum {string} */
+      object: 'plan_file';
+      planId: string;
+      /** @enum {string} */
+      kind: 'file' | 'link';
+      /** @description Place in the product, from 0 (the order buyers see). */
+      position: number;
+      /** @description The file's name for buyers, set by the operator: shown on the product and purchase pages and used as the download name. Replacing the content keeps it. */
+      displayName: string;
+      description: string | null;
+      /** @description Links only: the https URL. */
+      url: string | null;
+      /** @description Files only: the name the current content was uploaded under, as metadata. A replacement changes it; buyers see `displayName`. */
+      fileName: string | null;
+      /** @description Detected from the bytes once checked. */
+      contentType: string | null;
+      sizeBytes: number | null;
+      /** @description PDFs only. */
+      pageCount: number | null;
+      /** @description Checksum of the delivered bytes. */
+      sha256: string | null;
+      /** @description PDFs only: whether buyer stamping works; null until tested. */
+      stampable: boolean | null;
+      /** @description Increments each time the content is replaced. */
+      version: number | null;
+      /**
+       * @description `uploading` until the upload is completed, `checking` while it is scanned, then `ready`, `flagged` (a threat, or it could not be checked) or `blocked` (a type never delivered). `disabled`: hidden from new buyers; earlier buyers keep it. Only `ready` files and links are delivered.
+       * @enum {string}
+       */
+      state:
+        | 'uploading'
+        | 'checking'
+        | 'ready'
+        | 'flagged'
+        | 'blocked'
+        | 'disabled'
+        | 'deleted';
+      /** @enum {string|null} */
+      flagReason: 'threat' | 'unscannable' | null;
+      threatName: string | null;
+      blockedReason: string | null;
+      /** @description ISO-8601, while disabled. */
+      disabledAt: string | null;
+      /** @description An upload in progress for this file: its first content, or a replacement (buyers keep the current version until it passes its checks). */
+      pendingUpload: {
+        id: string;
+        /** @enum {string} */
+        kind: 'new' | 'replace';
+        /** @enum {string} */
+        state:
+          | 'uploading'
+          | 'checking'
+          | 'ready'
+          | 'flagged'
+          | 'blocked'
+          | 'aborted';
+      } | null;
+    };
+    PlanFileUpload: {
+      /** @description The upload id. */
+      id: string;
+      /** @enum {string} */
+      object: 'plan_file_upload';
+      /** @description The new file this upload fills (state `uploading`). Using the upload as a replacement removes this file. */
+      fileId: string;
+      /** @description ISO-8601. The URLs stop working then; an upload not completed within a day is stopped. */
+      expiresAt: string;
+      /** @description Where to send the bytes: one PUT for a small file, or one PUT per part. Then call the complete endpoint. */
+      transfer:
+        | {
+            /** @enum {string} */
+            method: 'single';
+            /** @description PUT the whole file here. */
+            url: string;
+          }
+        | {
+            /** @enum {string} */
+            method: 'multipart';
+            /** @description Every part but the last is exactly this size. */
+            partSizeBytes: number;
+            /** @description One presigned URL per part, in order. */
+            parts: {
+              partNumber: number;
+              /** @description PUT this part here. */
+              url: string;
+            }[];
+          };
+    };
     /** @description The plan single active price, or null when no price has been set. */
     PlanPrice: {
       /** @description ISO 4217 currency code, lowercase. */
@@ -7854,6 +11133,67 @@ export interface components {
       /** @description Unit amount in the smallest currency unit. */
       amountCents: number;
     } | null;
+    PlanPurchase: {
+      /** @description The purchase id, for the actions under /v1/plans/{id}/purchases/{purchaseId}. */
+      id: string;
+      /** @enum {string} */
+      object: 'plan_purchase';
+      planId: string;
+      /** @description The sale on GET /v1/transactions; null for a free claim. */
+      transactionId: string | null;
+      /** @description The buyer's email address. */
+      email: string;
+      /** @description The board user who bought it while signed in. */
+      boardUserId: string | null;
+      /**
+       * @description Access to the files: `awaiting_payment` (checkout not paid yet), `paid`, `free` (claimed at no charge), `access_removed`. Refunds are on the transaction.
+       * @enum {string}
+       */
+      status: 'awaiting_payment' | 'paid' | 'free' | 'access_removed';
+      amountCents: number;
+      currency: string;
+      /** @description The buyer's answers to the product's questions. */
+      answers: {
+        questionId: string;
+        /** @description The question as the buyer saw it. */
+        label: string;
+        value: string | boolean;
+      }[];
+      /** @description Downloads across all files. */
+      downloadsUsed: number;
+      /** @description Downloads per file (files never downloaded are left out). */
+      fileDownloads: {
+        fileId: string;
+        downloads: number;
+      }[];
+      /** @description ISO-8601. */
+      createdAt: string;
+      /** @description ISO-8601, once paid. */
+      paidAt: string | null;
+    };
+    PlanReview: {
+      /** @description The review id. */
+      id: string;
+      /** @enum {string} */
+      object: 'plan_review';
+      purchaseId: string;
+      /** @description 1 to 5. */
+      stars: number;
+      comment: string | null;
+      /** @description The buyer's first name. */
+      displayName: string | null;
+      /** @description Hidden from the product page. */
+      hidden: boolean;
+      /** @description Counts toward the rating: visible, and its purchase is neither refunded in full, disputed nor removed. */
+      counted: boolean;
+      reply: string | null;
+      /** @description ISO-8601. */
+      replyAt: string | null;
+      /** @description ISO-8601. */
+      createdAt: string;
+      /** @description ISO-8601. */
+      updatedAt: string;
+    };
     /** @description Present only on Operator API errors caused by the board's Cavuno plan. Read `GET /v1/billing/subscription` to choose between `checkout` and `changePlan`, call it with `{ "planKey": requiredPlan }`, and give the returned `url` to a person to confirm. Each `path` is relative to the API origin, not to a `/v1` base URL. Both endpoints need `billing.manage`. Board API errors never include it. */
     PlanUpgradeHint: {
       /**
@@ -7886,6 +11226,18 @@ export interface components {
         path: '/v1/billing/upgrade';
       };
     };
+    PreviewCompanyRoutingRuleBody: {
+      /**
+       * @description `any` (default): a job matches when one condition matches. `all`: every condition must match.
+       * @enum {string}
+       */
+      matchMode?: 'any' | 'all';
+      /** @description Conditions on the job (at most 20), combined by `matchMode`. A condition left without terms is dropped. Empty: every job passes the conditions. */
+      conditions?: components['schemas']['CompanyRoutingRuleCondition'][];
+      filters?: components['schemas']['CompanyRoutingRuleFilters'];
+      /** @description When previewing an edit, the id of the rule being edited: it is left out, and only rules before it count as claiming a job. Omit for a new rule (every existing rule runs first). */
+      excludeRuleId?: string;
+    };
     ProfileCustomFieldDefinition: {
       key: string;
       label: string;
@@ -7916,6 +11268,21 @@ export interface components {
       min?: number;
       max?: number;
     };
+    ProfileFieldAiFillBody: {
+      /** @description Keys of company fields with `aiFill` on to fill on the board’s companies. Only companies with a description and no value for a field get one; values already set are kept. */
+      fieldKeys: string[];
+    };
+    ProfileFieldAiFillRun: {
+      /** @description Identifier of the fill run. */
+      runId: string;
+      /**
+       * @description `running` right after it starts; companies are filled in the background.
+       * @enum {string}
+       */
+      status: 'running' | 'done' | 'failed';
+      /** @description The company field keys the run fills. */
+      fieldKeys: string[];
+    };
     ProfileFieldValuesBody: {
       values: {
         [key: string]: string | number | boolean | string[] | unknown;
@@ -7943,6 +11310,7 @@ export interface components {
       descriptionFieldKey?: string;
       valueDefinitions?: components['schemas']['ScalarProfileCustomFieldDefinition'][];
       entryDefinitions?: components['schemas']['ScalarProfileCustomFieldDefinition'][];
+      verification?: components['schemas']['ItemVerificationConfig'];
     };
     ProfileObjectReferenceSelectionWrite: {
       fieldKey: string;
@@ -7960,6 +11328,7 @@ export interface components {
       }[];
     };
     ProfileObjectReferencesResult: {
+      /** @description The reference fields on this profile. Fields whose collection is archived are omitted, along with their selections. */
       definitions: components['schemas']['ProfileObjectReferenceDefinition'][];
       selections: components['schemas']['ResolvedProfileObjectReference'][];
     };
@@ -7971,6 +11340,20 @@ export interface components {
       couponId: string;
       active: boolean;
       created: string;
+      /** @description How many times the code can be redeemed in total, or null for no limit. */
+      maxRedemptions: number | null;
+      /** @description How many times the code has been redeemed. */
+      timesRedeemed: number;
+      /** @description ISO-8601 time the code stops working, or null. */
+      expiresAt: string | null;
+    };
+    PublishEmailTemplateBody: {
+      /** @description Subject line, up to 200 characters. May use the tokens listed in `subjectTokens`, written as `{{token}}`. */
+      subject: string;
+      /** @description Inbox preview text, up to 150 characters. May use the tokens listed in `subjectTokens`. An empty string sends the default preview text. */
+      previewText: string;
+      /** @description Body HTML, up to 100 KB, in the same shape as the default template returned by the retrieve endpoint (paragraphs, headings, links and buttons; the board’s header, footer and theme are added around it). May use the tokens listed in `bodyTokens` and must contain every token in `requiredBodyTokens`. */
+      bodyHtml: string;
     };
     PublishJobBody: {
       /**
@@ -8014,11 +11397,11 @@ export interface components {
       }[];
     };
     PutPageContentBody: {
-      /** @description Markdown shown above the job list on page 1 of the page. Served as sanitized HTML. Omit to keep the current intro; `null` clears it. */
+      /** @description Markdown shown with the job list on page 1 of the page. Served as sanitized HTML. May use the placeholders `{{category}}` (category pages) or `{{location}}` (location pages), `{{board_name}}`, `{{count}}`, `{{job_label}}`, `{{salary_range}}` and `{{salary_count}}`, filled with the page's live values when read; a sentence whose placeholder has no value, or does not apply to the page, is left out. Omit to keep the current intro; `null` clears it. */
       intro?: string | null;
-      /** @description The page's `<title>`, used as written in place of the board's title template. Omit to keep; `null` clears it and the template applies again. */
+      /** @description The page's `<title>`, used in place of the board's title template. May use the placeholders `{{category}}` (category pages) or `{{location}}` (location pages), `{{board_name}}`, `{{count}}`, `{{job_label}}`, `{{salary_range}}` and `{{salary_count}}`, filled with the page's live values when read; a sentence whose placeholder has no value, or does not apply to the page, is left out. Omit to keep; `null` clears it and the template applies again. */
       metaTitle?: string | null;
-      /** @description The page's meta description, used as written in place of the board's description template. Omit to keep; `null` clears it. */
+      /** @description The page's meta description, used in place of the board's description template. May use the placeholders `{{category}}` (category pages) or `{{location}}` (location pages), `{{board_name}}`, `{{count}}`, `{{job_label}}`, `{{salary_range}}` and `{{salary_count}}`, filled with the page's live values when read; a sentence whose placeholder has no value, or does not apply to the page, is left out. Omit to keep; `null` clears it. */
       metaDescription?: string | null;
       /**
        * @description `llm` marks an AI draft a person approved. Defaults to `human`.
@@ -8042,7 +11425,7 @@ export interface components {
       /** @description The candidate's display name. */
       displayName: string;
       profile?: components['schemas']['CandidateProfileProjection'] & unknown;
-      /** @description When `false`, deactivates the candidate (sign-in disabled, sessions revoked, profile hidden from talent surfaces). When `true`, restores sign-in and talent-surface visibility; the candidate signs in again to establish a new session. Profile and application history are preserved either way. */
+      /** @description When `false`, deactivates the candidate for this membership source (sign-in disabled, sessions revoked, profile hidden from talent surfaces). When `true`, lifts only that membership deactivation; the candidate signs in again to establish a new session. `true` never lifts an operator deactivation from `POST /candidates/{id}/deactivate` or the dashboard Ban, so `deactivatedAt` stays set until the operator reactivates. Profile and application history are preserved either way. */
       active: boolean;
     };
     Redirect: {
@@ -8088,6 +11471,12 @@ export interface components {
           }
       )[];
     };
+    RefundTransactionBody: {
+      /** @description The amount to refund, in the transaction currency's minor units. Required: send the full remaining amount (`amountCents` minus `refundedAmountCents`) for a full refund. */
+      amountCents: number;
+      /** @description Whether the buyer loses what the sale granted. Only for a one-time purchase (`accessRemovable: true`). Omitted: a refund reaching the full amount removes access and a partial one keeps it. */
+      removeAccess?: boolean;
+    };
     RemotePermitTaxonomyEntry: {
       /** @description Discriminator. One of: `worldwide`, `world_region`, `continent`, `region`, `subregion`, `custom`, `country`, `subdivision`. */
       type: string;
@@ -8107,6 +11496,27 @@ export interface components {
     RenameCouponBody: {
       name: string;
     };
+    ReorderPlansBody: {
+      /**
+       * @description The plan purpose whose order you are setting. Plans are ordered within a purpose, as they are shown to buyers.
+       * @enum {string}
+       */
+      purpose:
+        | 'job_posting'
+        | 'talent_access'
+        | 'membership'
+        | 'job_seeker'
+        | 'employer_service'
+        | 'job_seeker_service'
+        | 'digital_product';
+      /** @description Complete active set: every non-archived plan of `purpose` exactly once, each with a unique `displayOrder`. */
+      orders: {
+        /** @description Plan ID from list or create. */
+        id: string;
+        /** @description Position of the plan. Lower values are shown first. */
+        displayOrder: number;
+      }[];
+    };
     ReorderSalesLedPlansBody: {
       /** @description Complete active set: every non-archived plan id exactly once, with unique displayOrder values. */
       orders: {
@@ -8114,6 +11524,66 @@ export interface components {
         id: string;
         displayOrder: number;
       }[];
+    };
+    ReplaceCheckoutFieldsBody: {
+      /** @description Collect a phone number in Stripe Checkout. */
+      phone: {
+        /**
+         * @description `on` asks for a phone number; `off` does not.
+         * @enum {string}
+         */
+        mode: 'off' | 'on';
+      };
+      /** @description Collect a contact person name. `printOnInvoice` adds it to invoices and counts toward the invoice field limit. */
+      contactPerson:
+        | {
+            /**
+             * @description Do not ask for a contact person.
+             * @enum {string}
+             */
+            mode: 'off';
+          }
+        | {
+            /**
+             * @description Ask for a contact person name.
+             * @enum {string}
+             */
+            mode: 'on';
+            /** @description Whether the buyer must give a contact person. */
+            required: boolean;
+            /** @description Print the contact person on invoices. Omitted means `false`. */
+            printOnInvoice?: boolean;
+          };
+      /** @description Custom buyer fields, in order. At most 3 may collect in Checkout, and at most 4 (including a printed contact person) may print on invoices. */
+      customFields: {
+        /** @description Stable key; letters, digits and `_`. Unique in the list. */
+        key: string;
+        /** @description Label the buyer sees. */
+        label: string;
+        /**
+         * @description Input type: free text, a number, or a dropdown of options.
+         * @enum {string}
+         */
+        type: 'text' | 'numeric' | 'dropdown';
+        /** @description Whether the buyer must fill the field. */
+        required: boolean;
+        /** @description Required for `dropdown` fields (at least one, values unique). Ignored for other types. */
+        dropdownOptions?: {
+          /** @description Option label the buyer sees. */
+          label: string;
+          /** @description Stored value; letters and digits only. */
+          value: string;
+        }[];
+        /** @description Where the field is used. Omitted means both Checkout and invoices. */
+        channels?: {
+          /** @description Collect the field in Stripe Checkout. */
+          checkout: boolean;
+          /** @description Print the field on invoices. */
+          invoice: boolean;
+        };
+      }[];
+      /** @description Send the buyer a paid invoice after a one-time employer checkout. Omitted leaves the current value. */
+      paidInvoicesEnabled?: boolean;
     };
     ReplaceFormLayoutsBody: {
       /** @description The job form, in display order. */
@@ -8124,10 +11594,15 @@ export interface components {
       talent?: components['schemas']['FormLayoutFieldRef'][];
     };
     ReplaceProfileFieldDefinitionsBody: {
-      definitions: components['schemas']['ProfileCustomFieldDefinition'][];
+      definitions: components['schemas']['OperatorProfileCustomFieldDefinition'][];
     };
     ReplaceProfileObjectReferenceSelectionsBody: {
+      /** @description Replaces the stored selections. Selections for fields whose collection is archived are ignored, and their stored selections are kept. */
       selections: components['schemas']['ProfileObjectReferenceSelectionWrite'][];
+    };
+    ReplyToInboxTicketBody: {
+      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+      body: string;
     };
     ReportingConnect: {
       /**
@@ -8170,6 +11645,10 @@ export interface components {
       connected: boolean;
       /** @description ISO-8601 timestamp of when the integration was connected. */
       connectedAt: string | null;
+    };
+    ResetPlanPurchaseDownloadsBody: {
+      /** @description Reset one file only; every file when omitted. */
+      fileId?: string;
     };
     ResolvedJobCollectionField: {
       key: string;
@@ -8420,7 +11899,9 @@ export interface components {
         values: {
           [key: string]: string | number | boolean | string[];
         };
+        verification?: components['schemas']['ItemVerificationBadge'];
       }[];
+      verification?: components['schemas']['ItemVerificationBadge'] & unknown;
     };
     ResourceLinks: {
       /**
@@ -8479,6 +11960,112 @@ export interface components {
           key: string;
           recordIds: string[];
         }[];
+      };
+    };
+    SearchConsoleComparisonResponse: {
+      /** @enum {string} */
+      object: 'search_console_comparison';
+      /** @description Effective requested period, moved back to end on dataThrough when needed. */
+      range: {
+        startDate: string;
+        endDate: string;
+      };
+      comparisonRange: {
+        startDate: string;
+        endDate: string;
+      };
+      /** @description Latest finalized day with data in the last 10 days, or null when none was found. */
+      dataThrough: string | null;
+      /** @description True when that period reached Google’s 25,000-row limit, so some rows are missing. */
+      truncated: {
+        current: boolean;
+        comparison: boolean;
+      };
+      /** @description Totals are ungrouped period totals. Buckets and counts cover every joined row before filters and paging. */
+      summary: {
+        totals: {
+          clicks: number;
+          impressions: number;
+          /** @description 0–1 fraction. */
+          ctr: number | null;
+          position: number | null;
+        };
+        comparisonTotals: {
+          clicks: number;
+          impressions: number;
+          /** @description 0–1 fraction. */
+          ctr: number | null;
+          position: number | null;
+        };
+        changes: {
+          clicksChange: number;
+          impressionsChange: number;
+          ctrChange: number | null;
+          positionChange: number | null;
+          clicksChangePercent: number | null;
+          impressionsChangePercent: number | null;
+        };
+        /** @description Row counts by rounded current average position. */
+        positionBuckets: {
+          top1: number;
+          top2to3: number;
+          top4to10: number;
+          top11to20: number;
+          beyond20: number;
+        };
+        counts: {
+          new: number;
+          lost: number;
+          up: number;
+          down: number;
+        };
+        /** @description Requested-period clicks not attributed to any returned row, such as anonymized queries. */
+        hiddenClicks: number;
+      };
+      /** @description Rows matching filters, before limit and offset. */
+      totalRows: number;
+      rows: {
+        /** @description Present when groupBy is query or query_page. */
+        query?: string;
+        /** @description Present when groupBy is page or query_page. */
+        page?: string;
+        clicks: number;
+        impressions: number;
+        /** @description 0–1 fraction; null without impressions. */
+        ctr: number | null;
+        position: number | null;
+        previousClicks: number;
+        previousImpressions: number;
+        previousCtr: number | null;
+        previousPosition: number | null;
+        clicksChange: number;
+        impressionsChange: number;
+        ctrChange: number | null;
+        /** @description previousPosition minus position: positive means the row moved up. */
+        positionChange: number | null;
+        /** @description Percentage change; null when previousClicks is 0. */
+        clicksChangePercent: number | null;
+        /** @description Percentage change; null when previousImpressions is 0. */
+        impressionsChangePercent: number | null;
+        /** @description No row in the comparison period. */
+        isNew: boolean;
+        /** @description No row in the requested period. */
+        isLost: boolean;
+        /** @description Position improved by at least 0.1 (not new or lost). */
+        isUp: boolean;
+        /** @description Position worsened by at least 0.1 (not new or lost). */
+        isDown: boolean;
+      }[];
+      cavuno: {
+        coverage: {
+          /** @enum {string} */
+          mode: 'board_hosts' | 'whole_property';
+          hostnames: string[];
+        };
+        /** @enum {string} */
+        dataState: 'final';
+        /** @enum {string} */
+        dataTimezone: 'America/Los_Angeles';
       };
     };
     SearchConsoleInspectionResponse: {
@@ -8653,6 +12240,25 @@ export interface components {
       logoUrl: string | null;
       heroUrl: string | null;
       config: components['schemas']['OperatorSettingsConfig'];
+      /** @description The newest language change on a site built with the AI website builder, or `null` when there has been none. */
+      languageChange?: {
+        id: string;
+        /** @enum {string} */
+        object: 'settings_language_change';
+        /**
+         * @description `preparing`: your site is being translated. `publishing`: the translated site is being published. `succeeded`: the change is live. `failed`: see `error`; nothing changed. `draft`: the site was never published, so the translation was saved as a draft in the builder instead of going live.
+         * @enum {string}
+         */
+        status: 'preparing' | 'publishing' | 'succeeded' | 'failed' | 'draft';
+        /** @description Board language the change targets (or keeps). */
+        language: string;
+        /** @description Requested secondary languages, or `null` for a board-language change. */
+        interfaceLocales: string[] | null;
+        /** @description Why the change failed, when `status` is `failed`. */
+        error: string | null;
+        createdAt: string;
+        updatedAt: string;
+      } | null;
       createdAt: string;
       updatedAt: string;
     };
@@ -8686,6 +12292,15 @@ export interface components {
       style?: ('default' | 'light' | 'dark' | 'contrast') | '' | unknown;
       /** @description How often the placement is shown (e.g. once every N items). */
       frequency?: number | unknown;
+    };
+    SettingsCustomLink: {
+      /** @description Your stable identifier for the link. */
+      id: string;
+      label: string;
+      /** @description An `http(s)`, `mailto:` or `tel:` URL, `#`, a bare host (stored as `https://…`), or a path on the board such as `/employers` (emails link it on the board's address). */
+      url: string;
+      /** @description Optional icon shown beside the link in email footers. */
+      iconName?: string;
     };
     SettingsPasswordProtectionBody: {
       /** @description Plaintext password used to gate the public board. Must be at least 8 characters. Stored hashed and encrypted server-side. */
@@ -8903,6 +12518,221 @@ export interface components {
       /** @description The subscriber's alerts. */
       alerts: components['schemas']['SubscriberAlert'][];
     };
+    TaxonomyMerge: {
+      id: string;
+      /** @enum {string} */
+      object: 'taxonomy_merge';
+      /** @enum {string} */
+      kind: 'category' | 'skill';
+      /** @description The term merged away. Its id no longer exists after the merge. */
+      from: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+      /** @description The term that survived. */
+      into: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+      undo: {
+        /**
+         * @description `applying` while jobs are being retagged; `ready` once undo is available; `over_cap` when the merge retagged too many jobs to undo; `undoing` / `undone` after an undo; `expired` after 30 days.
+         * @enum {string}
+         */
+        status:
+          | 'applying'
+          | 'ready'
+          | 'over_cap'
+          | 'undoing'
+          | 'undone'
+          | 'expired';
+        /** @description When undo stops being available. */
+        expiresAt: string;
+        /** @description After an undo, the id of the recreated term. */
+        restoredId: string | null;
+      };
+      createdAt: string;
+    };
+    TaxonomyMergePreview: {
+      /** @enum {string} */
+      object: 'taxonomy_merge_preview';
+      /** @enum {string} */
+      kind: 'category' | 'skill';
+      from: {
+        id: string;
+        name: string;
+        slug: string;
+        /** @description Live jobs tagged with this term. */
+        jobCount: number;
+      };
+      into: {
+        id: string;
+        name: string;
+        slug: string;
+        /** @description Live jobs tagged with this term. */
+        jobCount: number;
+      };
+      /** @description Subcategories that move to the surviving category. */
+      childCount: number;
+      /** @description Whether the merge will be undoable: `from` has no more live jobs than `undoJobCap`. */
+      undoAvailable: boolean;
+      undoJobCap: number;
+      undoWindowDays: number;
+    };
+    TaxonomyRule: {
+      id: string;
+      /** @enum {string} */
+      object: 'taxonomy_rule';
+      /** @enum {string} */
+      type: 'same_as' | 'ignore' | 'keep_separate' | 'merge';
+      /**
+       * @description The taxonomy: `category`, `skill` or `market`.
+       * @enum {string}
+       */
+      kind: 'category' | 'skill' | 'market';
+      /** @description Same as / ignore: the tag. Keep separate: one of the terms. Merge: the term merged away. */
+      tag: {
+        name: string;
+        slug: string;
+      };
+      /** @description Same as: the term. Keep separate: the terms kept apart from `tag`. Merge: the surviving term. */
+      terms: {
+        id: string | null;
+        name: string;
+        slug: string;
+      }[];
+      /** @description Who made it. Same as: `owner`, `ai`, `integration`, or null when not recorded. Ignore: `owner` or `review`. */
+      source: string | null;
+      createdBy: string | null;
+      createdAt: string;
+      /** @description Merge only: jobs it retagged. */
+      jobCount: number | null;
+      /** @description Whether `DELETE /v1/taxonomies/rules/{id}` applies. A merge is undone instead. */
+      removable: boolean;
+      /** @description Merge only: its undo state and deadline. */
+      undo: {
+        status: string;
+        expiresAt: string;
+      } | null;
+    };
+    TaxonomySettings: {
+      /** @enum {string} */
+      object: 'taxonomy_settings';
+      /** @description What automatic tagging does with a tag that doesn't match your list, per taxonomy. A change applies to tags that arrive after it. */
+      unmatchedTagMode: {
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        category: 'create' | 'ask';
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        skill: 'create' | 'ask';
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        market: 'create' | 'ask';
+      };
+      /** @description What each list means on this board, per taxonomy. AI tagging reads it to decide which terms a job or company belongs under. */
+      listDescription: {
+        /** @description One sentence on what your categories mean on this board, used by AI tagging instead of the default. `null` when unset. */
+        category: string | null;
+        /** @description One sentence on what your skills mean on this board, used by AI tagging instead of the default. `null` when unset. */
+        skill: string | null;
+        /** @description One sentence on what your markets mean on this board, used by AI tagging instead of the default. `null` when unset. */
+        market: string | null;
+      };
+      /** @description Whether terms AI added are removed once unused, per taxonomy. Applies only while `unmatchedTagMode` is `create`. */
+      removeUnusedTags: {
+        /** @description `true` (the default) lets Cavuno remove categories AI added once no live job has used them for 30 days, while AI manages the list. Terms you added are never removed. */
+        category: boolean;
+        /** @description `true` (the default) lets Cavuno remove skills AI added once no live job has used them for 30 days, while AI manages the list. Terms you added are never removed. */
+        skill: boolean;
+      };
+    };
+    TaxonomySuggestion: {
+      id: string;
+      /** @enum {string} */
+      object: 'taxonomy_suggestion';
+      /** @enum {string} */
+      type: 'unmatched' | 'duplicate';
+      /**
+       * @description The taxonomy: `category`, `skill` or `market`.
+       * @enum {string}
+       */
+      kind: 'category' | 'skill' | 'market';
+      /** @description Unmatched: the tag. Duplicate: the term the others would merge into. */
+      name: string;
+      slug: string;
+      /** @description Duplicate only: the term that survives a merge. */
+      into: {
+        id: string | null;
+        name: string;
+        slug: string;
+        /** @description Live jobs tagged with this term. */
+        jobCount: number;
+      } | null;
+      /** @description Duplicate only: the terms a merge folds into `into`. */
+      mergeTerms: {
+        id: string | null;
+        name: string;
+        slug: string;
+        /** @description Live jobs tagged with this term. */
+        jobCount: number;
+      }[];
+      /** @description Unmatched: jobs that arrived with the tag (markets: times seen). Duplicate: live jobs on `mergeTerms`. */
+      jobCount: number;
+      /** @description Unmatched only: up to 3 jobs that carried the tag. */
+      examples: {
+        id: string;
+        title: string;
+        companyName: string | null;
+      }[];
+      createdAt: string;
+      lastSeenAt: string | null;
+    };
+    TaxonomySuggestionAnswer: {
+      id: string;
+      /** @enum {string} */
+      object: 'taxonomy_suggestion_answer';
+      /** @enum {string} */
+      type: 'unmatched' | 'duplicate';
+      /**
+       * @description The taxonomy: `category`, `skill` or `market`.
+       * @enum {string}
+       */
+      kind: 'category' | 'skill' | 'market';
+      /** @enum {string} */
+      action: 'add' | 'map' | 'ignore' | 'merge' | 'keep_separate';
+      /** @enum {string} */
+      status: 'approved' | 'rejected';
+      /** @description `add` / `map`: the term. `merge`: the surviving term. */
+      term: {
+        id: string;
+        name: string;
+        slug: string;
+      } | null;
+      /** @description Jobs being tagged with `term` in the background. */
+      jobsToTag: number;
+      /** @description `merge`: one merge per term, each undoable at `POST /v1/taxonomies/{categories|skills}/merges/{mergeId}/undo`. */
+      mergeIds: string[];
+    };
+    TeamItemVerification: components['schemas']['ItemVerification'] & {
+      /** @description The staff note on the last decision. Never shown to workers. */
+      note: string | null;
+      /**
+       * @description Where the last decision was made: the dashboard, the Operator API, or the worker confirming an email domain.
+       * @enum {string|null}
+       */
+      source: 'dashboard' | 'api' | 'email_domain' | null;
+      /** Format: date-time */
+      decidedAt: string | null;
+    };
     Transaction: {
       id: string;
       /** @enum {string} */
@@ -8930,6 +12760,22 @@ export interface components {
       methodType: string | null;
       /** @enum {string|null} */
       publishTiming: 'on_issue' | 'on_payment' | null;
+      /** @description Cumulative amount refunded, in currency minor units; 0 when none. A refund that failed or was canceled does not count. */
+      refundedAmountCents: number;
+      /**
+       * @description From `refundedAmountCents` against `amountCents`.
+       * @enum {string}
+       */
+      refundStatus: 'none' | 'partial' | 'full';
+      /**
+       * @description The payment's dispute on the board's Stripe account, or null.
+       * @enum {string|null}
+       */
+      disputeStatus: 'open' | 'won' | 'lost' | null;
+      /** @description What the sale granted is revoked: by a refund, a dispute, or the operator. */
+      accessRemoved: boolean;
+      /** @description The sale is a one-time purchase, so remove-access and restore-access apply. False for subscriptions (access follows the subscription) and for sales not linked to a purchase. */
+      accessRemovable: boolean;
     };
     TransferOwnershipBody: {
       /** @description The user ID of the member who will become the primary owner. */
@@ -9018,14 +12864,18 @@ export interface components {
         )[];
         workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
       };
+      /** @description Most jobs from this rule live on the Board at once, counting published jobs and jobs awaiting approval (1–100,000). `null` means no rule limit; the Board's Backfill limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      jobLimit?: number | null;
     };
     UpdateBackfillSettingsBody: {
       /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
       jobLimit?: number | null;
-      /** @description "Posted within": Backfill skips jobs posted more than this many days ago (1–365). `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that are now too old and deletes too-old jobs awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
+      /** @description "Posted within": Backfill imports a job only if it was posted within this many days at the time it is imported (1–365); imported jobs then stay as they age. `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that were too old when imported and deletes those awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
       maxJobAgeDays?: number | null;
       /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
       excludeWorldwideRemote?: boolean;
+      /** @description When `true`, Backfill skips jobs that don't list pay (no `salaryMin` or `salaryMax` above 0), including relisted and sponsored jobs. Jobs already on your Board are not changed. Defaults to `false`. */
+      requireSalary?: boolean;
       /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
       sponsoredJobsEnabled?: boolean;
     };
@@ -9083,10 +12933,28 @@ export interface components {
       instagramUrl?: string | null;
       /** @description Canonical market slugs assigned to the company. Pass an empty array to clear all markets. */
       markets?: string[];
+      /** @description Makes this company a subsidiary of another company in the same account: the parent company's `id`. Groups are one level deep, so the parent cannot itself be a subsidiary, and a company with subsidiaries cannot get a parent. A subsidiary may use its parent's website domain (or a path on it); it is then not filled in automatically from the website, and shows the parent's logo until it has its own. Changing it changes the public company page, so confirm with the operator first. Pass `null` to remove the company from its group; omitted means unchanged. */
+      parentCompanyId?: string | null;
       /** @description The company's display name. */
       name?: string;
       /** @description URL-friendly slug for the company. */
       slug?: string;
+    };
+    UpdateCompanyRoutingRuleBody: {
+      /**
+       * @description `any`: a job matches when one condition matches. `all`: every condition must match.
+       * @enum {string}
+       */
+      matchMode?: 'any' | 'all';
+      /** @description Replaces the conditions. Omit to keep them. */
+      conditions?: components['schemas']['CompanyRoutingRuleCondition'][];
+      filters?: components['schemas']['CompanyRoutingRuleFilters'] & unknown;
+      /** @description When true, also moves the parent's published jobs the rule matches now (not jobs moved by hand, nor jobs an earlier rule matches) to the subsidiary. Default false: the rule applies to jobs synced from now on. */
+      moveExistingJobs?: boolean;
+    };
+    UpdateCompanyRoutingRuleOrderBody: {
+      /** @description Every one of the company's routing rule ids, once each, in the new order. The first matching rule wins. */
+      ruleIds: string[];
     };
     UpdateCustomObjectRecordBody: {
       name?: string;
@@ -9220,6 +13088,31 @@ export interface components {
       /** @description Mailbox before the `@`. Normalized to lowercase. */
       senderLocalPart?: string;
     };
+    UpdateEmployerMembershipBody: {
+      /**
+       * @description The new company role. `admin` manages the company team and profile; `member` does not.
+       * @enum {string}
+       */
+      role: 'admin' | 'member';
+    };
+    UpdateInboxSettingsBody: {
+      /** @description Turns the Inbox and the board’s public Contact page on or off. Turning it off requires disconnecting forwarding and any custom receiving address first. */
+      contactEnabled: boolean;
+    };
+    UpdateInboxTicketBody: {
+      /**
+       * @description Conversation status. One of `open`, `snoozed` or `closed`.
+       * @enum {string}
+       */
+      status?: 'open' | 'snoozed' | 'closed';
+      /**
+       * Format: date-time
+       * @description When a snoozed conversation reopens. Required with `status: "snoozed"` and only allowed with it. Must be in the future and at most 366 days away. ISO 8601 datetime.
+       */
+      snoozedUntil?: string;
+      /** @description The user ID of an active member to assign the conversation to, or `null` to unassign it. */
+      assigneeUserId?: string | null;
+    };
     UpdateInvitationBody: {
       /**
        * @description The new role for the pending invitation.
@@ -9266,6 +13159,8 @@ export interface components {
           | 'country'
           | 'custom';
         value: string;
+        /** @description Ignored on input. Job reads add it to some entries; send it back or leave it out. */
+        code?: string;
       }[];
       /** @description Where remote candidates must be timezone-compatible. Each entry mirrors the `remotePermits` shape (`world_region`, `continent`, `region`, `subregion`, `country`) plus `timezone` (specific IANA name with optional `plusMinus` ±N hours expansion) and `all` (every timezone: equivalent of `worldwide` for permits). The canonical `{type, value}` set is published at `GET /v1/taxonomies/remote-timezones`. **When omitted on POST**, the server auto-derives this from `remotePermits` (or `[{all,all}]` if neither was provided). **PATCH never auto-re-derives**: once set, only an explicit replacement updates the stored value, even when `remotePermits` changes. Pass `[]` to clear an existing constraint. */
       remoteTimezones?: {
@@ -9357,7 +13252,7 @@ export interface components {
       customFieldValues?: {
         [key: string]: string | string[] | boolean | number | unknown;
       };
-      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. */
+      /** @description Collection-reference selections keyed by the configured job collection field key. Values are arrays of record IDs, including for single-select fields. On PATCH omitted keys are preserved; send null or an empty array to clear a field. Keys for fields whose collection is archived are ignored, and their stored selections are kept. */
       collectionValues?: {
         [key: string]: string[] | unknown;
       };
@@ -9415,6 +13310,56 @@ export interface components {
       ctaText?: string;
       /** @description CTA target for a contact plan. Must be an https, mailto:, or tel: URL. Empty string clears it. */
       ctaDestination?: string;
+      digitalProduct?: components['schemas']['UpdatePlanDigitalProductInput'];
+    };
+    /** @description Digital products only: the product fields to change. On a digital product, `isPublic: true` lists it on the board when it has a ready file or link; without one the request is kept (`digitalProduct.listingPending`) and the product is listed automatically once one is ready. `isPublic: false` or archiving drops a pending request; a product Cavuno took down cannot be listed. The contact and recommendation fields are refused. */
+    UpdatePlanDigitalProductInput: {
+      pricing?: components['schemas']['PlanDigitalProductPricingInput'];
+      /** @description Product page URL word: lowercase letters, numbers and hyphens. Generated from the name on create when omitted. */
+      slug?: string;
+      summary?: string | null;
+      /** @description Formatted description as HTML, up to 50,000 characters. Sanitized on save: headings (`h2`, `h3`), paragraphs, bold, italic, underline, strikethrough, lists, quotes, dividers, links and images uploaded as this board's product images (from the dashboard's product editor) are kept; everything else is removed. When it has text, its plain text replaces the plan's `description`. `null` clears it and keeps `description`; sending only the plan's `description` also clears it. */
+      descriptionHtml?: string | null;
+      details?: components['schemas']['PlanDigitalProductDetailInput'][] | null;
+      /** @description Media ids of this board; the cover first. */
+      images?: string[] | null;
+      thankYouMessage?: string | null;
+      refundPolicy?: string | null;
+      downloadCap?: number;
+      /** @description Turning it on stamps the existing sales in the background. */
+      stampPdfs?: boolean;
+      ratingsEnabled?: boolean;
+      salesLimit?: number | null;
+      /** @description Show the number of sales on the product page. Off by default. */
+      showSalesCount?: boolean;
+      /** @description E-book or e-publication: books, newspapers, magazines, sheet music or maps delivered as files. Sets the product's Stripe tax code to `txcd_10302000` (digital books) instead of the one picked from its files. Some countries charge a lower VAT rate on these; it applies when the board collects tax with Stripe Tax. */
+      isEbook?: boolean;
+      questions?: components['schemas']['PlanDigitalProductQuestion'][] | null;
+    };
+    UpdatePlanFileBody: {
+      displayName?: string;
+      /** @description `null` or an empty string clears it. */
+      description?: string | null;
+      /** @description Links only. */
+      url?: string;
+      /** @description `true` hides a ready file from new buyers (earlier buyers keep it); `false` gives it back. */
+      disabled?: boolean;
+      /** @description Move it to this place in the product, from 0. */
+      position?: number;
+      /** @description Replace a ready (or disabled) file with an upload started by POST /v1/plans/{id}/files/uploads for this product and not completed yet. Complete that upload afterwards; buyers keep the current version until the new one passes its checks. The file keeps its `displayName`; its `fileName` becomes the upload's. */
+      replaceWithUploadId?: string;
+      /** @description With `replaceWithUploadId`: email earlier buyers once the new version is live. */
+      notifyBuyers?: boolean;
+    };
+    UpdatePlanPurchaseBody: {
+      /** @description The buyer's corrected email address. The download link stays the same; resend it with POST /v1/plans/{id}/purchases/{purchaseId}/resend. */
+      email: string;
+    };
+    UpdatePlanReviewBody: {
+      /** @description Your public reply; `null` or an empty string removes it. */
+      reply?: string | null;
+      /** @description Hide it from the product page and the rating, or show it. */
+      hidden?: boolean;
     };
     UpdateRedirectBody: {
       /** @description Source path to match, for example `/old-careers`. */
@@ -9525,6 +13470,41 @@ export interface components {
       /** @description The display name of the tag. */
       name?: string;
     };
+    UpdateTaxonomySettingsBody: {
+      unmatchedTagMode?: {
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        category?: 'create' | 'ask';
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        skill?: 'create' | 'ask';
+        /**
+         * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
+         * @enum {string}
+         */
+        market?: 'create' | 'ask';
+      };
+      /** @description What each list means on this board. Taxonomies you leave out keep their description. */
+      listDescription?: {
+        /** @description One sentence on what your categories mean on this board, at most 300 characters. `null` or an empty string clears it. */
+        category?: string | null;
+        /** @description One sentence on what your skills mean on this board, at most 300 characters. `null` or an empty string clears it. */
+        skill?: string | null;
+        /** @description One sentence on what your markets mean on this board, at most 300 characters. `null` or an empty string clears it. */
+        market?: string | null;
+      };
+      /** @description Whether terms AI added are removed after 30 days with no live jobs. Taxonomies you leave out keep their setting. */
+      removeUnusedTags?: {
+        /** @description `false` keeps categories AI added even when no live job uses them. */
+        category?: boolean;
+        /** @description `false` keeps skills AI added even when no live job uses them. */
+        skill?: boolean;
+      };
+    };
     UpdateWebhookEndpointBody: {
       /** Format: uri */
       url?: string;
@@ -9535,12 +13515,16 @@ export interface components {
         | 'company.created'
         | 'company.updated'
         | 'company.deleted'
+        | 'company.verification.updated'
         | 'candidate.created'
         | 'candidate.updated'
         | 'candidate.deleted'
         | 'candidate.profile.updated'
+        | 'candidate.verification.updated'
         | 'marketing_permission.granted'
         | 'marketing_permission.withdrawn'
+        | 'digital_product.purchased'
+        | 'digital_product.refunded'
       )[];
       /** @enum {string} */
       status?: 'enabled' | 'paused';
@@ -9870,6 +13854,139 @@ export interface components {
       };
     };
     /**
+     * @example {
+     *       "id": "evt_01EXAMPLECANDIDATEVERIFIED",
+     *       "object": "event",
+     *       "type": "candidate.verification.updated",
+     *       "schema_version": "1",
+     *       "occurred_at": "2026-11-02T12:00:00Z",
+     *       "board_id": "acc_01EXAMPLEBOARD",
+     *       "data": {
+     *         "object": {
+     *           "id": "itemVerifications_01EXAMPLE",
+     *           "object": "item_verification",
+     *           "subject_type": "candidate",
+     *           "subject_id": "boardUsers_01EXAMPLE",
+     *           "item_key": "ref:licences:customObjectRecords_01EXAMPLE:first",
+     *           "item_kind": "collection_entry",
+     *           "field_key": "licences",
+     *           "record_id": "customObjectRecords_01EXAMPLE",
+     *           "entry_key": "first",
+     *           "entry_id": null,
+     *           "previous_status": "pending",
+     *           "status": "verified",
+     *           "lapse_reason": null,
+     *           "reason_code": null,
+     *           "source": "dashboard",
+     *           "expires_at": "2027-11-02T00:00:00Z",
+     *           "updated_at": "2026-11-02T12:00:00Z",
+     *           "revision": 2
+     *         },
+     *         "changed_fields": [
+     *           "status",
+     *           "expires_at"
+     *         ]
+     *       }
+     *     }
+     */
+    WebhookCandidateVerificationUpdatedEvent: {
+      /** @description Stable public event id (evt_…). */
+      id: string;
+      /** @enum {string} */
+      object: 'event';
+      /** @enum {string} */
+      type: 'candidate.verification.updated';
+      /** @enum {string} */
+      schema_version: '1';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      occurred_at: string;
+      /** @description Board account id that owns the event. */
+      board_id: string;
+      data: {
+        /** @description One status change on one profile item. Never the item values, the staff note or the proof file. */
+        object: {
+          /** @description The verification id. An item verified again after it was removed gets a new id. */
+          id: string;
+          /** @enum {string} */
+          object: 'item_verification';
+          /** @enum {string} */
+          subject_type: 'candidate' | 'company';
+          /** @description The candidate or company id. */
+          subject_id: string;
+          /** @description Stable key of the item on that profile. */
+          item_key: string;
+          /** @enum {string} */
+          item_kind:
+            | 'collection_entry'
+            | 'collection_selection'
+            | 'experience'
+            | 'education';
+          /** @description Collection field key; null for experience and education. */
+          field_key: string | null;
+          /** @description The selected collection entry; null for experience and education. */
+          record_id: string | null;
+          /** @description Repeatable entry key; set only for `collection_entry` items. */
+          entry_key: string | null;
+          /** @description Experience or education entry id; null for collection items. */
+          entry_id: string | null;
+          /** @enum {string} */
+          previous_status:
+            | 'unverified'
+            | 'pending'
+            | 'needs_info'
+            | 'verified'
+            | 'rejected'
+            | 'unable_to_verify'
+            | 'changed'
+            | 'lapsed'
+            | 'revoked';
+          /** @enum {string} */
+          status:
+            | 'unverified'
+            | 'pending'
+            | 'needs_info'
+            | 'verified'
+            | 'rejected'
+            | 'unable_to_verify'
+            | 'changed'
+            | 'lapsed'
+            | 'revoked';
+          /** @enum {string|null} */
+          lapse_reason: 'expired' | 'recheck_due' | null;
+          /**
+           * @description Reason for a team decision; null for other changes.
+           * @enum {string|null}
+           */
+          reason_code:
+            | 'details_mismatch'
+            | 'not_found_in_register'
+            | 'document_unreadable'
+            | 'document_expired'
+            | 'suspected_fraud'
+            | 'issuer_unreachable'
+            | 'other'
+            | null;
+          /**
+           * @description Where the change came from.
+           * @enum {string}
+           */
+          source:
+            | 'dashboard'
+            | 'api'
+            | 'email_domain'
+            | 'worker'
+            | 'profile_edit'
+            | 'expiry';
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          expires_at: string | null;
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          updated_at: string;
+          revision: number;
+        };
+        changed_fields: ('status' | 'reason_code' | 'expires_at')[];
+      };
+    };
+    /**
      * @example name
      * @enum {string}
      */
@@ -10096,6 +14213,139 @@ export interface components {
         changed_fields: ('slug' | 'name' | 'website' | 'logo_url' | 'url')[];
       };
     };
+    /**
+     * @example {
+     *       "id": "evt_01EXAMPLECOMPANYVERIFIED",
+     *       "object": "event",
+     *       "type": "company.verification.updated",
+     *       "schema_version": "1",
+     *       "occurred_at": "2026-11-02T12:00:00Z",
+     *       "board_id": "acc_01EXAMPLEBOARD",
+     *       "data": {
+     *         "object": {
+     *           "id": "itemVerifications_01EXAMPLECOMPANY",
+     *           "object": "item_verification",
+     *           "subject_type": "company",
+     *           "subject_id": "companies_01EXAMPLE",
+     *           "item_key": "ref:memberships:customObjectRecords_01EXAMPLE",
+     *           "item_kind": "collection_selection",
+     *           "field_key": "memberships",
+     *           "record_id": "customObjectRecords_01EXAMPLE",
+     *           "entry_key": null,
+     *           "entry_id": null,
+     *           "previous_status": "verified",
+     *           "status": "changed",
+     *           "lapse_reason": null,
+     *           "reason_code": null,
+     *           "source": "profile_edit",
+     *           "expires_at": null,
+     *           "updated_at": "2026-11-02T12:00:00Z",
+     *           "revision": 3
+     *         },
+     *         "changed_fields": [
+     *           "status",
+     *           "expires_at"
+     *         ]
+     *       }
+     *     }
+     */
+    WebhookCompanyVerificationUpdatedEvent: {
+      /** @description Stable public event id (evt_…). */
+      id: string;
+      /** @enum {string} */
+      object: 'event';
+      /** @enum {string} */
+      type: 'company.verification.updated';
+      /** @enum {string} */
+      schema_version: '1';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      occurred_at: string;
+      /** @description Board account id that owns the event. */
+      board_id: string;
+      data: {
+        /** @description One status change on one profile item. Never the item values, the staff note or the proof file. */
+        object: {
+          /** @description The verification id. An item verified again after it was removed gets a new id. */
+          id: string;
+          /** @enum {string} */
+          object: 'item_verification';
+          /** @enum {string} */
+          subject_type: 'candidate' | 'company';
+          /** @description The candidate or company id. */
+          subject_id: string;
+          /** @description Stable key of the item on that profile. */
+          item_key: string;
+          /** @enum {string} */
+          item_kind:
+            | 'collection_entry'
+            | 'collection_selection'
+            | 'experience'
+            | 'education';
+          /** @description Collection field key; null for experience and education. */
+          field_key: string | null;
+          /** @description The selected collection entry; null for experience and education. */
+          record_id: string | null;
+          /** @description Repeatable entry key; set only for `collection_entry` items. */
+          entry_key: string | null;
+          /** @description Experience or education entry id; null for collection items. */
+          entry_id: string | null;
+          /** @enum {string} */
+          previous_status:
+            | 'unverified'
+            | 'pending'
+            | 'needs_info'
+            | 'verified'
+            | 'rejected'
+            | 'unable_to_verify'
+            | 'changed'
+            | 'lapsed'
+            | 'revoked';
+          /** @enum {string} */
+          status:
+            | 'unverified'
+            | 'pending'
+            | 'needs_info'
+            | 'verified'
+            | 'rejected'
+            | 'unable_to_verify'
+            | 'changed'
+            | 'lapsed'
+            | 'revoked';
+          /** @enum {string|null} */
+          lapse_reason: 'expired' | 'recheck_due' | null;
+          /**
+           * @description Reason for a team decision; null for other changes.
+           * @enum {string|null}
+           */
+          reason_code:
+            | 'details_mismatch'
+            | 'not_found_in_register'
+            | 'document_unreadable'
+            | 'document_expired'
+            | 'suspected_fraud'
+            | 'issuer_unreachable'
+            | 'other'
+            | null;
+          /**
+           * @description Where the change came from.
+           * @enum {string}
+           */
+          source:
+            | 'dashboard'
+            | 'api'
+            | 'email_domain'
+            | 'worker'
+            | 'profile_edit'
+            | 'expiry';
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          expires_at: string | null;
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          updated_at: string;
+          revision: number;
+        };
+        changed_fields: ('status' | 'reason_code' | 'expires_at')[];
+      };
+    };
     WebhookDelivery: {
       id: string;
       /** @enum {string} */
@@ -10140,6 +14390,195 @@ export interface components {
     };
     WebhookDeliveryDetail: components['schemas']['WebhookDelivery'] & {
       attempts: components['schemas']['WebhookDeliveryAttempt'][];
+    };
+    /**
+     * @example {
+     *       "id": "evt_01EXAMPLEDIGITALPURCHASED",
+     *       "object": "event",
+     *       "type": "digital_product.purchased",
+     *       "schema_version": "1",
+     *       "occurred_at": "2026-10-26T12:00:00Z",
+     *       "board_id": "acc_01EXAMPLEBOARD",
+     *       "data": {
+     *         "object": {
+     *           "id": "digitalPurchases_01EXAMPLE",
+     *           "object": "digital_purchase",
+     *           "product_id": "plans_01EXAMPLEPRODUCT",
+     *           "product_slug": "climate-salary-report",
+     *           "product_name": "Climate salary report",
+     *           "email": "buyer@example.test",
+     *           "amount_cents": 1900,
+     *           "currency": "usd",
+     *           "refunded_amount_cents": 0,
+     *           "status": "paid",
+     *           "purchased_at": "2026-10-26T12:00:00Z",
+     *           "revision": 1
+     *         },
+     *         "changed_fields": []
+     *       }
+     *     }
+     */
+    WebhookDigitalProductPurchasedEvent: {
+      /** @description Stable public event id (evt_…). */
+      id: string;
+      /** @enum {string} */
+      object: 'event';
+      /** @enum {string} */
+      type: 'digital_product.purchased';
+      /** @enum {string} */
+      schema_version: '1';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      occurred_at: string;
+      /** @description Board account id that owns the event. */
+      board_id: string;
+      data: {
+        /** @description V1 digital product purchase snapshot. Explicit allowlist; never the download link or buyer answers. */
+        object: {
+          /** @description The purchase id. */
+          id: string;
+          /** @enum {string} */
+          object: 'digital_purchase';
+          /** @description The product (plan) id. */
+          product_id: string;
+          product_slug: string;
+          product_name: string;
+          /**
+           * Format: email
+           * @description The buyer email.
+           */
+          email: string;
+          /** @description What the buyer paid, in minor units; 0 for a free claim. */
+          amount_cents: number;
+          currency: string;
+          /** @description The refunded total, in minor units; 0 until a refund. It goes down again when a refund fails or is canceled. */
+          refunded_amount_cents: number;
+          /** @enum {string} */
+          status: 'paid' | 'free' | 'access_removed';
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          purchased_at: string;
+          revision: number;
+        };
+        changed_fields: 'refunded_amount_cents'[];
+      };
+    };
+    /**
+     * @example {
+     *       "id": "evt_01EXAMPLEDIGITALREFUNDED",
+     *       "object": "event",
+     *       "type": "digital_product.refunded",
+     *       "schema_version": "1",
+     *       "occurred_at": "2026-10-27T09:00:00Z",
+     *       "board_id": "acc_01EXAMPLEBOARD",
+     *       "data": {
+     *         "object": {
+     *           "id": "digitalPurchases_01EXAMPLE",
+     *           "object": "digital_purchase",
+     *           "product_id": "plans_01EXAMPLEPRODUCT",
+     *           "product_slug": "climate-salary-report",
+     *           "product_name": "Climate salary report",
+     *           "email": "buyer@example.test",
+     *           "amount_cents": 1900,
+     *           "currency": "usd",
+     *           "refunded_amount_cents": 1900,
+     *           "status": "access_removed",
+     *           "purchased_at": "2026-10-26T12:00:00Z",
+     *           "revision": 2
+     *         },
+     *         "changed_fields": [
+     *           "refunded_amount_cents"
+     *         ]
+     *       }
+     *     }
+     */
+    WebhookDigitalProductRefundedEvent: {
+      /** @description Stable public event id (evt_…). */
+      id: string;
+      /** @enum {string} */
+      object: 'event';
+      /** @enum {string} */
+      type: 'digital_product.refunded';
+      /** @enum {string} */
+      schema_version: '1';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      occurred_at: string;
+      /** @description Board account id that owns the event. */
+      board_id: string;
+      data: {
+        /** @description V1 digital product purchase snapshot. Explicit allowlist; never the download link or buyer answers. */
+        object: {
+          /** @description The purchase id. */
+          id: string;
+          /** @enum {string} */
+          object: 'digital_purchase';
+          /** @description The product (plan) id. */
+          product_id: string;
+          product_slug: string;
+          product_name: string;
+          /**
+           * Format: email
+           * @description The buyer email.
+           */
+          email: string;
+          /** @description What the buyer paid, in minor units; 0 for a free claim. */
+          amount_cents: number;
+          currency: string;
+          /** @description The refunded total, in minor units; 0 until a refund. It goes down again when a refund fails or is canceled. */
+          refunded_amount_cents: number;
+          /** @enum {string} */
+          status: 'paid' | 'free' | 'access_removed';
+          /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+          purchased_at: string;
+          revision: number;
+        };
+        changed_fields: 'refunded_amount_cents'[];
+      };
+    };
+    /**
+     * @example refunded_amount_cents
+     * @enum {string}
+     */
+    WebhookDigitalPurchaseChangedField: 'refunded_amount_cents';
+    /**
+     * @description V1 digital product purchase snapshot. Explicit allowlist; never the download link or buyer answers.
+     * @example {
+     *       "id": "digitalPurchases_01EXAMPLE",
+     *       "object": "digital_purchase",
+     *       "product_id": "plans_01EXAMPLEPRODUCT",
+     *       "product_slug": "climate-salary-report",
+     *       "product_name": "Climate salary report",
+     *       "email": "buyer@example.test",
+     *       "amount_cents": 1900,
+     *       "currency": "usd",
+     *       "refunded_amount_cents": 0,
+     *       "status": "paid",
+     *       "purchased_at": "2026-10-26T12:00:00Z",
+     *       "revision": 1
+     *     }
+     */
+    WebhookDigitalPurchaseSnapshot: {
+      /** @description The purchase id. */
+      id: string;
+      /** @enum {string} */
+      object: 'digital_purchase';
+      /** @description The product (plan) id. */
+      product_id: string;
+      product_slug: string;
+      product_name: string;
+      /**
+       * Format: email
+       * @description The buyer email.
+       */
+      email: string;
+      /** @description What the buyer paid, in minor units; 0 for a free claim. */
+      amount_cents: number;
+      currency: string;
+      /** @description The refunded total, in minor units; 0 until a refund. It goes down again when a refund fails or is canceled. */
+      refunded_amount_cents: number;
+      /** @enum {string} */
+      status: 'paid' | 'free' | 'access_removed';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      purchased_at: string;
+      revision: number;
     };
     WebhookEndpoint: {
       id: string;
@@ -10223,6 +14662,116 @@ export interface components {
         /** @description Closed vocabulary of fields that changed; empty for create/delete. */
         changed_fields: string[];
       };
+    };
+    /**
+     * @example status
+     * @enum {string}
+     */
+    WebhookItemVerificationChangedField:
+      | 'status'
+      | 'reason_code'
+      | 'expires_at';
+    /**
+     * @description One status change on one profile item. Never the item values, the staff note or the proof file.
+     * @example {
+     *       "id": "itemVerifications_01EXAMPLE",
+     *       "object": "item_verification",
+     *       "subject_type": "candidate",
+     *       "subject_id": "boardUsers_01EXAMPLE",
+     *       "item_key": "ref:licences:customObjectRecords_01EXAMPLE:first",
+     *       "item_kind": "collection_entry",
+     *       "field_key": "licences",
+     *       "record_id": "customObjectRecords_01EXAMPLE",
+     *       "entry_key": "first",
+     *       "entry_id": null,
+     *       "previous_status": "pending",
+     *       "status": "verified",
+     *       "lapse_reason": null,
+     *       "reason_code": null,
+     *       "source": "dashboard",
+     *       "expires_at": "2027-11-02T00:00:00Z",
+     *       "updated_at": "2026-11-02T12:00:00Z",
+     *       "revision": 2
+     *     }
+     */
+    WebhookItemVerificationSnapshot: {
+      /** @description The verification id. An item verified again after it was removed gets a new id. */
+      id: string;
+      /** @enum {string} */
+      object: 'item_verification';
+      /** @enum {string} */
+      subject_type: 'candidate' | 'company';
+      /** @description The candidate or company id. */
+      subject_id: string;
+      /** @description Stable key of the item on that profile. */
+      item_key: string;
+      /** @enum {string} */
+      item_kind:
+        | 'collection_entry'
+        | 'collection_selection'
+        | 'experience'
+        | 'education';
+      /** @description Collection field key; null for experience and education. */
+      field_key: string | null;
+      /** @description The selected collection entry; null for experience and education. */
+      record_id: string | null;
+      /** @description Repeatable entry key; set only for `collection_entry` items. */
+      entry_key: string | null;
+      /** @description Experience or education entry id; null for collection items. */
+      entry_id: string | null;
+      /** @enum {string} */
+      previous_status:
+        | 'unverified'
+        | 'pending'
+        | 'needs_info'
+        | 'verified'
+        | 'rejected'
+        | 'unable_to_verify'
+        | 'changed'
+        | 'lapsed'
+        | 'revoked';
+      /** @enum {string} */
+      status:
+        | 'unverified'
+        | 'pending'
+        | 'needs_info'
+        | 'verified'
+        | 'rejected'
+        | 'unable_to_verify'
+        | 'changed'
+        | 'lapsed'
+        | 'revoked';
+      /** @enum {string|null} */
+      lapse_reason: 'expired' | 'recheck_due' | null;
+      /**
+       * @description Reason for a team decision; null for other changes.
+       * @enum {string|null}
+       */
+      reason_code:
+        | 'details_mismatch'
+        | 'not_found_in_register'
+        | 'document_unreadable'
+        | 'document_expired'
+        | 'suspected_fraud'
+        | 'issuer_unreachable'
+        | 'other'
+        | null;
+      /**
+       * @description Where the change came from.
+       * @enum {string}
+       */
+      source:
+        | 'dashboard'
+        | 'api'
+        | 'email_domain'
+        | 'worker'
+        | 'profile_edit'
+        | 'expiry';
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      expires_at: string | null;
+      /** @description ISO-8601 UTC timestamp with second precision (…Z). */
+      updated_at: string;
+      revision: number;
     };
     /**
      * @description A single closed Job changed_fields vocabulary member.
@@ -10893,6 +15442,180 @@ export interface operations {
       };
     };
   };
+  compareSearchConsole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @description First day of the requested period (YYYY-MM-DD, America/Los_Angeles). */
+          startDate: string;
+          /** @description Last day of the requested period. When it is later than the latest finalized day, the period is moved back to end on that day and keeps its length. */
+          endDate: string;
+          /**
+           * @description previous_period compares with the equal-length window immediately before; previous_year compares with the same dates one year earlier.
+           * @default previous_period
+           * @enum {string}
+           */
+          compareTo?: 'previous_period' | 'previous_year';
+          /**
+           * @description Row key: search query, page URL, or query and page pair.
+           * @default query
+           * @enum {string}
+           */
+          groupBy?: 'query' | 'page' | 'query_page';
+          /** @description Only with groupBy query_page: pick each query’s best-positioned page (ties go to more impressions) in each period separately and join the periods on the query, so isNew and isLost mean the query itself appeared or disappeared and page is the current period’s best page. */
+          bestPageOnly?: boolean;
+          /**
+           * @default web
+           * @enum {string}
+           */
+          type?: 'web' | 'image' | 'video' | 'news' | 'discover' | 'googleNews';
+          /** @description Google Search Analytics dimension filters, combined with AND and applied by Google to both periods. */
+          dimensionFilters?: {
+            /** @enum {string} */
+            dimension:
+              | 'country'
+              | 'device'
+              | 'page'
+              | 'query'
+              | 'searchAppearance';
+            /** @enum {string} */
+            operator:
+              | 'contains'
+              | 'equals'
+              | 'notContains'
+              | 'notEquals'
+              | 'includingRegex'
+              | 'excludingRegex';
+            expression: string;
+          }[];
+          /** @description Filters over the joined rows, combined with AND and applied before sorting and paging. */
+          filters?: (
+            | {
+                /** @enum {string} */
+                field: 'query' | 'page';
+                /** @enum {string} */
+                operator: 'contains' | 'notContains' | 'equals' | 'notEquals';
+                value: string;
+              }
+            | {
+                /** @enum {string} */
+                field:
+                  | 'clicks'
+                  | 'impressions'
+                  | 'ctr'
+                  | 'position'
+                  | 'previousClicks'
+                  | 'previousImpressions'
+                  | 'previousCtr'
+                  | 'previousPosition'
+                  | 'clicksChange'
+                  | 'impressionsChange'
+                  | 'ctrChange'
+                  | 'positionChange'
+                  | 'clicksChangePercent'
+                  | 'impressionsChangePercent';
+                /** @enum {string} */
+                operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte';
+                value: number;
+              }
+            | {
+                /** @enum {string} */
+                field: 'isNew' | 'isLost' | 'isUp' | 'isDown';
+                /** @enum {string} */
+                operator: 'eq';
+                value: boolean;
+              }
+          )[];
+          /** @description Sort keys, applied in order. Defaults to clicks descending. Ties are broken by the row key; null values sort last. */
+          orderBy?: {
+            /** @enum {string} */
+            field:
+              | 'clicks'
+              | 'impressions'
+              | 'ctr'
+              | 'position'
+              | 'previousClicks'
+              | 'previousImpressions'
+              | 'previousCtr'
+              | 'previousPosition'
+              | 'clicksChange'
+              | 'impressionsChange'
+              | 'ctrChange'
+              | 'positionChange'
+              | 'clicksChangePercent'
+              | 'impressionsChangePercent';
+            /** @enum {string} */
+            direction: 'asc' | 'desc';
+          }[];
+          /**
+           * @description Include rows that appear only in the comparison period (isLost).
+           * @default false
+           */
+          includeLost?: boolean;
+          /** @default 25 */
+          limit?: number;
+          /**
+           * @description Rows to skip. Up to 50,000: two periods of up to 25,000 Google rows each.
+           * @default 0
+           */
+          offset?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Period-over-period Search Console rows and summary. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchConsoleComparisonResponse'];
+        };
+      };
+      /** @description Search Console is not connected or access was lost. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Google Search Console quota was reached. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Google rejected the validated request. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Google Search Console is unavailable. */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   inspectSearchConsoleUrl: {
     parameters: {
       query?: never;
@@ -11109,6 +15832,204 @@ export interface operations {
       };
     };
   };
+  getApplication: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The application id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OperatorApplicationDetail'];
+        };
+      };
+      /** @description Application not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteApplication: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The application id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The application was deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Application not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listAuditLogs: {
+    parameters: {
+      query?: {
+        /** @description Only return entries made by this kind of actor. */
+        actorType?:
+          | 'user_session'
+          | 'api_key'
+          | 'oauth_token'
+          | 'board_user'
+          | 'system'
+          | 'companion';
+        /** @description Only return entries about this kind of record, the same choices as the Audit log page in Settings. */
+        resourceType?:
+          | 'job'
+          | 'company'
+          | 'blog_post'
+          | 'blog_tag'
+          | 'blog_author'
+          | 'feed'
+          | 'employer'
+          | 'candidate'
+          | 'subscriber'
+          | 'invitation'
+          | 'member'
+          | 'settings'
+          | 'page'
+          | 'email'
+          | 'custom_domain'
+          | 'email_domain'
+          | 'redirect'
+          | 'plan'
+          | 'coupon'
+          | 'webhook'
+          | 'api_key'
+          | 'integration'
+          | 'indexing'
+          | 'import_batch'
+          | 'invoice'
+          | 'backfill'
+          | 'inbox_ticket';
+        /** @description Only return entries at or after this time. ISO 8601 datetime. On the Grow plan entries older than 90 days are never returned. */
+        from?: string;
+        /** @description Only return entries at or before this time. ISO 8601 datetime. */
+        to?: string;
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 50, and the default is 25.
+         * @example 25
+         */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/audit-logs */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['AuditLogEntry'][];
+          };
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the `audit.read` permission (`audit_log_forbidden`), or the board’s plan does not include the audit log (`audit_log_plan_required`). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getAuditLog: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The audit log entry ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuditLogEntryDetail'];
+        };
+      };
+      /** @description Missing the `audit.read` permission (`audit_log_forbidden`), or the board’s plan does not include the audit log (`audit_log_plan_required`). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Audit log entry not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   unblockAllBackfillBlockedJobs: {
     parameters: {
       query?: never;
@@ -11141,8 +16062,13 @@ export interface operations {
   listBackfillCompanies: {
     parameters: {
       query: {
-        /** @description Dashboard tab state: backfilling | available | needs_match | not_backfilling. */
-        state: 'backfilling' | 'available' | 'needs_match' | 'not_backfilling';
+        /** @description Dashboard tab state: backfilling | available | needs_match | not_backfilling | blocked. `blocked` lists companies blocked from Backfill, most recently blocked first. */
+        state:
+          | 'backfilling'
+          | 'available'
+          | 'needs_match'
+          | 'not_backfilling'
+          | 'blocked';
         /** @description Case-insensitive name substring filter. */
         search?: string;
         limit?: number;
@@ -11370,6 +16296,48 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listBackfillExclusions: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+        /** @description Only exclusions of this type. Results are then ordered by pattern instead of newest first. */
+        type?: 'job_url' | 'domain' | 'company' | 'title' | 'url';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of Backfill exclusions. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/backfill/exclusions */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['BackfillExclusion'][];
+          };
+        };
+      };
+      /** @description The pagination cursor or query is invalid. */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -11637,6 +16605,104 @@ export interface operations {
       };
     };
   };
+  getBackfillStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board’s Backfill status. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BackfillStatus'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listBackfillSyncRuns: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of Backfill sync runs. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/backfill/sync-runs */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['BackfillSyncRun'][];
+          };
+        };
+      };
+      /** @description The pagination cursor or query is invalid. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getBillingBuilderCredits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board Builder credit history. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BillingBuilderCredits'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   createCheckoutSession: {
     parameters: {
       query?: never;
@@ -11699,6 +16765,33 @@ export interface operations {
       };
     };
   };
+  disconnectBillingConnect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Payment connection removed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Sandbox boards cannot disconnect. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   createBillingConnectOnboardingLink: {
     parameters: {
       query?: never;
@@ -11728,6 +16821,57 @@ export interface operations {
       };
     };
   };
+  createBillingPortalSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CreateBillingPortalSessionBody'];
+      };
+    };
+    responses: {
+      /** @description Billing portal session created. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BillingPortalSession'];
+        };
+      };
+      /** @description The request was malformed or `returnUrl` is not allowed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The Board has no billing account yet. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The billing portal could not be opened. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getBillingSubscription: {
     parameters: {
       query?: never;
@@ -11744,6 +16888,35 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['BillingSubscription'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getBillingTax: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board tax collection settings. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BillingTax'];
         };
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -12955,6 +18128,58 @@ export interface operations {
       };
     };
   };
+  listCandidateItemVerificationQueue: {
+    parameters: {
+      query?: {
+        /** @description The status to list (default `pending`). Newest change first. */
+        status?:
+          | 'pending'
+          | 'needs_info'
+          | 'verified'
+          | 'rejected'
+          | 'unable_to_verify'
+          | 'changed'
+          | 'lapsed'
+          | 'revoked';
+        /** @description Pagination cursor. */
+        cursor?: string;
+        /** @description Page size (1 to 100, default 50). */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/candidates/verifications */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['ItemVerificationQueueEntry'][];
+          };
+        };
+      };
+      /** @description Invalid query or cursor (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getCandidate: {
     parameters: {
       query?: never;
@@ -13353,7 +18578,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Candidate reactivated. `deactivatedAt` is `null`. Sign-in, session access, and talent-surface visibility are restored. */
+      /** @description Operator deactivation lifted. `deactivatedAt` is `null` and sign-in, session access, and talent-surface visibility are restored, unless the membership sync still has the candidate inactive. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -13405,6 +18630,172 @@ export interface operations {
       };
     };
   };
+  listCandidateItemVerifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/candidates/{id}/verifications */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['TeamItemVerification'][];
+          };
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCandidateItemVerification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+        /** @description The item, URL-encoded: `experience:{id}`, `education:{id}`, `ref:{fieldKey}:{recordId}` or `ref:{fieldKey}:{recordId}:{entryKey}`. */
+        itemKey: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ItemVerificationItem'];
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Verification is not switched on for the item (`item_verification_disabled`). */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCandidateItemVerificationDecision: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+        /** @description The item, URL-encoded: `experience:{id}`, `education:{id}`, `ref:{fieldKey}:{recordId}` or `ref:{fieldKey}:{recordId}:{entryKey}`. */
+        itemKey: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DecideItemVerificationBody'];
+      };
+    };
+    responses: {
+      /** @description The item after the decision. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TeamItemVerification'];
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The item changed since `expectedHash` was read (`item_verification_changed`): read it again and review the current details. Or the decision does not apply to its status (`item_verification_conflict`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Verification is not switched on for the item (`item_verification_disabled`). */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listCompanies: {
     parameters: {
       query?: {
@@ -13415,6 +18806,8 @@ export interface operations {
          * @example 20
          */
         limit?: number;
+        /** @description Only return the subsidiaries of this company: pass the parent company's `id`. A company group is one level deep, so the parent's own `parentCompanyId` is always `null`. */
+        parentCompanyId?: string;
       };
       header?: never;
       path?: never;
@@ -13481,8 +18874,17 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description Another company already uses the same website domain or name. */
+      /** @description Another company already uses the same website domain or name. A subsidiary may use the website domain of its own parent company. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `company_group_depth`: the parent is itself a subsidiary, the company has subsidiaries, or the company was given as its own parent. `company_group_account`: `parentCompanyId` is not a company in this account. */
+      422: {
         headers: {
           [name: string]: unknown;
         };
@@ -13663,6 +19065,58 @@ export interface operations {
       };
     };
   };
+  listCompanyItemVerificationQueue: {
+    parameters: {
+      query?: {
+        /** @description The status to list (default `pending`). Newest change first. */
+        status?:
+          | 'pending'
+          | 'needs_info'
+          | 'verified'
+          | 'rejected'
+          | 'unable_to_verify'
+          | 'changed'
+          | 'lapsed'
+          | 'revoked';
+        /** @description Pagination cursor. */
+        cursor?: string;
+        /** @description Page size (1 to 100, default 50). */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/companies/verifications */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['ItemVerificationQueueEntry'][];
+          };
+        };
+      };
+      /** @description Invalid query or cursor (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getCompany: {
     parameters: {
       query?: never;
@@ -13780,8 +19234,17 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description Another company already uses the same website domain or name. */
+      /** @description Another company already uses the same website domain or name. A subsidiary may use the website domain of its own parent company. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `company_group_depth`: the parent is itself a subsidiary, the company has subsidiaries, or the company was given as its own parent. `company_group_account`: `parentCompanyId` is not a company in this account. */
+      422: {
         headers: {
           [name: string]: unknown;
         };
@@ -14434,6 +19897,321 @@ export interface operations {
       };
     };
   };
+  listCompanyRoutingRules: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The routing rules, in order. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CompanyRoutingRule'][];
+          };
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCompanyRoutingRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CreateCompanyRoutingRuleBody'];
+      };
+    };
+    responses: {
+      /** @description The created routing rule. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyRoutingRuleSaveResult'];
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `routing_rule_exists`: the target already has a routing rule. `companies_duplicate_domain`: making the target a subsidiary conflicts with another company website domain. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `routing_rule_empty`: no condition with terms and no country. `routing_rule_invalid`: over a limit. `routing_rule_location`: an unknown country or region code, or a region outside the listed countries. `routing_rule_target`: the target is this company, a subsidiary of another company, has subsidiaries, or is blocked. `routing_rule_limit`: the company already has 50 rules. `company_group_depth`: this company is itself a subsidiary. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCompanyRoutingRuleOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateCompanyRoutingRuleOrderBody'];
+      };
+    };
+    responses: {
+      /** @description The routing rules, in the new order. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CompanyRoutingRule'][];
+          };
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `routing_rule_order`: the ids are not exactly the company's rules, once each. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  previewCompanyRoutingRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description The company's opaque object `id`: the `id` field returned by the company endpoints (e.g. `p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w`). This is NOT the `slug` or display name; passing a slug like `antler` returns 404. To look up a company by name or slug, use `GET /v1/companies`, `POST /v1/companies/search`, or `POST /v1/companies/find-or-create` and read the returned `id`.
+         * @example p17xq4c2b9r5gz3e8j0r6t4k7m2n9d5w
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['PreviewCompanyRoutingRuleBody'];
+      };
+    };
+    responses: {
+      /** @description The jobs the draft rule matches. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyRoutingRulePreview'];
+        };
+      };
+      /** @description Company or excluded routing rule not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `routing_rule_invalid`: over a limit. `routing_rule_location`: an unknown country or region code, or a region outside the listed countries. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCompanyRoutingRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The parent company id. Routing rules belong to a parent company and route its feed jobs to its subsidiaries. */
+        id: string;
+        /** @description The routing rule id returned by the list or create endpoints. A rule under another company returns 404. */
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The routing rule. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyRoutingRule'];
+        };
+      };
+      /** @description Company or routing rule not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteCompanyRoutingRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The parent company id. Routing rules belong to a parent company and route its feed jobs to its subsidiaries. */
+        id: string;
+        /** @description The routing rule id returned by the list or create endpoints. A rule under another company returns 404. */
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The rule was deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Company or routing rule not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCompanyRoutingRule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The parent company id. Routing rules belong to a parent company and route its feed jobs to its subsidiaries. */
+        id: string;
+        /** @description The routing rule id returned by the list or create endpoints. A rule under another company returns 404. */
+        ruleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateCompanyRoutingRuleBody'];
+      };
+    };
+    responses: {
+      /** @description The updated routing rule. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyRoutingRuleSaveResult'];
+        };
+      };
+      /** @description Company or routing rule not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `routing_rule_empty`: no condition with terms and no country. `routing_rule_invalid`: over a limit. `routing_rule_location`: an unknown country or region code, or a region outside the listed countries. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   createCompanyUnblock: {
     parameters: {
       query?: never;
@@ -14460,6 +20238,172 @@ export interface operations {
       };
       /** @description Company not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listCompanyItemVerifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/companies/{id}/verifications */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['TeamItemVerification'][];
+          };
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCompanyItemVerification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+        /** @description The item, URL-encoded: `experience:{id}`, `education:{id}`, `ref:{fieldKey}:{recordId}` or `ref:{fieldKey}:{recordId}:{entryKey}`. */
+        itemKey: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ItemVerificationItem'];
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Verification is not switched on for the item (`item_verification_disabled`). */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCompanyItemVerificationDecision: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The candidate or company id. */
+        id: string;
+        /** @description The item, URL-encoded: `experience:{id}`, `education:{id}`, `ref:{fieldKey}:{recordId}` or `ref:{fieldKey}:{recordId}:{entryKey}`. */
+        itemKey: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DecideItemVerificationBody'];
+      };
+    };
+    responses: {
+      /** @description The item after the decision. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TeamItemVerification'];
+        };
+      };
+      /** @description Invalid request (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The profile is not on this board, or the item is not on the profile (`item_verification_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The item changed since `expectedHash` was read (`item_verification_changed`): read it again and review the current details. Or the decision does not apply to its status (`item_verification_conflict`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Verification is not switched on for the item (`item_verification_disabled`). */
+      422: {
         headers: {
           [name: string]: unknown;
         };
@@ -14669,6 +20613,49 @@ export interface operations {
       };
     };
   };
+  listPromotionCodes: {
+    parameters: {
+      query?: {
+        /** @description Opaque cursor (a promotion code id) to fetch the next page. */
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        /** @description The coupon id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Promotion codes of the coupon. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/coupons/{id}/promotion-codes */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['PromotionCode'][];
+          };
+        };
+      };
+      /** @description No coupon with this id on the Board. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   createCouponPromotionCode: {
     parameters: {
       query?: never;
@@ -14736,6 +20723,35 @@ export interface operations {
       };
     };
   };
+  deleteCustomObjectRecord: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        recordId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog record deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   updateCustomObjectRecord: {
     parameters: {
       query?: never;
@@ -14778,7 +20794,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -14869,7 +20885,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -14911,6 +20927,44 @@ export interface operations {
       };
       /** @description Catalog resource not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteCustomObjectType: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        typeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog type deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Catalog resource not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -14962,7 +21016,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -15058,7 +21112,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -15120,7 +21174,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -15182,7 +21236,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description A key, external ID, or catalog capacity conflicts. */
+      /** @description A key, external ID, or catalog capacity conflicts, or the type is in use by a field or still active. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -15202,6 +21256,35 @@ export interface operations {
       };
       /** @description A field type is immutable or a removed field is still in use. */
       422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getDashboardLinks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The Board’s dashboard links. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DashboardLinks'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
@@ -15290,6 +21373,38 @@ export interface operations {
       };
       /** @description The board already has the maximum number of development origins (`development_origins_limit_reached`). */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getDevelopmentOrigin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The development origin ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DevelopmentOrigin'];
+        };
+      };
+      /** @description Development origin not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -15788,6 +21903,59 @@ export interface operations {
       };
     };
   };
+  probeDomain: {
+    parameters: {
+      query?: {
+        /** @description Path and optional query string to request on the domain, starting with `/`, for example `/jobs?page=2`. Defaults to `/`. A full URL is refused. */
+        path?: string;
+      };
+      header?: never;
+      path: {
+        /** @description The custom domain ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DomainProbe'];
+        };
+      };
+      /** @description The path is not a relative path. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Domain not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Too many probes for this Board; retry later. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   verifyDomain: {
     parameters: {
       query?: never;
@@ -16092,6 +22260,209 @@ export interface operations {
       };
       /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
       502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listEmailTemplates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/email-templates */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['EmailTemplateSummary'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmailTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailTemplate'];
+        };
+      };
+      /** @description No email template has this type (`email_templates_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  publishEmailTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PublishEmailTemplateBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailTemplate'];
+        };
+      };
+      /** @description The subject, preview text or body was rejected (`email_templates_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, or puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`). `error.details` names the `field`, the `reason` and the `token`. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No email template has this type (`email_templates_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resetEmailTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No email template has this type (`email_templates_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  testEmailTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailTemplateTest'];
+        };
+      };
+      /** @description The member making the request is no longer an active member of the board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No email template has this type (`email_templates_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The member has no email address (`email_templates_no_test_recipient`), or the board is not set up yet (`email_templates_board_not_configured`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has sent 20 test emails in the last hour (`email_templates_test_rate_limited`). The `Retry-After` header gives the seconds to wait. */
+      429: {
         headers: {
           [name: string]: unknown;
         };
@@ -16442,6 +22813,253 @@ export interface operations {
       };
     };
   };
+  listEmployerMembershipInvites: {
+    parameters: {
+      query?: {
+        /** @description Pagination cursor. */
+        cursor?: string;
+        /** @description Page size (1–100, default 50). */
+        limit?: number;
+        /** @description Filter invites by status. */
+        status?: 'pending' | 'accepted' | 'revoked';
+        /** @description Filter to a single company id. */
+        companyId?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/employers/memberships/invites */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['EmployerMembershipInvite'][];
+          };
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createEmployerMembershipInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CreateEmployerMembershipInviteBody'];
+      };
+    };
+    responses: {
+      /** @description Invite created and emailed. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembershipInvite'];
+        };
+      };
+      /** @description The email is invalid, already belongs to an approved member of the company, or already has a pending invite. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Employer accounts are disabled on this board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Company not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The company has too many pending invites. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Too many invites sent in the last hour. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmployerMembershipInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The invite id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembershipInvite'];
+        };
+      };
+      /** @description Invite not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  revokeEmployerMembershipInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The invite id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Invite revoked. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembershipInvite'];
+        };
+      };
+      /** @description Invite not found or no longer pending. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resendEmployerMembershipInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The invite id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description New invite created and emailed. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembershipInvite'];
+        };
+      };
+      /** @description The address now belongs to an approved member of the company. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Employer accounts are disabled on this board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Invite not found or no longer pending. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Too many invites sent in the last hour. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getEmployersMembership: {
     parameters: {
       query?: never;
@@ -16465,6 +23083,119 @@ export interface operations {
       };
       /** @description Membership not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  removeEmployerMembership: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The membership id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembership'];
+        };
+      };
+      /** @description Employer accounts are disabled on this board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Membership not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The membership is not approved. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateEmployersMembership: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The membership id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateEmployerMembershipBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembership'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Employer accounts are disabled on this board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Membership not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The membership is not approved, or the change would leave the company without an admin. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -16953,6 +23684,675 @@ export interface operations {
       };
     };
   };
+  getInboxSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxSettings'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateInboxSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateInboxSettingsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxSettings'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox cannot be turned off while forwarding or a custom receiving address is connected. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listInboxTickets: {
+    parameters: {
+      query?: {
+        /** @description Only return conversations with this status. Defaults to `open`. */
+        status?: 'open' | 'snoozed' | 'closed';
+        /** @description `all` returns every conversation, `mine` only conversations assigned to you (the member behind this API key, OAuth grant or session) and `unassigned` only conversations nobody owns. Defaults to `all`. */
+        queue?: 'all' | 'mine' | 'unassigned';
+        /** @description Full-text search over the subject, requester name and email, and message text. Results are ordered by relevance instead of recency. */
+        search?: string;
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 100.
+         * @example 25
+         */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/inbox/tickets */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['InboxTicket'][];
+          };
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getInboxTicket: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxTicketDetail'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteInboxTicket: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The conversation was deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateInboxTicket: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateInboxTicketBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxTicket'];
+        };
+      };
+      /** @description The request was malformed, the snooze time is invalid, or the assignee is not an active member. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listInboxTicketMessages: {
+    parameters: {
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 100.
+         * @example 25
+         */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/inbox/tickets/{id}/messages */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['InboxMessage'][];
+          };
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  cancelInboxTicketReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID. */
+        id: string;
+        /** @description The ID of a reply on this conversation. */
+        messageId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxMessage'];
+        };
+      };
+      /** @description Missing the required permission, or you did not send this reply. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation or reply not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The undo window has ended, or Inbox is turned off. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  retryInboxTicketReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID. */
+        id: string;
+        /** @description The ID of a reply on this conversation. */
+        messageId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxMessage'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation or reply not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The message is not a failed reply, or Inbox is turned off. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createInboxTicketNote: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateInboxTicketNoteBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxMessage'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  markInboxTicketRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['MarkInboxTicketReadBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxTicket'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replyToInboxTicket: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The conversation ID returned by the list endpoint. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplyToInboxTicketBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxMessage'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Conversation not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off, or the board’s receiving address is still being prepared. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getIntegrationsIndexing: {
     parameters: {
       query?: never;
@@ -16973,6 +24373,50 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listIndexingSubmissions: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+        /** @description Only return submissions in this state. */
+        state?: 'pending' | 'submitted' | 'error' | 'failed' | 'skipped';
+        /** @description Only return submissions for this page path, for example `/companies/acme/jobs/engineer`. A full URL also works and is reduced to its path. Combined with `state`, pages can hold fewer rows than `limit` while `hasMore` is true. */
+        url?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/integrations/indexing/submissions */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['IndexingSubmission'][];
+          };
+        };
+      };
+      /** @description The pagination cursor or query is invalid. */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -17330,6 +24774,38 @@ export interface operations {
       };
       /** @description The email already belongs to a member. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getInvitation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The invitation ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Invitation'];
+        };
+      };
+      /** @description Invitation not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -18097,6 +25573,35 @@ export interface operations {
       };
     };
   };
+  getJobStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Published job statistics. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobStats'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getJob: {
     parameters: {
       query?: never;
@@ -18200,6 +25705,56 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Job not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listJobApplications: {
+    parameters: {
+      query?: {
+        /** @description Pagination cursor. */
+        cursor?: string;
+        /** @description Page size (1–100, default 50). */
+        limit?: number;
+        /** @description Only applications in this stage: a system stage value (for example `review` or `hired`) or a custom stage id. `applied` and `review` are the same column, so either returns rows whose `stage` is `applied` or `review`. */
+        stage?: string;
+      };
+      header?: never;
+      path: {
+        /**
+         * @description The job's opaque object `id`: the `id` field returned by the job endpoints (e.g. `j8k2q7d4b9r3m6x0p5t1v7w2y9z4c8n3`). This is NOT the `slug` or title; passing a slug like `senior-backend-engineer` returns 404. To look up a job by title or slug, use `GET /v1/jobs` or `POST /v1/jobs/search` and read the returned `id`.
+         * @example j8k2q7d4b9r3m6x0p5t1v7w2y9z4c8n3
+         */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/jobs/{id}/applications */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['OperatorApplication'][];
+          };
         };
       };
       /** @description Job not found. */
@@ -19545,6 +27100,65 @@ export interface operations {
       };
     };
   };
+  reorderPlans: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderPlansBody'];
+      };
+    };
+    responses: {
+      /** @description The reordered non-archived plans of that purpose. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/plans */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['AdminPlan'][];
+          };
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A plan in `orders` was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The set is incomplete, or contains a duplicate plan ID or `displayOrder`. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getPlan: {
     parameters: {
       query?: never;
@@ -19706,6 +27320,294 @@ export interface operations {
       };
     };
   };
+  listPlanFiles: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/plans/{id}/files */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['PlanFile'][];
+          };
+        };
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createPlanFileLink: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePlanFileLinkBody'];
+      };
+    };
+    responses: {
+      /** @description Link added. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanFile'];
+        };
+      };
+      /** @description Invalid name, URL or description. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The product already has 50 files and links. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createPlanFileUpload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePlanFileUploadBody'];
+      };
+    };
+    responses: {
+      /** @description Upload started. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanFileUpload'];
+        };
+      };
+      /** @description Invalid name, or a size over 500 MB. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The product already has 50 files and links. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  completePlanFileUpload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+        /** @description The upload id returned by POST /v1/plans/{id}/files/uploads. */
+        uploadId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The file the upload fills. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanFile'];
+        };
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Parts or bytes have not all arrived, they do not match the declared size, or the upload is already finished or stopped. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deletePlanFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+        /** @description The file id (the `id` returned by GET /v1/plans/{id}/files), not its name. */
+        fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description It is a listed product's last ready file or link. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updatePlanFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+        /** @description The file id (the `id` returned by GET /v1/plans/{id}/files), not its name. */
+        fileId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePlanFileBody'];
+      };
+    };
+    responses: {
+      /** @description The updated file. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanFile'];
+        };
+      };
+      /** @description Invalid field values. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Product, file or upload not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The file's state refuses the change, it is a listed product's last ready file, or another upload is in progress. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   updatePlanPrice: {
     parameters: {
       query?: never;
@@ -19751,6 +27653,398 @@ export interface operations {
       };
       /** @description Price publishing failed. */
       502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listPlanPurchases: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/plans/{id}/purchases */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['PlanPurchase'][];
+          };
+        };
+      };
+      /** @description Digital product not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updatePlanPurchase: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product. */
+        id: string;
+        /** @description The purchase id from GET /v1/plans/{id}/purchases. */
+        purchaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePlanPurchaseBody'];
+      };
+    };
+    responses: {
+      /** @description The corrected sale. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanPurchase'];
+        };
+      };
+      /** @description Not an email address (`digital_product_email_invalid`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not a sale of this digital product on this board (`digital_product_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resetPlanPurchaseDownloads: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product. */
+        id: string;
+        /** @description The purchase id from GET /v1/plans/{id}/purchases. */
+        purchaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['ResetPlanPurchaseDownloadsBody'];
+      };
+    };
+    responses: {
+      /** @description The sale with its downloads reset. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanPurchase'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not a sale of this digital product on this board (`digital_product_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  removePlanPurchaseAccess: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product. */
+        id: string;
+        /** @description The purchase id from GET /v1/plans/{id}/purchases. */
+        purchaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The sale with its access ended. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanPurchase'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not a sale of this digital product on this board (`digital_product_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The sale was paid (`digital_product_purchase_paid`): change its access with POST /v1/transactions/{transactionId}/remove-access or /restore-access. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resendPlanPurchaseDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product. */
+        id: string;
+        /** @description The purchase id from GET /v1/plans/{id}/purchases. */
+        purchaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The email is queued. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanPurchase'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not a sale of this digital product on this board (`digital_product_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The sale is unpaid, or its access was removed (`digital_product_purchase_inactive`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  restorePlanPurchaseAccess: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product. */
+        id: string;
+        /** @description The purchase id from GET /v1/plans/{id}/purchases. */
+        purchaseId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The sale with its access restored. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanPurchase'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not a sale of this digital product on this board (`digital_product_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The sale was paid (`digital_product_purchase_paid`): change its access with POST /v1/transactions/{transactionId}/remove-access or /restore-access. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listPlanReviews: {
+    parameters: {
+      query?: {
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/plans/{id}/reviews */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['PlanReview'][];
+          };
+        };
+      };
+      /** @description Digital product not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updatePlanReview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The plan id of the digital product (the `id` returned by create or list endpoints). */
+        id: string;
+        /** @description The review id returned by GET /v1/plans/{id}/reviews. */
+        reviewId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePlanReviewBody'];
+      };
+    };
+    responses: {
+      /** @description The updated review. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanReview'];
+        };
+      };
+      /** @description The reply is too long. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Digital product or review not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -19886,6 +28180,38 @@ export interface operations {
       };
       /** @description The request body exceeded 5 MB. */
       413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getRedirect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The redirect ID returned by create or list endpoints. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Redirect'];
+        };
+      };
+      /** @description Redirect not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -20314,7 +28640,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description The account's plan tier does not permit this change. Common cases include disabling password protection on a plan that requires it, and removing Cavuno branding on a plan that does not allow it. */
+      /** @description The account's plan tier does not permit this change (common cases include disabling password protection on a plan that requires it, and removing Cavuno branding on a plan that does not allow it), or the acting member may not change the board language (`settings_language_change_refused`). */
       403: {
         headers: {
           [name: string]: unknown;
@@ -20323,7 +28649,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description The supplied slug is already in use, or password protection cannot be enabled until a password is set via `POST /v1/settings/password-protection`. */
+      /** @description The supplied slug is already in use; password protection cannot be enabled until a password is set via `POST /v1/settings/password-protection`; the talent access model is locked by active plans with candidate database credits; the theme, custom links or language are managed by the AI website builder for this board; or a language change was refused (`settings_language_change_refused`, with the reason in `message`). */
       409: {
         headers: {
           [name: string]: unknown;
@@ -20382,6 +28708,68 @@ export interface operations {
         content?: never;
       };
       /** @description The supplied AdSense client ID is not in the required `ca-pub-XXXXXXXXXXXXXXXX` format. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCheckoutFields: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CheckoutFields'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  replaceCheckoutFields: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['ReplaceCheckoutFieldsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CheckoutFields'];
+        };
+      };
+      /** @description The configuration breaks a Stripe limit (for example more than 3 Checkout fields, duplicate keys, or a dropdown without options). */
       400: {
         headers: {
           [name: string]: unknown;
@@ -20552,6 +28940,48 @@ export interface operations {
       };
     };
   };
+  startJobFormCustomFieldAiFill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['JobFormCustomFieldAiFillBody'];
+      };
+    };
+    responses: {
+      /** @description The run started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobFormCustomFieldAiFillRun'];
+        };
+      };
+      /** @description A field key is unknown or does not have `aiFill` on. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A run is already going for this board (`settings_ai_fill_running`), or AI fill is unavailable right now (`settings_ai_fill_unavailable`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   enablePasswordProtection: {
     parameters: {
       query?: never;
@@ -20636,7 +29066,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ProfileCustomFieldDefinition'][];
+          'application/json': components['schemas']['OperatorProfileCustomFieldDefinition'][];
         };
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
@@ -20671,11 +29101,65 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ProfileCustomFieldDefinition'][];
+          'application/json': components['schemas']['OperatorProfileCustomFieldDefinition'][];
+        };
+      };
+      /** @description Content validation failed, AI fill settings were sent on a candidate field, or AI fill was turned on for a field type it cannot answer. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
         };
       };
       /** @description An existing field type was changed. */
       422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  startCompanyProfileFieldAiFill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Only company fields have AI fill. */
+        entity: 'company';
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileFieldAiFillBody'];
+      };
+    };
+    responses: {
+      /** @description The run started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProfileFieldAiFillRun'];
+        };
+      };
+      /** @description `entity` is not `company`, or a field key is unknown or does not have `aiFill` on. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A company run is already going for this board (`settings_ai_fill_running`), or AI fill is unavailable right now (`settings_ai_fill_unavailable`). */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -21352,6 +29836,65 @@ export interface operations {
       };
     };
   };
+  resendSubscriberConfirmation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The subscriber ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The confirmation email was sent. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SubscriberDetail'];
+        };
+      };
+      /** @description Subscriber not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The subscriber has already confirmed (`subscribers_already_confirmed`) or is unsubscribed (`subscribers_already_unsubscribed`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A confirmation email was sent to this subscriber in the last two minutes (`subscribers_confirmation_throttled`). Retry after the `Retry-After` header. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email could not be sent (`subscribers_confirmation_send_failed`). Retry after two minutes. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   resubscribeSubscriber: {
     parameters: {
       query?: never;
@@ -21503,6 +30046,47 @@ export interface operations {
         };
       };
       /** @description Slug taken. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  undoTaxonomiesCategoryMerge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The merge id returned by the merge endpoint. */
+        mergeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMerge'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The merge can no longer be undone. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -21702,6 +30286,38 @@ export interface operations {
       };
     };
   };
+  getTaxonomiesCategoryAlias: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        alias: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Category'];
+        };
+      };
+      /** @description Category or alias not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   deleteTaxonomiesCategoryAlias: {
     parameters: {
       query?: never;
@@ -21720,6 +30336,104 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  mergeTaxonomiesCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The category's opaque object id (not the slug). Use list/create responses to obtain it. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MergeTaxonomyBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMerge'];
+        };
+      };
+      /** @description The two terms cannot be merged. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The merge conflicted with another change. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  previewTaxonomiesCategoryMerge: {
+    parameters: {
+      query: {
+        /** @description The id of the term that would survive the merge. */
+        intoId: string;
+      };
+      header?: never;
+      path: {
+        /** @description The category's opaque object id (not the slug). Use list/create responses to obtain it. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMergePreview'];
+        };
+      };
+      /** @description The two terms cannot be merged. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
       };
       /** @description Not found. */
       404: {
@@ -21950,6 +30664,38 @@ export interface operations {
       };
     };
   };
+  getTaxonomiesMarketAlias: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        alias: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Market'];
+        };
+      };
+      /** @description Market or alias not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   deleteTaxonomiesMarketAlias: {
     parameters: {
       query?: never;
@@ -22054,6 +30800,154 @@ export interface operations {
       };
     };
   };
+  listTaxonomiesRules: {
+    parameters: {
+      query: {
+        /** @description The taxonomy: `category`, `skill` or `market`. */
+        kind: 'category' | 'skill' | 'market';
+        /** @description `same_as`: a tag tagged as a term. `ignore`: a tag that is never added. `keep_separate`: terms not suggested for merging. `merge`: your merges, with their undo state. */
+        type: 'same_as' | 'ignore' | 'keep_separate' | 'merge';
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/taxonomies/rules */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['TaxonomyRule'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteTaxonomiesRule: {
+    parameters: {
+      query: {
+        /** @description The taxonomy: `category`, `skill` or `market`. */
+        kind: 'category' | 'skill' | 'market';
+      };
+      header?: never;
+      path: {
+        /** @description The rule id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Removed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The rule cannot be removed here. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTaxonomiesSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomySettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateTaxonomiesSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateTaxonomySettingsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomySettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listTaxonomiesSkills: {
     parameters: {
       query?: {
@@ -22119,6 +31013,47 @@ export interface operations {
         };
       };
       /** @description Slug taken. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  undoTaxonomiesSkillMerge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The merge id returned by the merge endpoint. */
+        mergeId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMerge'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The merge can no longer be undone. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -22272,6 +31207,38 @@ export interface operations {
       };
     };
   };
+  getTaxonomiesSkillAlias: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        alias: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Skill'];
+        };
+      };
+      /** @description Skill or alias not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   deleteTaxonomiesSkillAlias: {
     parameters: {
       query?: never;
@@ -22293,6 +31260,202 @@ export interface operations {
       };
       /** @description Skill or alias not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  mergeTaxonomiesSkill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The skill's opaque object id (not the slug). Use list/create responses to obtain it. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MergeTaxonomyBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMerge'];
+        };
+      };
+      /** @description The two terms cannot be merged. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The merge conflicted with another change. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  previewTaxonomiesSkillMerge: {
+    parameters: {
+      query: {
+        /** @description The id of the term that would survive the merge. */
+        intoId: string;
+      };
+      header?: never;
+      path: {
+        /** @description The skill's opaque object id (not the slug). Use list/create responses to obtain it. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyMergePreview'];
+        };
+      };
+      /** @description The two terms cannot be merged. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listTaxonomiesSuggestions: {
+    parameters: {
+      query: {
+        /** @description The taxonomy: `category`, `skill` or `market`. */
+        kind: 'category' | 'skill' | 'market';
+        /** @description `unmatched`: tags that matched no term while `unmatchedTagMode` is `ask`. `duplicate`: terms suggested for merging. */
+        type: 'unmatched' | 'duplicate';
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/taxonomies/suggestions */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['TaxonomySuggestion'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  answerTaxonomiesSuggestion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The suggestion id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AnswerTaxonomySuggestionBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomySuggestionAnswer'];
+        };
+      };
+      /** @description The answer does not fit the suggestion. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The suggestion conflicted with another change. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -22373,6 +31536,314 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  refundTransaction: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The transaction ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RefundTransactionBody'];
+      };
+    };
+    responses: {
+      /** @description The refunded transaction. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Transaction'];
+        };
+      };
+      /** @description `amountCents` missing or not a positive integer (`validation_bad_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing, or another board's transaction (`transactions_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `transaction_not_refundable`: not paid, or paid outside Stripe. `refund_amount_exceeds_refundable`: more than is left (`error.details.refundableCents`). `transaction_disputed`: the payment has an open or lost dispute. `access_not_removable`: `removeAccess` sent for a sale with no one-time access. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_not_connected`: the board has no connected Stripe account. `refund_refused`: Stripe refused to create the refund; retrying will not work. `refund_failed`: Stripe created the refund but it failed or was canceled, so no money moved and access is unchanged. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_error`: any other Stripe error (network, rate limit, outage). Retry with the same `Idempotency-Key`. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  removeTransactionAccess: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The transaction ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The transaction with its access removed. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Transaction'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing, or another board's transaction (`transactions_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `access_not_removable`: a subscription (access follows it) or a sale not linked to a purchase. `transaction_not_refundable`: the sale is not paid. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_not_connected`. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_error`. Retry. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resendTransactionInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The transaction ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The invoice email was queued. Returns the transaction, unchanged. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Transaction'];
+        };
+      };
+      /** @description Transaction not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The transaction is not a job posting invoice (`transactions_invoice_action_unsupported`), or the invoice is already paid, void or uncollectible (`transactions_invoice_not_open`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  restoreTransactionAccess: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The transaction ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The transaction with its access restored. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Transaction'];
+        };
+      };
+      /** @description Missing `plans.manage` or `billing.read`. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing, or another board's transaction (`transactions_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `access_not_removable`: a subscription (access follows it) or a sale not linked to a purchase. `transaction_not_refundable`: the sale is not paid. `transaction_disputed`: the payment has an open or lost dispute. `access_restore_blocked`: the company holds another membership now. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_not_connected`. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `stripe_error`. Retry. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  voidTransactionInvoice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The transaction ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The invoice was voided. Returns the transaction with `status: void`. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Transaction'];
+        };
+      };
+      /** @description Transaction not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The transaction is not a job posting invoice (`transactions_invoice_action_unsupported`), or the invoice is already paid, void or uncollectible (`transactions_invoice_not_open`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The payment provider could not void the invoice right now (`transactions_invoice_provider_error`). Nothing was changed; retry later. */
+      502: {
         headers: {
           [name: string]: unknown;
         };

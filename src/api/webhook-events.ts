@@ -127,9 +127,45 @@ export type MarketingPermissionWebhookEvent =
   | MarketingPermissionGrantedWebhookEvent
   | MarketingPermissionWithdrawnWebhookEvent;
 
+/** Closed digital purchase `changed_fields` vocabulary. */
+export const DIGITAL_PURCHASE_CHANGED_FIELDS = [
+  'refunded_amount_cents',
+] as const;
+export type DigitalPurchaseChangedField =
+  (typeof DIGITAL_PURCHASE_CHANGED_FIELDS)[number];
+export type DigitalPurchaseWebhookSnapshot =
+  Schemas['WebhookDigitalPurchaseSnapshot'];
+export type DigitalProductPurchasedWebhookEvent =
+  Schemas['WebhookDigitalProductPurchasedEvent'];
+export type DigitalProductRefundedWebhookEvent =
+  Schemas['WebhookDigitalProductRefundedEvent'];
+export type DigitalProductWebhookEvent =
+  | DigitalProductPurchasedWebhookEvent
+  | DigitalProductRefundedWebhookEvent;
+
+/** Closed item verification `changed_fields` vocabulary. */
+export const ITEM_VERIFICATION_CHANGED_FIELDS = [
+  'status',
+  'reason_code',
+  'expires_at',
+] as const;
+export type ItemVerificationChangedField =
+  (typeof ITEM_VERIFICATION_CHANGED_FIELDS)[number];
+export type ItemVerificationWebhookSnapshot =
+  Schemas['WebhookItemVerificationSnapshot'];
+export type CandidateVerificationUpdatedWebhookEvent =
+  Schemas['WebhookCandidateVerificationUpdatedEvent'];
+export type CompanyVerificationUpdatedWebhookEvent =
+  Schemas['WebhookCompanyVerificationUpdatedEvent'];
+export type ItemVerificationWebhookEvent =
+  | CandidateVerificationUpdatedWebhookEvent
+  | CompanyVerificationUpdatedWebhookEvent;
+
 /** The complete, closed V1 receiver union. */
 export type V1WebhookEvent =
   | JobWebhookEvent
   | CompanyWebhookEvent
   | CandidateWebhookEvent
-  | MarketingPermissionWebhookEvent;
+  | MarketingPermissionWebhookEvent
+  | DigitalProductWebhookEvent
+  | ItemVerificationWebhookEvent;

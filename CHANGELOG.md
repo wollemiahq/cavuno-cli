@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.21.0 — 2026-11-04
+
+- **`cavuno settings profile-fields-list`** and **`profile-fields-set`** read
+  and replace company or candidate profile field definitions, including their
+  AI fill settings. `profile-fields-set` accepts the array `profile-fields-list`
+  prints, or `{ "definitions": [...] }`.
+- **`cavuno settings job-form-ai-fill --fields <keys>`** and
+  **`profile-fields-ai-fill --fields <keys>`** fill empty job or company custom
+  fields with AI. A fill already running exits with code 7.
+
 ## 1.20.0 — 2026-11-03
 
 - Company group errors (`company_group_depth`, `company_group_account`) exit
