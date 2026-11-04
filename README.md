@@ -213,6 +213,10 @@ Board coupons and promotion codes. Requires a ready payment connection.
 | `cavuno settings set-password-protection` | Set board password (reads secret from stdin) |
 | `cavuno settings delete-password-protection` | Remove board password protection (`--yes`) |
 | `cavuno settings job-form-set-custom-fields --file <json>` | Replace custom job field definitions (whole-array) |
+| `cavuno settings job-form-ai-fill --fields <keys>` | Fill custom fields on live jobs with AI (comma-separated keys) |
+| `cavuno settings profile-fields-list --entity <candidate\|company>` | List profile field definitions |
+| `cavuno settings profile-fields-set --entity <candidate\|company> --file <json>` | Replace profile field definitions (whole-array) |
+| `cavuno settings profile-fields-ai-fill --fields <keys>` | Fill company fields on companies with AI (comma-separated keys) |
 
 ### Domains
 

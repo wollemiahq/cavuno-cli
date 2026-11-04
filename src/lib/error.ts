@@ -38,6 +38,8 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   validation_bad_request: 2,
   settings_conflicting_fields: 2,
   settings_custom_field_type_immutable: 2,
+  settings_ai_fill_running: 7,
+  settings_ai_fill_unavailable: 7,
   jobs_not_found: 4,
   jobs_company_not_found: 4,
   jobs_quota_exceeded: 5,

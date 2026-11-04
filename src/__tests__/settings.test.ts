@@ -8,7 +8,15 @@ const {
   mockClearPasswordProtection,
   mockSetJobFormCustomFields,
   mockUpdateAdsense,
+  mockStartJobFormCustomFieldAiFill,
+  mockListProfileFieldDefinitions,
+  mockReplaceProfileFieldDefinitions,
+  mockStartProfileFieldAiFill,
 } = vi.hoisted(() => ({
+  mockStartJobFormCustomFieldAiFill: vi.fn(),
+  mockListProfileFieldDefinitions: vi.fn(),
+  mockReplaceProfileFieldDefinitions: vi.fn(),
+  mockStartProfileFieldAiFill: vi.fn(),
   mockUpdateAdsense: vi.fn(),
   mockUpdate: vi.fn(),
   mockGet: vi.fn(),
@@ -27,6 +35,10 @@ vi.mock('../api/settings.js', () => ({
     setPasswordProtection: vi.fn(),
     clearPasswordProtection: mockClearPasswordProtection,
     setJobFormCustomFields: mockSetJobFormCustomFields,
+    startJobFormCustomFieldAiFill: mockStartJobFormCustomFieldAiFill,
+    listProfileFieldDefinitions: mockListProfileFieldDefinitions,
+    replaceProfileFieldDefinitions: mockReplaceProfileFieldDefinitions,
+    startProfileFieldAiFill: mockStartProfileFieldAiFill,
   })),
 }));
 
@@ -358,6 +370,229 @@ describe('settings update CLI options', () => {
     } finally {
       errSpy.mockRestore();
       exitSpy.mockRestore();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('settings AI fill and profile field commands', () => {
+  let originalKey: string | undefined;
+  let originalUrl: string | undefined;
+  let logSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    originalKey = process.env.CAVUNO_API_KEY;
+    originalUrl = process.env.CAVUNO_API_URL;
+    process.env.CAVUNO_API_KEY = VALID_KEY;
+    process.env.CAVUNO_API_URL = 'http://localhost:3000/api/v1';
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    vi.clearAllMocks();
+    const run = {
+      runId: 'run_1',
+      status: 'queued',
+      fieldKeys: ['visa_sponsorship'],
+    };
+    mockStartJobFormCustomFieldAiFill.mockResolvedValue(success(run));
+    mockStartProfileFieldAiFill.mockResolvedValue(success(run));
+    mockListProfileFieldDefinitions.mockResolvedValue(success({ data: [] }));
+    mockReplaceProfileFieldDefinitions.mockResolvedValue(success({ data: [] }));
+  });
+
+  afterEach(() => {
+    if (originalKey === undefined) delete process.env.CAVUNO_API_KEY;
+    else process.env.CAVUNO_API_KEY = originalKey;
+    if (originalUrl === undefined) delete process.env.CAVUNO_API_URL;
+    else process.env.CAVUNO_API_URL = originalUrl;
+    logSpy.mockRestore();
+  });
+
+  it('job-form-ai-fill splits --fields into fieldKeys', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'job-form-ai-fill',
+        '--fields',
+        'visa_sponsorship, clearance',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockStartJobFormCustomFieldAiFill).toHaveBeenCalledWith({
+      fieldKeys: ['visa_sponsorship', 'clearance'],
+    });
+  });
+
+  it('profile-fields-ai-fill defaults to the company entity', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'profile-fields-ai-fill',
+        '--fields',
+        'industry',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockStartProfileFieldAiFill).toHaveBeenCalledWith('company', {
+      fieldKeys: ['industry'],
+    });
+  });
+
+  it('maps 409 settings_ai_fill_running to exit 7', async () => {
+    mockStartJobFormCustomFieldAiFill.mockResolvedValue({
+      data: undefined,
+      error: {
+        error: {
+          code: 'settings_ai_fill_running',
+          message: 'A run is already going.',
+        },
+      },
+      response: new Response(null, { status: 409 }),
+    });
+
+    await expect(
+      createProgram().parseAsync(
+        ['node', 'cavuno', 'settings', 'job-form-ai-fill', '--fields', 'a'],
+        { from: 'node' },
+      ),
+    ).rejects.toMatchObject({ exitCode: 7 });
+  });
+
+  it('rejects a non-company entity and empty --fields with exit 2', async () => {
+    const errSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((
+      code?: number,
+    ) => {
+      throw new Error(`exit:${code}`);
+    }) as never);
+
+    try {
+      await expect(
+        createProgram().parseAsync(
+          [
+            'node',
+            'cavuno',
+            'settings',
+            'profile-fields-ai-fill',
+            '--entity',
+            'candidate',
+            '--fields',
+            'a',
+          ],
+          { from: 'node' },
+        ),
+      ).rejects.toThrow('exit:2');
+      await expect(
+        createProgram().parseAsync(
+          ['node', 'cavuno', 'settings', 'job-form-ai-fill', '--fields', ','],
+          { from: 'node' },
+        ),
+      ).rejects.toThrow('exit:2');
+      expect(mockStartProfileFieldAiFill).not.toHaveBeenCalled();
+      expect(mockStartJobFormCustomFieldAiFill).not.toHaveBeenCalled();
+    } finally {
+      errSpy.mockRestore();
+      exitSpy.mockRestore();
+    }
+  });
+
+  it('profile-fields-list passes --entity through', async () => {
+    await createProgram().parseAsync(
+      [
+        'node',
+        'cavuno',
+        'settings',
+        'profile-fields-list',
+        '--entity',
+        'candidate',
+      ],
+      { from: 'node' },
+    );
+
+    expect(mockListProfileFieldDefinitions).toHaveBeenCalledWith('candidate');
+  });
+
+  it('profile-fields-set accepts the bare array profile-fields-list prints', async () => {
+    const { mkdtemp, writeFile, rm } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const dir = await mkdtemp(join(tmpdir(), 'cavuno-profile-fields-'));
+    const filePath = join(dir, 'fields.json');
+    const definitions = [
+      { key: 'industry', label: 'Industry', type: 'short_text' },
+    ];
+    await writeFile(filePath, JSON.stringify(definitions), 'utf8');
+
+    try {
+      await createProgram().parseAsync(
+        [
+          'node',
+          'cavuno',
+          'settings',
+          'profile-fields-set',
+          '--entity',
+          'company',
+          '--file',
+          filePath,
+        ],
+        { from: 'node' },
+      );
+
+      expect(mockReplaceProfileFieldDefinitions).toHaveBeenCalledWith(
+        'company',
+        { definitions },
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('profile-fields-set forwards the --file body for the entity', async () => {
+    const { mkdtemp, writeFile, rm } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+
+    const dir = await mkdtemp(join(tmpdir(), 'cavuno-profile-fields-'));
+    const filePath = join(dir, 'fields.json');
+    const body = {
+      definitions: [
+        {
+          key: 'industry',
+          label: 'Industry',
+          type: 'short_text',
+          aiFill: true,
+        },
+      ],
+    };
+    await writeFile(filePath, JSON.stringify(body), 'utf8');
+
+    try {
+      await createProgram().parseAsync(
+        [
+          'node',
+          'cavuno',
+          'settings',
+          'profile-fields-set',
+          '--entity',
+          'company',
+          '--file',
+          filePath,
+        ],
+        { from: 'node' },
+      );
+
+      expect(mockReplaceProfileFieldDefinitions).toHaveBeenCalledWith(
+        'company',
+        body,
+      );
+    } finally {
       await rm(dir, { recursive: true, force: true });
     }
   });

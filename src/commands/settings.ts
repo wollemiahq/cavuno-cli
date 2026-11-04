@@ -368,6 +368,197 @@ export function registerSettingsCommand(root: Command): void {
       ],
     },
   );
+
+  annotate(
+    settings
+      .command('job-form-ai-fill')
+      .description(
+        'Start a background run that fills the named custom fields on live ' +
+          'jobs with AI. Each field must have aiFill on. Only empty values ' +
+          'are filled. One run per board at a time.',
+      )
+      .requiredOption(
+        '--fields <keys>',
+        'Comma-separated custom field keys (1-50)',
+        parseCsv,
+      )
+      .action(async function (this: Command) {
+        const client = getClient(this);
+        const format = getFormat(this);
+        const opts = this.opts<{ fields: string[] }>();
+        const fieldKeys = requireFieldKeys(opts.fields, 'job-form-ai-fill');
+        const { data, error, response } =
+          await client.startJobFormCustomFieldAiFill({ fieldKeys });
+        if (error) throw fromApiError(error, response);
+        print(data, format);
+      }),
+    {
+      mapsTo: 'POST /v1/settings/job-form/custom-fields/ai-fill',
+      examples: [
+        'cavuno settings job-form-ai-fill --fields visa_sponsorship',
+        'cavuno settings job-form-ai-fill --fields visa_sponsorship,clearance',
+      ],
+    },
+  );
+
+  annotate(
+    settings
+      .command('profile-fields-list')
+      .description(
+        'List candidate or company profile field definitions in display order.',
+      )
+      .requiredOption('--entity <entity>', 'candidate | company')
+      .action(async function (this: Command) {
+        const client = getClient(this);
+        const format = getFormat(this);
+        const opts = this.opts<{ entity: string }>();
+        const entity = parseProfileFieldEntity(
+          opts.entity,
+          'profile-fields-list',
+        );
+        const { data, error, response } =
+          await client.listProfileFieldDefinitions(entity);
+        if (error) throw fromApiError(error, response);
+        print(data, format);
+      }),
+    {
+      mapsTo: 'GET /v1/settings/profile-fields/{entity}',
+      examples: ['cavuno settings profile-fields-list --entity company'],
+    },
+  );
+
+  annotate(
+    settings
+      .command('profile-fields-set')
+      .description(
+        'Replace the candidate or company profile field definitions ' +
+          '(whole-array PUT). Pass JSON via --file or stdin: ' +
+          '{ "definitions": [...] }. Array order is display order. ' +
+          'Changing type on an existing key is rejected.',
+      )
+      .requiredOption('--entity <entity>', 'candidate | company')
+      .option('--file <path>', 'JSON file body (otherwise read stdin)')
+      .action(async function (this: Command) {
+        const client = getClient(this);
+        const format = getFormat(this);
+        const opts = this.opts<{ entity: string; file?: string }>();
+        const entity = parseProfileFieldEntity(
+          opts.entity,
+          'profile-fields-set',
+        );
+        const body = await readProfileFieldDefinitionsBody(opts.file);
+        const { data, error, response } =
+          await client.replaceProfileFieldDefinitions(
+            entity,
+            body as Parameters<typeof client.replaceProfileFieldDefinitions>[1],
+          );
+        if (error) throw fromApiError(error, response);
+        print(data, format);
+      }),
+    {
+      mapsTo: 'PUT /v1/settings/profile-fields/{entity}',
+      examples: [
+        'cavuno settings profile-fields-set --entity company --file company-fields.json',
+      ],
+    },
+  );
+
+  annotate(
+    settings
+      .command('profile-fields-ai-fill')
+      .description(
+        'Start a background run that fills the named company fields on ' +
+          'companies with AI. Each field must have aiFill on. Only companies ' +
+          'with a description and an empty value are filled. One run per ' +
+          'board at a time.',
+      )
+      .option(
+        '--entity <entity>',
+        'company (the only entity with AI fill)',
+        'company',
+      )
+      .requiredOption(
+        '--fields <keys>',
+        'Comma-separated company field keys (1-50)',
+        parseCsv,
+      )
+      .action(async function (this: Command) {
+        const client = getClient(this);
+        const format = getFormat(this);
+        const opts = this.opts<{ entity: string; fields: string[] }>();
+        if (opts.entity !== 'company') {
+          console.error(
+            'profile-fields-ai-fill: --entity must be company (only company fields have AI fill).',
+          );
+          process.exit(2);
+        }
+        const fieldKeys = requireFieldKeys(
+          opts.fields,
+          'profile-fields-ai-fill',
+        );
+        const { data, error, response } = await client.startProfileFieldAiFill(
+          'company',
+          { fieldKeys },
+        );
+        if (error) throw fromApiError(error, response);
+        print(data, format);
+      }),
+    {
+      mapsTo: 'POST /v1/settings/profile-fields/{entity}/ai-fill',
+      examples: [
+        'cavuno settings profile-fields-ai-fill --fields industry,funding_stage',
+      ],
+    },
+  );
+}
+
+function parseCsv(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
+function requireFieldKeys(keys: string[], command: string): string[] {
+  if (keys.length === 0) {
+    console.error(`${command}: --fields needs at least one field key.`);
+    process.exit(2);
+  }
+  return keys;
+}
+
+function parseProfileFieldEntity(
+  raw: string,
+  command: string,
+): 'candidate' | 'company' {
+  if (raw !== 'candidate' && raw !== 'company') {
+    console.error(`${command}: --entity must be candidate or company.`);
+    process.exit(2);
+  }
+  return raw;
+}
+
+async function readProfileFieldDefinitionsBody(
+  file?: string,
+): Promise<{ definitions: unknown[] }> {
+  const parsed = await readJsonBodyFromFileOrStdin(file, {
+    command: 'profile-fields-set',
+    shapeHint: '{ "definitions": [...] }',
+  });
+  // A bare array is what profile-fields-list prints, so list output can be
+  // edited and sent straight back.
+  if (Array.isArray(parsed)) return { definitions: parsed };
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    !Array.isArray((parsed as { definitions?: unknown }).definitions)
+  ) {
+    console.error(
+      'profile-fields-set: body must be { "definitions": [...] } or an array',
+    );
+    process.exit(2);
+  }
+  return parsed as { definitions: unknown[] };
 }
 
 async function readJobFormCustomFieldsBody(

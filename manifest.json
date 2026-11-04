@@ -1,6 +1,6 @@
 {
   "version": "1.20.0",
-  "generatedAt": "2026-10-19T05:16:14.665Z",
+  "generatedAt": "2026-11-03T23:24:59.505Z",
   "groups": [
     {
       "name": "jobs",
@@ -2205,6 +2205,86 @@
             "cavuno settings job-form-set-custom-fields --file custom-fields.json"
           ],
           "mapsTo": "PUT /v1/settings/job-form/custom-fields"
+        },
+        {
+          "name": "job-form-ai-fill",
+          "description": "Start a background run that fills the named custom fields on live jobs with AI. Each field must have aiFill on. Only empty values are filled. One run per board at a time.",
+          "synopsis": "cavuno settings job-form-ai-fill [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--fields <keys>",
+              "description": "Comma-separated custom field keys (1-50)",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno settings job-form-ai-fill --fields visa_sponsorship",
+            "cavuno settings job-form-ai-fill --fields visa_sponsorship,clearance"
+          ],
+          "mapsTo": "POST /v1/settings/job-form/custom-fields/ai-fill"
+        },
+        {
+          "name": "profile-fields-list",
+          "description": "List candidate or company profile field definitions in display order.",
+          "synopsis": "cavuno settings profile-fields-list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--entity <entity>",
+              "description": "candidate | company",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno settings profile-fields-list --entity company"
+          ],
+          "mapsTo": "GET /v1/settings/profile-fields/{entity}"
+        },
+        {
+          "name": "profile-fields-set",
+          "description": "Replace the candidate or company profile field definitions (whole-array PUT). Pass JSON via --file or stdin: { \"definitions\": [...] }. Array order is display order. Changing type on an existing key is rejected.",
+          "synopsis": "cavuno settings profile-fields-set [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--entity <entity>",
+              "description": "candidate | company",
+              "required": true
+            },
+            {
+              "flags": "--file <path>",
+              "description": "JSON file body (otherwise read stdin)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno settings profile-fields-set --entity company --file company-fields.json"
+          ],
+          "mapsTo": "PUT /v1/settings/profile-fields/{entity}"
+        },
+        {
+          "name": "profile-fields-ai-fill",
+          "description": "Start a background run that fills the named company fields on companies with AI. Each field must have aiFill on. Only companies with a description and an empty value are filled. One run per board at a time.",
+          "synopsis": "cavuno settings profile-fields-ai-fill [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--entity <entity>",
+              "description": "company (the only entity with AI fill)",
+              "required": false,
+              "defaultValue": "company"
+            },
+            {
+              "flags": "--fields <keys>",
+              "description": "Comma-separated company field keys (1-50)",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno settings profile-fields-ai-fill --fields industry,funding_stage"
+          ],
+          "mapsTo": "POST /v1/settings/profile-fields/{entity}/ai-fill"
         }
       ]
     },
