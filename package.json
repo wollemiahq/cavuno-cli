@@ -1,6 +1,6 @@
 {
   "name": "cavuno",
-  "version": "1.21.0",
+  "version": "1.23.0",
   "description": "Manage your Cavuno job board from the command line.",
   "keywords": [
     "ai-agent",
