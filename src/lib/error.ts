@@ -150,6 +150,7 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   redirects_not_found: 4,
   redirects_from_path_taken: 7,
   redirects_invalid_status_code: 2,
+  redirects_invalid_path: 2,
   // Distribution — XML feeds
   distribution_feed_not_found: 4,
   distribution_feed_invalid: 2,

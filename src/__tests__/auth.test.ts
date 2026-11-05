@@ -14,12 +14,15 @@ describe('resolveAuth', () => {
     };
     delete process.env.CAVUNO_API_KEY;
     delete process.env.CAVUNO_API_URL;
+    // Never read a real `cavuno auth login` session from this machine.
+    process.env.CAVUNO_CONFIG_DIR = '/nonexistent/cavuno-test-config';
   });
   afterEach(() => {
     if (original.key !== undefined) process.env.CAVUNO_API_KEY = original.key;
     else delete process.env.CAVUNO_API_KEY;
     if (original.url !== undefined) process.env.CAVUNO_API_URL = original.url;
     else delete process.env.CAVUNO_API_URL;
+    delete process.env.CAVUNO_CONFIG_DIR;
   });
 
   it('throws CliError exit=1 when CAVUNO_API_KEY is missing', () => {

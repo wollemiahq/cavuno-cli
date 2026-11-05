@@ -3,6 +3,25 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.23.0 — 2026-11-05
+
+- **`cavuno todos list`** reads the board's to-dos in Home's order, with each
+  one's status and dashboard link. While the board is being set up these are
+  its setup steps.
+- A reserved or malformed redirect path now fails with
+  `redirects_invalid_path` (exit code 2) instead of
+  `redirects_invalid_status_code`.
+
+## 1.22.0 — 2026-11-04
+
+- **`cavuno auth login`** signs the CLI in with your browser: you approve
+  access and choose the board, and the CLI saves a session that renews itself.
+  `--no-browser` prints the sign-in URL instead of opening it. Sessions are
+  stored in `~/.config/cavuno/credentials.json`, one per API URL.
+- **`cavuno auth status`** shows the board the CLI is signed in to and how it
+  authenticates; **`cavuno auth logout`** revokes the session and deletes it.
+- `CAVUNO_API_KEY` still takes precedence over a saved session when set.
+
 ## 1.21.0 — 2026-11-04
 
 - **`cavuno settings profile-fields-list`** and **`profile-fields-set`** read
