@@ -1,7 +1,50 @@
 {
-  "version": "1.21.0",
-  "generatedAt": "2026-11-03T23:24:59.505Z",
+  "version": "1.22.0",
+  "generatedAt": "2026-11-04T05:16:48.442Z",
   "groups": [
+    {
+      "name": "auth",
+      "description": "Sign the CLI in to your board with your browser, check who it is signed in as, or sign out.",
+      "commands": [
+        {
+          "name": "login",
+          "description": "Sign in with your browser and choose the board to connect. Saves a session that renews itself; CAVUNO_API_KEY still takes precedence when set.",
+          "synopsis": "cavuno auth login [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--no-browser",
+              "description": "Print the sign-in URL instead of opening a browser",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno auth login",
+            "cavuno auth login --no-browser"
+          ]
+        },
+        {
+          "name": "status",
+          "description": "Show the board the CLI is signed in to, and how it authenticates.",
+          "synopsis": "cavuno auth status",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno auth status"
+          ]
+        },
+        {
+          "name": "logout",
+          "description": "Sign out: revoke the saved session and delete it from this machine.",
+          "synopsis": "cavuno auth logout",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno auth logout"
+          ]
+        }
+      ]
+    },
     {
       "name": "jobs",
       "description": "Manage jobs in the authenticated account.",
