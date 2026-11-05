@@ -24,7 +24,17 @@ Requires Node.js 18.18 or newer.
 
 ## Authenticate
 
-Set two environment variables. Mint a key in the Cavuno dashboard under **Settings → Developer → API keys** — the plaintext secret shows once at creation, copy it to your secrets manager immediately.
+On your own machine, sign in with your browser:
+
+```bash
+cavuno auth login    # opens Cavuno, you pick the board and approve
+cavuno auth status   # which board the CLI is signed in to
+cavuno auth logout   # revoke the session and delete it from this machine
+```
+
+`cavuno auth login` uses OAuth with PKCE and a loopback redirect, so no secret is pasted anywhere. The session is saved to `~/.config/cavuno/credentials.json` (readable only by you; `$CAVUNO_CONFIG_DIR` or `$XDG_CONFIG_HOME` move it) and renews itself. On a machine without a browser, `--no-browser` prints the sign-in URL instead. Connecting requires a plan with API access, including the trial.
+
+In CI and other non-interactive environments, use an API key instead. Mint one in the Cavuno dashboard under **Settings → Developer → API keys** — the plaintext secret shows once at creation, copy it to your secrets manager immediately.
 
 ```bash
 export CAVUNO_API_KEY='cavuno_live_...'
@@ -33,11 +43,12 @@ export CAVUNO_API_URL='https://api.cavuno.com/v1'
 cavuno usage get
 ```
 
-The CLI fails fast at startup if `CAVUNO_API_KEY` is missing or malformed — you don't wait on a 401 round-trip to spot a typo.
+`CAVUNO_API_KEY` takes precedence over a saved session. The CLI fails fast at startup if it is malformed, or if neither a key nor a session exists — you don't wait on a 401 round-trip to spot a typo.
 
 ## Commands
 
 ```
+cavuno auth         # Sign in with your browser, check status, sign out
 cavuno jobs         # Manage jobs (incl. batch)
 cavuno usage        # Inspect plan usage
 cavuno billing      # Read subscription and payment connection status
