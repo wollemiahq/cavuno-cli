@@ -1696,7 +1696,7 @@ export interface paths {
     put?: never;
     /**
      * Preview a routing rule
-     * @description Read-only. Lists the parent company's published jobs a draft rule matches (the first 500 jobs), with why each matched, which are locked to their company, which an earlier rule already routes, and how many `moveExistingJobs` would move. A draft with no condition terms and no country matches nothing.
+     * @description Read-only. Lists up to 5 of the parent company's newest published jobs a draft rule matches, checking at most its 200 newest, with why each matched, which are locked to their company, and which an earlier rule already routes. `hasMore` says more jobs match; there is no total count. A draft with no condition terms and no country matches nothing.
      */
     post: operations['previewCompanyRoutingRule'];
     delete?: never;
@@ -5727,6 +5727,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/todos': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List to-dos
+     * @description Lists the to-dos on your Board’s Home, in the order Home shows them, including done ones. While the Board is being set up these are its setup steps: name the Board, brand it, source jobs, set up payments, connect a domain and publish. Steps that do not apply to the Board are left out. The list is the same one Home and Companion show.
+     */
+    get: operations['listTodos'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/transactions': {
     parameters: {
       query?: never;
@@ -7666,7 +7686,7 @@ export interface components {
           /** @enum {string} */
           kind: 'condition';
           /** @enum {string} */
-          field: 'application_url' | 'title';
+          field: 'application_url' | 'title' | 'description';
           term: string;
         }
       | {
@@ -7694,7 +7714,7 @@ export interface components {
       matchMode: 'any' | 'all';
       conditions: {
         /** @enum {string} */
-        field: 'application_url' | 'title';
+        field: 'application_url' | 'title' | 'description';
         /** @enum {string} */
         operator: 'contains_any' | 'contains_all';
         terms: string[];
@@ -7708,10 +7728,10 @@ export interface components {
     };
     CompanyRoutingRuleCondition: {
       /**
-       * @description The job field the terms are looked for in.
+       * @description The job field the terms are looked for in. `description` is the job description as plain text (HTML tags removed).
        * @enum {string}
        */
-      field: 'application_url' | 'title';
+      field: 'application_url' | 'title' | 'description';
       /**
        * @description `contains_any`: the field contains one of the terms. `contains_all`: it contains every term. Case-insensitive substring match.
        * @enum {string}
@@ -7730,7 +7750,7 @@ export interface components {
     CompanyRoutingRulePreview: {
       /** @enum {string} */
       object: 'company_routing_rule_preview';
-      /** @description The parent's published jobs the draft rule matches. */
+      /** @description Up to 5 of the parent's newest published jobs the draft rule matches. */
       jobs: {
         /** @description The job id. */
         id: string;
@@ -7745,13 +7765,23 @@ export interface components {
           targetName: string;
         } | null;
       }[];
-      /** @description Matched jobs `moveExistingJobs` would move: not locked and not claimed by an earlier rule. */
+      /** @description True when more jobs match than `jobs` lists. */
+      hasMore: boolean;
+      /** @description True when the check stopped at the parent's 200 newest published jobs before finding more than 5 matches. Older jobs were not checked. */
+      scanCapped: boolean;
+      /**
+       * @deprecated
+       * @description Deprecated: the jobs in `jobs` that `moveExistingJobs` would move (not locked, not claimed by an earlier rule), so at most 5. `moveExistingJobs` moves every match; read `movedJobCount` on the save result.
+       */
       moveCount: number;
-      /** @description True when the parent has more than 500 published jobs; only the first 500 were checked. */
+      /**
+       * @deprecated
+       * @description Deprecated: use `hasMore` and `scanCapped`. True when either is true.
+       */
       truncated: boolean;
     };
     CompanyRoutingRuleSaveResult: components['schemas']['CompanyRoutingRule'] & {
-      /** @description Jobs moved to the subsidiary by `moveExistingJobs` (counted from the first 500 published jobs; the rest move in the background). 0 when not requested. */
+      /** @description Jobs moved to the subsidiary by `moveExistingJobs` during this request: the matches among the parent's first 100 published jobs. Later matches move in the background. 0 when not requested. */
       movedJobCount: number;
     };
     CompanySummary: {
@@ -12732,6 +12762,40 @@ export interface components {
       source: 'dashboard' | 'api' | 'email_domain' | null;
       /** Format: date-time */
       decidedAt: string | null;
+    };
+    Todo: {
+      /** @description Stable to-do id. Setup to-dos use the step name, for example `setup-payments`. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'todo';
+      /**
+       * @description Where the to-do comes from. `setup`: a setup step Cavuno adds and ticks from the Board’s state. More kinds may be added; show a to-do of an unknown kind as it is.
+       * @enum {string}
+       */
+      kind: 'setup';
+      /** @description The to-do as it reads on Home. */
+      title: string;
+      /** @description What the to-do involves, as it reads on Home. */
+      description: string;
+      /**
+       * @description Whether the to-do is done. Setup to-dos are done once the Board’s state shows it, never by being marked. More statuses may be added; treat an unknown status as open.
+       * @enum {string}
+       */
+      status: 'open' | 'done';
+      /** @description Something that was meant to happen did not, and only the operator can unblock it, for example a website build or Stripe verification that failed. */
+      needsAttention: boolean;
+      /**
+       * @description Who added the to-do. Setup to-dos are added by Cavuno. More values may be added.
+       * @enum {string}
+       */
+      addedBy: 'cavuno';
+      /** @description Label of the dashboard button that opens where the to-do is done, or null when there is nothing to open. */
+      actionLabel: string | null;
+      /** @description Absolute dashboard URL where the to-do is done, or null when there is nothing to open, for example while the website is being built. */
+      url: string | null;
     };
     Transaction: {
       id: string;
@@ -31456,6 +31520,43 @@ export interface operations {
       };
       /** @description The suggestion conflicted with another change. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listTodos: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/todos */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['Todo'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
