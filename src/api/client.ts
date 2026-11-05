@@ -13,7 +13,8 @@ export interface CavunoClientOptions {
    */
   baseUrl: string;
   /**
-   * API key in the `cavuno_live_<keyId>_<secret>` format. Mint one under
+   * API key in the `cavuno_live_<keyId>_<secret>` format, or an OAuth access
+   * token (a JWT, as issued to `cavuno auth login`). Mint an API key under
    * Settings → Developer → API keys (`/home/<board>/settings/api`).
    */
   apiKey: string;
@@ -41,14 +42,16 @@ export interface IdempotencyOptions {
 }
 
 const KEY_PATTERN = /^cavuno_live_[a-z2-7]{16}_[A-Za-z0-9_-]{32}$/;
+/** A compact JWS: three base64url segments. OAuth access tokens are JWTs. */
+const ACCESS_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
 
 /**
- * Validate the documented API-key format BEFORE making any HTTP call.
+ * Validate the credential's shape BEFORE making any HTTP call.
  * Throws synchronously so consumers fail fast with a clear
  * error instead of waiting for a 401 from the network.
  */
 function assertApiKeyShape(key: string): void {
-  if (!KEY_PATTERN.test(key)) {
+  if (!KEY_PATTERN.test(key) && !ACCESS_TOKEN_PATTERN.test(key)) {
     throw new Error(
       'CAVUNO_API_KEY is not a valid live API key. Expected format: ' +
         '`cavuno_live_<16-char keyId>_<32-char secret>`. Mint one at ' +

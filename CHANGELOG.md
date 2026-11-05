@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.22.0 — 2026-11-04
+
+- **`cavuno auth login`** signs the CLI in with your browser: you approve
+  access and choose the board, and the CLI saves a session that renews itself.
+  `--no-browser` prints the sign-in URL instead of opening it. Sessions are
+  stored in `~/.config/cavuno/credentials.json`, one per API URL.
+- **`cavuno auth status`** shows the board the CLI is signed in to and how it
+  authenticates; **`cavuno auth logout`** revokes the session and deletes it.
+- `CAVUNO_API_KEY` still takes precedence over a saved session when set.
+
 ## 1.21.0 — 2026-11-04
 
 - **`cavuno settings profile-fields-list`** and **`profile-fields-set`** read
