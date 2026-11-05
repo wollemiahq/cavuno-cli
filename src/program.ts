@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 
 import { registerAnalyticsCommand } from './commands/analytics.js';
+import { refreshStoredSession, registerAuthCommand } from './commands/auth.js';
 import { registerBackfillCommand } from './commands/backfill.js';
 import { registerBillingCommand } from './commands/billing.js';
 import { registerBlogCommand } from './commands/blog.js';
@@ -36,6 +37,7 @@ import { registerTransactionsCommand } from './commands/transactions.js';
 import { registerWebhooksCommand } from './commands/webhooks.js';
 
 export const PUBLIC_GROUPS = [
+  'auth',
   'jobs',
   'builder',
   'usage',
@@ -87,8 +89,14 @@ export function createCliProgram(version: string) {
       '--format <format>',
       'Output format: json (default, pipe-friendly) or table (human-friendly)',
       'json',
-    );
+    )
+    .hook('preAction', async (_root, action) => {
+      // `auth` manages the session itself; every other command needs a live token.
+      if (action.parent?.name() === 'auth') return;
+      await refreshStoredSession(action.optsWithGlobals<{ apiUrl?: string }>());
+    });
 
+  registerAuthCommand(program);
   registerJobsCommand(program);
   registerBuilderCommand(program);
   registerUsageCommand(program);
