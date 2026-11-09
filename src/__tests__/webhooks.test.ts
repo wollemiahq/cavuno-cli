@@ -1,5 +1,13 @@
 import { Command } from 'commander';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from 'vitest';
 
 const {
   mockList,
@@ -69,7 +77,7 @@ describe('webhooks CLI command registration', () => {
   let originalKey: string | undefined;
   let originalUrl: string | undefined;
   let logSpy: ReturnType<typeof vi.spyOn>;
-  let errSpy: ReturnType<typeof vi.spyOn>;
+  let errSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     originalKey = process.env.CAVUNO_API_KEY;
