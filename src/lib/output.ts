@@ -1,3 +1,5 @@
+import { stripVTControlCharacters } from 'node:util';
+
 /**
  * Output formatters for CLI subcommands.
  *
@@ -23,10 +25,12 @@ export function printTable(rows: Array<Record<string, unknown>>): void {
   }
   const cols = Object.keys(rows[0]!);
   const widths = cols.map((c) =>
-    Math.max(c.length, ...rows.map((r) => formatCell(r[c]).length)),
+    Math.max(formatCell(c).length, ...rows.map((r) => formatCell(r[c]).length)),
   );
 
-  const header = cols.map((c, i) => c.padEnd(widths[i]!)).join('  ');
+  const header = cols
+    .map((c, i) => formatCell(c).padEnd(widths[i]!))
+    .join('  ');
   console.log(header);
   console.log(widths.map((w) => '─'.repeat(w)).join('  '));
   for (const row of rows) {
@@ -41,7 +45,10 @@ function formatCell(v: unknown): string {
   if (v === null || v === undefined) return '';
   if (Array.isArray(v)) return `[${v.length}]`;
   if (typeof v === 'object') return '{…}';
-  return String(v);
+  return stripVTControlCharacters(String(v)).replace(
+    /[\u0000-\u001f\u007f-\u009f]/gu,
+    ' ',
+  );
 }
 
 export function print(
