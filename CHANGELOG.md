@@ -3,6 +3,24 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.24.0 — 2026-11-12
+
+- **`cavuno contacts`** works with everyone the board can email, one row per
+  person. `list` filters by `--status`, `--subscription`, `--role`,
+  `--source` and `--search`; `get`, `emails`, `activity`, `job-alerts`,
+  `job-alert` and `subscription` read one contact.
+- **`unsubscribe`**, **`resubscribe`**, **`remove-subscription`** and
+  **`remove-job-alert`** change a contact's email and need `--yes`.
+  `resubscribe` undoes an unsubscribe your team made at once; otherwise it
+  emails the person a confirmation link, or is refused with 409 when they
+  turned the email off themselves.
+
+## 1.23.1 — 2026-11-11
+
+- Table output strips terminal control characters and escape sequences from
+  cell values and column headers, so data returned by the API cannot change
+  how your terminal displays it.
+
 ## 1.23.0 — 2026-11-05
 
 - **`cavuno todos list`** reads the board's to-dos in Home's order, with each
