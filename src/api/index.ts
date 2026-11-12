@@ -123,6 +123,12 @@ export {
   type SubscriberExportQuery,
   type SubscriberImportOptions,
 } from './subscribers.js';
+export {
+  createContactsClient,
+  type ContactsClient,
+  type ContactListQuery,
+  type ContactSubscriptionKind,
+} from './contacts.js';
 export { createTaxonomiesClient, type TaxonomiesClient } from './taxonomies.js';
 export {
   createMembersClient,

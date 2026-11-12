@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.23.1 — 2026-11-11
+
+- Table output strips terminal control characters and escape sequences from
+  cell values and column headers, so data returned by the API cannot change
+  how your terminal displays it.
+
 ## 1.23.0 — 2026-11-05
 
 - **`cavuno todos list`** reads the board's to-dos in Home's order, with each
