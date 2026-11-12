@@ -1,6 +1,6 @@
 {
-  "version": "1.23.0",
-  "generatedAt": "2026-11-04T23:15:43.664Z",
+  "version": "1.23.1",
+  "generatedAt": "2026-11-12T06:11:13.017Z",
   "groups": [
     {
       "name": "auth",
@@ -6138,7 +6138,7 @@
         },
         {
           "name": "resubscribe",
-          "description": "Admin-resubscribe a previously unsubscribed subscriber (clears unsubscribedAt, reactivates alerts).",
+          "description": "Undo an unsubscribe your team made (clears unsubscribedAt, reactivates alerts). Refused with 409 when the person unsubscribed themselves or never confirmed; `cavuno contacts resubscribe` emails them a confirmation link instead.",
           "synopsis": "cavuno subscribers resubscribe <id> [options]",
           "arguments": [
             {
@@ -6238,6 +6238,309 @@
             "cavuno subscribers import ./subscribers.csv --no-send-confirmation"
           ],
           "mapsTo": "POST /v1/subscribers/import"
+        }
+      ]
+    },
+    {
+      "name": "contacts",
+      "description": "Everyone the board can email, one row per person, with their job alerts, job matches and marketing consent. You can turn subscriptions off but never add one.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List contacts, newest first (paginated).",
+          "synopsis": "cavuno contacts list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--search <query>",
+              "description": "Case-insensitive substring match on email",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "subscribed | pending | waitlisted | unsubscribed | suppressed",
+              "required": false
+            },
+            {
+              "flags": "--subscription <kind>",
+              "description": "Only contacts who still have this subscription: job_alerts | job_matches | marketing",
+              "required": false
+            },
+            {
+              "flags": "--role <role>",
+              "description": "candidate | employer | subscriber (no sign-in on the board)",
+              "required": false
+            },
+            {
+              "flags": "--source <source>",
+              "description": "form | import | job_alert_form | sign_up",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 50)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts list",
+            "cavuno contacts list --status suppressed",
+            "cavuno contacts list --subscription marketing --search alice"
+          ],
+          "mapsTo": "GET /v1/contacts"
+        },
+        {
+          "name": "get",
+          "description": "Fetch one contact: status, suppression reason, each subscription with its status, source and last email.",
+          "synopsis": "cavuno contacts get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts get boardUsers_01EXAMPLE"
+          ],
+          "mapsTo": "GET /v1/contacts/:id"
+        },
+        {
+          "name": "emails",
+          "description": "The emails sent to a contact and whether each was delivered, delayed or bounced. Opens and clicks are never recorded.",
+          "synopsis": "cavuno contacts emails <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts emails boardUsers_01EXAMPLE"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/emails"
+        },
+        {
+          "name": "activity",
+          "description": "What happened to a contact and when: signed up, confirmed, waitlisted, unsubscribed, suppressed.",
+          "synopsis": "cavuno contacts activity <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts activity boardUsers_01EXAMPLE"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/activity"
+        },
+        {
+          "name": "job-alerts",
+          "description": "A contact's job alerts, each with its criteria and frequency.",
+          "synopsis": "cavuno contacts job-alerts <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts job-alerts boardUsers_01EXAMPLE"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/job-alerts"
+        },
+        {
+          "name": "job-alert",
+          "description": "Fetch one of a contact's job alerts.",
+          "synopsis": "cavuno contacts job-alert <id> <alertId>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "alertId",
+              "description": "Job alert ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts job-alert boardUsers_01EXAMPLE jobAlerts_01EXAMPLE"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/job-alerts/:alertId"
+        },
+        {
+          "name": "subscription",
+          "description": "Fetch one of a contact's subscriptions and its status.",
+          "synopsis": "cavuno contacts subscription <id> <kind>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "kind",
+              "description": "job_alerts | job_matches | marketing",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts subscription boardUsers_01EXAMPLE marketing"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/subscriptions/:kind"
+        },
+        {
+          "name": "unsubscribe",
+          "description": "Stop every email to a contact: job alerts, job matches and marketing. Recorded as your team’s unsubscribe; see `resubscribe` for bringing them back.",
+          "synopsis": "cavuno contacts unsubscribe <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts unsubscribe boardUsers_01EXAMPLE --yes"
+          ],
+          "mapsTo": "POST /v1/contacts/:id/unsubscribe"
+        },
+        {
+          "name": "resubscribe",
+          "description": "Bring back an unsubscribed contact. Undoes it at once when your team made every unsubscribe and the address is confirmed (outcome resubscribed). Otherwise, when job alerts are off, emails a confirmation link and their alerts come back on the click (outcome confirmation_sent). Refused (409) when only job matches or marketing the person turned off themselves are off.",
+          "synopsis": "cavuno contacts resubscribe <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts resubscribe boardUsers_01EXAMPLE --yes"
+          ],
+          "mapsTo": "POST /v1/contacts/:id/resubscribe"
+        },
+        {
+          "name": "remove-subscription",
+          "description": "Turn off one of a contact’s subscriptions. Job alerts stay saved but stop; marketing is withdrawn as an operator request.",
+          "synopsis": "cavuno contacts remove-subscription <id> <kind> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "kind",
+              "description": "job_alerts | job_matches | marketing",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts remove-subscription boardUsers_01EXAMPLE marketing --yes"
+          ],
+          "mapsTo": "DELETE /v1/contacts/:id/subscriptions/:kind"
+        },
+        {
+          "name": "remove-job-alert",
+          "description": "Delete one of a contact’s job alerts. Their other alerts keep sending. This cannot be undone.",
+          "synopsis": "cavuno contacts remove-job-alert <id> <alertId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "alertId",
+              "description": "Job alert ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts remove-job-alert boardUsers_01EXAMPLE jobAlerts_01EXAMPLE --yes"
+          ],
+          "mapsTo": "DELETE /v1/contacts/:id/job-alerts/:alertId"
         }
       ]
     },
