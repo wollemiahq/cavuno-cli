@@ -198,7 +198,7 @@ export function registerSubscribersCommand(root: Command): void {
       subscribers
         .command('resubscribe')
         .description(
-          'Admin-resubscribe a previously unsubscribed subscriber (clears unsubscribedAt, reactivates alerts).',
+          'Undo an unsubscribe your team made (clears unsubscribedAt, reactivates alerts). Refused with 409 when the person unsubscribed themselves or never confirmed; `cavuno contacts resubscribe` emails them a confirmation link instead.',
         )
         .argument('<id>', 'Subscriber ID'),
     ).action(async function (this: Command, id: string) {
