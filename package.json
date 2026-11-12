@@ -1,6 +1,6 @@
 {
   "name": "cavuno",
-  "version": "1.23.0",
+  "version": "1.23.1",
   "description": "Manage your Cavuno job board from the command line.",
   "keywords": [
     "ai-agent",
@@ -68,7 +68,7 @@
     "@types/node": "24.9.1",
     "tsup": "^8.4.0",
     "tsx": "^4.19.2",
-    "vitest": "^3.2.6",
+    "vitest": "^5.1.0",
     "typescript": "^5.9.3",
     "@typescript/native-preview": "7.0.0-dev.20260707.2"
   },
