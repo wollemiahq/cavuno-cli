@@ -16,11 +16,12 @@ export type ContactSubscriptionKind =
 /**
  * Facade for `/v1/contacts`: everyone the board can email, one row per
  * person, with their job alerts, job matches and marketing consent. Operators
- * can turn subscriptions off but never add one; `resubscribe` undoes an
+ * can turn subscriptions off but never add one (`addTopic` only narrows
+ * marketing a person already confirmed); `resubscribe` undoes an
  * unsubscribe the team made, or emails the person a confirmation link.
  * `/v1/subscribers` stays the job alert view.
  *
- * Writes send an `Idempotency-Key`: the two DELETEs require one, and the
+ * Writes send an `Idempotency-Key`: the DELETEs require one, and the
  * POSTs replay a repeated key instead of acting twice.
  */
 export function createContactsClient(opts: CavunoClientOptions) {
@@ -71,6 +72,21 @@ export function createContactsClient(opts: CavunoClientOptions) {
     ) =>
       c.DELETE('/contacts/{id}/job-alerts/{alertId}', {
         params: { path: { id, alertId } },
+        headers: headers(idempotency),
+      }),
+    topic: (id: string, key: string) =>
+      c.GET('/contacts/{id}/topics/{key}', {
+        params: { path: { id, key } },
+      }),
+    addTopic: (id: string, key: string, idempotency: IdempotencyOptions) =>
+      c.POST('/contacts/{id}/topics', {
+        ...contact(id),
+        body: { key },
+        headers: headers(idempotency),
+      }),
+    removeTopic: (id: string, key: string, idempotency: IdempotencyOptions) =>
+      c.DELETE('/contacts/{id}/topics/{key}', {
+        params: { path: { id, key } },
         headers: headers(idempotency),
       }),
   };
