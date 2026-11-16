@@ -422,7 +422,7 @@ export interface paths {
     put?: never;
     /**
      * Create a Backfill rule
-     * @description Create a named Backfill rule using the same typed rule-card conditions and filters as the dashboard form. An empty rules array requires at least one nonempty structured filter. Requires an `Idempotency-Key` header.
+     * @description Create a named Backfill rule using the same typed rule-card conditions and filters as the dashboard form. An empty rules array requires at least one nonempty structured filter. Conditions and filters identical to an existing rule return that rule unchanged, with its own `jobLimit`; change its limit with `PATCH /backfill/rules/{id}`. Requires an `Idempotency-Key` header.
      */
     post: operations['createBackfillRule'];
     delete?: never;
@@ -995,6 +995,26 @@ export interface paths {
      * @description Updates the specified blog tag by setting the values of the parameters passed. Any parameters not provided will be left unchanged. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     patch: operations['updateBlogTag'];
+    trace?: never;
+  };
+  '/campaign-readiness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve campaign readiness
+     * @description Retrieves what your Board needs before it can send email campaigns: a paid plan, a verified sending domain, a verified bulk subdomain and a mailing address. Each item's status says whether it's done, and `blocking_item` names the first one left.
+     */
+    get: operations['getCampaignReadiness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/candidates': {
@@ -2553,6 +2573,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/email-domains/bulk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve the bulk sending domain
+     * @description Returns the board’s bulk sending domain, the subdomain of its sending domain that marketing email will send from, with its status and what is left to set up.
+     */
+    get: operations['getMarketingEmailDomain'];
+    put?: never;
+    /**
+     * Add a bulk sending domain
+     * @description Adds the board’s bulk sending domain, a subdomain of its verified sending domain (`updates.<domain>` by default), and returns the DNS records to publish. Marketing email gets its own domain so its reputation stays apart from sign-in and transactional email. The setup loop is: publish every required record in `dnsRecords`, publish a DMARC record if `dmarcFound` is false, then call `POST /email-domains/bulk/verify`. Once DNS and DMARC pass, verify starts the domain test, which finishes within about two minutes: read `GET /email-domains/bulk` for `domainTest` and `status` rather than calling verify again, since each run sends a test message. Cavuno also re-checks DNS and DMARC in the background, and runs the first domain test by itself once both pass within 72 hours of adding the domain. Requires a verified sending domain and a plan that includes branding removal.
+     */
+    post: operations['createMarketingEmailDomain'];
+    /**
+     * Delete the bulk sending domain
+     * @description Removes the bulk sending domain. Its DNS records can then be deleted. Deleting the sending domain removes it too.
+     */
+    delete: operations['deleteMarketingEmailDomain'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-domains/bulk/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Verify the bulk sending domain
+     * @description Checks the DNS records and DMARC now and returns the updated domain. Once both pass, it also starts the email provider’s domain test in the background, which sends one test message from the domain and reports within about two minutes: read `GET /email-domains/bulk` for the result. A test already in progress is not started again. If `dnsRecords` was empty, this also retries setting the domain up with the email provider.
+     */
+    post: operations['verifyMarketingEmailDomain'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/email-domains/{id}': {
     parameters: {
       query?: never;
@@ -2595,6 +2663,195 @@ export interface paths {
      * @description Checks the domain’s DNS records now and returns the updated domain. Call it after publishing the records in `dnsRecords`; DNS changes can take a few minutes to propagate, so a `pending` or `failed` result right after publishing is normal. If `dnsRecords` was empty, this also retries setting the domain up with the email provider.
      */
     post: operations['verifyEmailDomain'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List email template designs
+     * @description Returns the board’s email templates, System first. A template designs the frame of the emails that use it; each email’s wording comes from `/v1/email-templates`, and the footer is added by Cavuno. The list is short and returned in one page.
+     */
+    get: operations['listEmailLayouts'];
+    put?: never;
+    /**
+     * Create an email template design
+     * @description Creates a template as a copy of System or another template. It is used by no email until it is published and assigned.
+     */
+    post: operations['createEmailLayout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an email template design
+     * @description Retrieves a template with its draft: the source files, the compiled HTML and what blocks publishing it.
+     */
+    get: operations['getEmailLayout'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an email template design
+     * @description Deletes a template and its versions. Refused for System, and while any email uses the template.
+     */
+    delete: operations['deleteEmailLayout'];
+    options?: never;
+    head?: never;
+    /** Rename an email template design */
+    patch: operations['updateEmailLayout'];
+    trace?: never;
+  };
+  '/email-layouts/{id}/draft': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update an email template design draft
+     * @description Replaces the draft’s source files. Starts an asynchronous `email_layouts.compile` operation that compiles them in an isolated sandbox and stores the result as the draft, including a draft that doesn’t compile. Once it succeeds, read the template for the compiled HTML and `draft.problems`, what blocks publishing it. The operation fails with `email_layouts_revision_conflict` if the draft changed after this request. Emails keep sending the published version.
+     */
+    put: operations['updateEmailLayoutDraft'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Duplicate an email template design
+     * @description Creates a new template from this template’s draft.
+     */
+    post: operations['duplicateEmailLayout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/publish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish an email template design
+     * @description Starts an asynchronous `email_layouts.publish` operation. It renders every email that can use the template with sample data and the board’s brand, and makes the draft live as a new version only when each one renders, keeps its footer and required links, and stays under 100 KB. Otherwise the operation fails with `email_layouts_publish_refused`, its `error.message` lists every problem, one per line, and the published version keeps sending. Once it succeeds, the template’s `currentVersionId` is the new version. The newest 50 versions are kept.
+     */
+    post: operations['publishEmailLayout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send a test email with a template design
+     * @description Sends one email rendered with the template’s draft, sample values and your board’s branding to the email address of the member making the request (for an API key, the member who created it). A board can send 20 test emails an hour, shared with the other test sends.
+     */
+    post: operations['testEmailLayout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List email template design versions
+     * @description Returns the template’s published versions, newest first.
+     */
+    get: operations['listEmailLayoutVersions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/versions/{versionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve an email template design version
+     * @description Retrieves a published version with its source and HTML.
+     */
+    get: operations['getEmailLayoutVersion'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email-layouts/{id}/versions/{versionId}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore an email template design version
+     * @description Copies a version into the draft. Emails keep sending the published version until the draft is published again.
+     */
+    post: operations['restoreEmailLayoutVersion'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3907,6 +4164,58 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/marketing-topics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List marketing topics
+     * @description The board’s live marketing topics, oldest first: the kinds of marketing email people can choose, such as a weekly newsletter. A person’s marketing consent covers all of them; topics only narrow what they get. At most 20, so the list is never paginated.
+     */
+    get: operations['listMarketingTopics'];
+    put?: never;
+    /**
+     * Create a marketing topic
+     * @description Adds a topic sign-up forms can offer. Create it before writing a form that uses its key. A board has at most 20 live topics.
+     */
+    post: operations['createMarketingTopic'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/marketing-topics/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a marketing topic
+     * @description Retrieves a topic by key, including a removed one (with `archivedAt` set), so you can read back a create, rename or removal.
+     */
+    get: operations['getMarketingTopic'];
+    put?: never;
+    post?: never;
+    /**
+     * Remove a marketing topic
+     * @description Removes a topic from sign-up forms and email preferences. It is archived, not deleted: people’s choices stay as history, and its key can’t be reused. It can’t be undone.
+     */
+    delete: operations['deleteMarketingTopic'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a marketing topic
+     * @description Changes a live topic’s name or its `addNewSignups` setting. Its key never changes.
+     */
+    patch: operations['updateMarketingTopic'];
     trace?: never;
   };
   '/me': {
@@ -5843,7 +6152,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Get a taxonomy rule
+     * @description One rule of one taxonomy, as `GET /v1/taxonomies/rules` lists it. 404 once it is removed, or once a merge is undone.
+     */
+    get: operations['getTaxonomiesRule'];
     put?: never;
     post?: never;
     /**
@@ -7578,6 +7891,77 @@ export interface components {
       /** @description Ordered Cavuno company IDs (max 100). Partial success is returned per item. */
       companyIds: string[];
     };
+    BulkEmailDomain: {
+      id: string;
+      /** @enum {string} */
+      object: 'bulk_email_domain';
+      /** @description The bulk sending hostname. */
+      domain: string;
+      /**
+       * @description `verified` once the DNS records verify, a DMARC record covers the domain and the email provider’s domain test passes. `pending` while any of those is still to come (see `nextStep`). `failed` when the last DNS check or the last domain test failed.
+       * @enum {string}
+       */
+      status: 'pending' | 'verified' | 'failed';
+      /**
+       * @description What is left, in order: `dns` (publish `dnsRecords` and verify), `dmarc` (publish a DMARC TXT record at `_dmarc.<domain>` or on the organisational domain; any policy, `p=none` included), `domain_test` (verify to run the test, then read the domain after about two minutes; if it failed, fix `domainTest.failedChecks` and verify again). `null` once verified.
+       * @enum {string|null}
+       */
+      nextStep: 'dns' | 'dmarc' | 'domain_test' | null;
+      senderLocalPart: string;
+      /** @description The From address marketing email will use. */
+      senderAddress: string;
+      /** @description Records to publish at the domain’s DNS provider. Empty while the domain is still being set up with the email provider; call verify to retry. */
+      dnsRecords: components['schemas']['EmailDomainDnsRecord'][];
+      /** @description Whether the last lookup found a DMARC record for the domain or its organisational domain. */
+      dmarcFound: boolean;
+      /** @description The last domain test, which sends one test message from the domain. `null` until it has run. */
+      domainTest: {
+        passed: boolean;
+        /** @description Checks passed out of all checks the test ran. */
+        score: {
+          pass: number;
+          total: number;
+        };
+        /** @description Required checks that did not pass: `spf_aligned`, `dkim_aligned`, `aligned_auth`, `dmarc`, `from_mx`, or `no_report` when no report arrived in time. */
+        failedChecks: string[];
+        /** @description The full report from the email provider. */
+        reportUrl: string | null;
+        checkedAt: string;
+      } | null;
+      verifiedAt: string | null;
+      lastCheckedAt: string | null;
+      createdAt: string;
+    };
+    CampaignReadiness: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign_readiness';
+      /** @description True when every item is complete and campaigns can be sent. */
+      ready: boolean;
+      blocking_item: components['schemas']['CampaignReadinessItemKey'];
+      /** @description Every item, in setup order: plan, sending_domain, bulk_domain, mailing_address. */
+      items: components['schemas']['CampaignReadinessItem'][];
+    };
+    CampaignReadinessItem: {
+      key: components['schemas']['CampaignReadinessItemKey'] & unknown;
+      /**
+       * @description complete; pending (a domain is added and waiting on its DNS records); failed (the last check of a domain failed); or missing (not set up yet).
+       * @enum {string}
+       */
+      status: 'complete' | 'pending' | 'failed' | 'missing';
+    };
+    /**
+     * @description The first item that is not complete, in the order of `items`. Null when ready.
+     * @enum {string|null}
+     */
+    CampaignReadinessItemKey:
+      | 'plan'
+      | 'sending_domain'
+      | 'bulk_domain'
+      | 'mailing_address'
+      | null;
     Candidate: {
       /** @description Unique identifier for the candidate. */
       id: string;
@@ -7613,6 +7997,18 @@ export interface components {
        * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Sign-in returns once neither an operator deactivation nor a membership deactivation (`POST /candidates/reconcile` with `active: false`) is in effect; the candidate then signs in again to establish a new session.
        */
       deactivatedAt: string | null;
+      /**
+       * @description Whether the candidate appears in the board's talent directory, and if not, why. `listed_public`: shown to everyone who can browse the directory. `listed_signed_in`: shown only to signed-in viewers who can browse it (profile visibility logged-in only). `hidden`: profile visibility is hidden or was never set. `deactivated`: sign-in is disabled (see `deactivatedAt`). `incomplete_profile`: visible, but the profile has none of headline, skills, location, bio, work experience, education, or languages, so there is nothing to list; it is listed shortly after one is added. `pending`: a profile change is still being applied to talent search. This usually takes seconds; a failing update is retried for several hours. `sync_failed`: updating talent search failed after every retry, so the directory may not reflect this profile; the candidate's next profile change tries again. Describes the candidate only: it does not reflect whether the board's talent directory is turned on. Operator-only; never shown to employers or the public.
+       * @enum {string}
+       */
+      talentDirectoryStatus:
+        | 'listed_public'
+        | 'listed_signed_in'
+        | 'hidden'
+        | 'deactivated'
+        | 'incomplete_profile'
+        | 'pending'
+        | 'sync_failed';
       profile: components['schemas']['AdminCandidateProfile'];
       /** @description Number of jobs the candidate has saved. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
       savedJobCount: number;
@@ -8268,6 +8664,8 @@ export interface components {
         /** @description ISO-8601 timestamp of when the email was sent. */
         sentAt: string;
       } | null;
+      /** @description The person's tags, such as `audience:employer`, oldest first. Sign-up forms add them. */
+      tags: string[];
     };
     ContactActivity: {
       /**
@@ -8306,14 +8704,15 @@ export interface components {
        */
       object: 'contact_email';
       /**
-       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, or a job alert sign-up confirmation.
+       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, or a newsletter sign-up confirmation (`board.subscribe`).
        * @enum {string}
        */
       kind:
         | 'job_alert_digest'
         | 'job_matches_digest'
         | 'import_confirmation'
-        | 'job_alert_confirmation';
+        | 'job_alert_confirmation'
+        | 'subscribe_confirmation';
       /** @description The email's subject line. */
       subject: string;
       /**
@@ -8397,6 +8796,28 @@ export interface components {
       since: string | null;
       /** @description For `marketing`, the wording the person agreed to when they signed up as a guest. `null` otherwise. */
       consentText: string | null;
+      /** @description For `marketing`, the person's topics on the board's live topics: the kinds of marketing email they chose. Empty when they have none or the board has no topics. `null` for other kinds. */
+      topics: components['schemas']['ContactTopic'][] | null;
+    };
+    ContactTopic: {
+      /** @description The topic’s key. */
+      key: string;
+      /** @description The topic’s name. */
+      name: string;
+      /**
+       * @description `subscribed` when the person gets it, `pending` while it waits for them to confirm (their address, or a sign-up for a topic they had left), `unsubscribed` once it was removed.
+       * @enum {string}
+       */
+      status: 'subscribed' | 'pending' | 'unsubscribed';
+      /** @description ISO-8601 timestamp of when it was granted, or requested while pending. */
+      since: string | null;
+      /** @description The wording the person agreed to on the sign-up form that added it, or `null`. */
+      consentText: string | null;
+      /**
+       * @description How it was added: a sign-up (`signup`), the person on their email preferences (`preference_page`), or an operator (`operator`).
+       * @enum {string}
+       */
+      source: 'signup' | 'preference_page' | 'operator';
     };
     Coupon: {
       id: string;
@@ -8517,6 +8938,10 @@ export interface components {
       title: string;
       /** @enum {string} */
       status?: 'draft' | 'scheduled' | 'published';
+    };
+    CreateBulkEmailDomainBody: {
+      /** @description Hostname for marketing email, a subdomain of the board’s verified sending domain. Defaults to `updates.<sending domain>`. Normalized to lowercase. */
+      domain?: string;
     };
     CreateCandidateBody: {
       /**
@@ -8681,6 +9106,12 @@ export interface components {
       senderName?: string;
       /** @description Mailbox before the `@`, for example `info` or `hello`. Defaults to `info`. Normalized to lowercase. */
       senderLocalPart?: string;
+    };
+    CreateEmailLayoutBody: {
+      /** @description Template name shown in the dashboard, 1 to 80 characters. */
+      name: string;
+      /** @description The template to start from: `system` (the default) or another template’s id. Its draft is copied. */
+      copyFrom?: string;
     };
     CreateEmployerMembershipInviteBody: {
       /** @description The company to invite to. */
@@ -8881,6 +9312,14 @@ export interface components {
       slug?: string;
       aliasSlugs?: string[];
       sourceLocale?: string;
+    };
+    CreateMarketingTopicBody: {
+      /** @description What people see on sign-up forms and their email preferences, such as `Weekly newsletter`. 1 to 60 characters. */
+      name: string;
+      /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. Defaults to the name in lowercase with dashes (`weekly-newsletter`). */
+      key?: string;
+      /** @description Add new marketing sign-ups: a sign-up that names no topic (a newsletter form without `topics`, or the marketing checkbox on the job alert form, at checkout or on sign-up) also gets this topic. A sign-up that names topics gets only those, and someone who removed this topic themselves is never added back. Turning it on adds no one who already signed up. Defaults to `true`. */
+      addNewSignups?: boolean;
     };
     CreatePlanBody: {
       /** @description Display name for the plan. */
@@ -9613,6 +10052,10 @@ export interface components {
       name: string;
       expectedValue: string | null;
     };
+    DuplicateEmailLayoutBody: {
+      /** @description Name of the copy, 1 to 80 characters. Defaults to the template’s name followed by “copy”. */
+      name?: string;
+    };
     DuplicateJobBody: Record<string, never>;
     EmailDomain: {
       id: string;
@@ -9654,10 +10097,163 @@ export interface components {
       value: string;
       /** @description Suggested TTL. `Auto` means the DNS provider’s default. */
       ttl: string;
-      /** @description Whether the domain needs this record to send. DMARC is recommended but optional. */
+      /** @description Whether the domain needs this record to send. DMARC is recommended but optional on a sending domain, and required on a bulk sending domain. */
       required: boolean;
       /** @description Last check of this record: `pending`, `verified`, or `failed`. */
       status: string;
+    };
+    EmailLayout: {
+      /** @description Unique identifier for the template. `system` for the System template before the board first changes it. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_layout';
+      /** @description Template name. */
+      name: string;
+      /** @description What the template designs. `layout`: the frame around a system email’s wording. */
+      kind: string;
+      /**
+       * @description `system` for the System template, which can’t be deleted; otherwise `null`.
+       * @enum {string|null}
+       */
+      role: 'system' | null;
+      /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
+      currentVersionId: string | null;
+      /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
+      createdAt: string | null;
+      /** @description The working copy. Emails keep sending the published version until the draft is published. */
+      draft: {
+        /** @description Changes on every draft write; send it as `baseRevision`. */
+        revision: number;
+        /** @description The draft’s source files. */
+        files: {
+          /** @description File name. */
+          path: string;
+          /** @description The file’s source. */
+          contents: string;
+        }[];
+        /** @description The compiled HTML, with slots such as `{{{content}}}` and brand tokens unfilled, or `null` when the source doesn’t compile. */
+        compiledHtml: string | null;
+        /** @description What blocks publishing the draft, from its last compile. Empty when it can be published. */
+        problems: string[];
+        /** @description The version the draft was restored from, if it was. */
+        restoredFromVersionId: string | null;
+        /** @description Time the draft last changed. ISO 8601 datetime. */
+        updatedAt: string | null;
+      };
+    };
+    EmailLayoutFile: {
+      /** @description File name: lowercase letters, digits and dashes, ending in `.tsx` or `.ts`. One file must be `template.tsx`. */
+      path: string;
+      /** @description The file’s source. */
+      contents: string;
+    };
+    EmailLayoutSummary: {
+      /** @description Unique identifier for the template. `system` for the System template before the board first changes it. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_layout';
+      /** @description Template name. */
+      name: string;
+      /** @description What the template designs. `layout`: the frame around a system email’s wording. */
+      kind: string;
+      /**
+       * @description `system` for the System template, which can’t be deleted; otherwise `null`.
+       * @enum {string|null}
+       */
+      role: 'system' | null;
+      /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
+      currentVersionId: string | null;
+      /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
+      createdAt: string | null;
+      /** @description How many emails use this template, counting every email left on System. */
+      usedBy: number;
+    };
+    EmailLayoutTest: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_layout_test';
+      /** @description The template that was tested. */
+      layoutId: string;
+      /** @description The email that was sent. */
+      emailType: string;
+      /**
+       * @description Always `true` when the test was sent.
+       * @enum {boolean}
+       */
+      sent: true;
+    };
+    EmailLayoutVersion: {
+      /** @description Unique identifier for the version. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_layout_version';
+      /** @description The template the version belongs to. */
+      layoutId: string;
+      /** @description Version number, counting up from 1 per template. */
+      number: number;
+      /** @description Time the version was published. ISO 8601 datetime. */
+      createdAt: string;
+      /** @description Who published the version. */
+      createdBy: {
+        /** @description `user_session`, `api_key` or `oauth_token`. */
+        type: string;
+        /** @description The member, API key or OAuth token id. */
+        id: string;
+      };
+      /** @description The version this one was restored from, if it was. */
+      restoredFromVersionId: string | null;
+      /** @description SHA-256 of the source files. */
+      sourceHash: string;
+      /** @description SHA-256 of the compiled HTML. */
+      htmlHash: string;
+      /** @description The version’s source files. */
+      files: {
+        /** @description File name. */
+        path: string;
+        /** @description The file’s source. */
+        contents: string;
+      }[];
+      /** @description The compiled HTML emails send with. */
+      compiledHtml: string;
+    };
+    EmailLayoutVersionSummary: {
+      /** @description Unique identifier for the version. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'email_layout_version';
+      /** @description The template the version belongs to. */
+      layoutId: string;
+      /** @description Version number, counting up from 1 per template. */
+      number: number;
+      /** @description Time the version was published. ISO 8601 datetime. */
+      createdAt: string;
+      /** @description Who published the version. */
+      createdBy: {
+        /** @description `user_session`, `api_key` or `oauth_token`. */
+        type: string;
+        /** @description The member, API key or OAuth token id. */
+        id: string;
+      };
+      /** @description The version this one was restored from, if it was. */
+      restoredFromVersionId: string | null;
+      /** @description SHA-256 of the source files. */
+      sourceHash: string;
+      /** @description SHA-256 of the compiled HTML. */
+      htmlHash: string;
     };
     EmailTemplate: {
       /** @description Unique identifier for the email template. Same as `type`. */
@@ -10389,8 +10985,6 @@ export interface components {
       resolvedCollectionFields: components['schemas']['ResolvedJobCollectionField'][];
       /** @description Long-form description of the role (HTML), or `null` if not specified. */
       description: string | null;
-      /** @description Where candidates apply, or `null` if not specified. An HTTPS URL or `mailto:` URI. */
-      applicationUrl: string | null;
       /** @description Hierarchical permit selection authored by the caller. Lossless round-trip with the input: `[{type:"world_region",value:"EMEA"}]` goes in and comes out the same. The three `remoteWorkPermit*` and `remoteWorldwide` fields below are read-only derived projections of this list. */
       remotePermits: {
         type: string;
@@ -10702,7 +11296,7 @@ export interface components {
     };
     JobOfficeLocationInput:
       | {
-          /** @description Free-form location string (e.g. `"Berlin, Germany"`, `"Utrecht, Netherlands"`, `"Mountain View, California, USA"`). Resolved server-side; rejected when no high-confidence match is found. */
+          /** @description Free-form location string (e.g. `"Berlin, Germany"`, `"Utrecht, Netherlands"`, `"Mountain View, California, USA"`). Resolved server-side; rejected with `400 jobs_unresolvable_location` when no high-confidence match is found. A failed lookup is cached, so sending the same string again fails the same way: resend the location as `{city, region, country}` instead. */
           query: string;
         }
       | {
@@ -10852,6 +11446,8 @@ export interface components {
       categories: string[];
       /** @description External identifier supplied by the caller on create, used for deduplication via `GET /v1/jobs?externalId=...`. `null` when no external identifier was set. */
       externalId: string | null;
+      /** @description Where candidates apply, or `null` if not specified. An HTTPS URL or `mailto:` URI. To find jobs with a given application URL, filter with `GET /v1/jobs?applicationUrl=...` instead of reading every job. */
+      applicationUrl: string | null;
       /** @description Board-defined custom-field values for this job, keyed by the field `key` (the definitions are published at `GET /v1/settings/job-form`). Each value is returned as stored: a string (`short_text` / `long_text` / a `single_select` option key), a string array (`multi_select` option keys), a boolean, or a number. Always an object: `{}` when the job has no custom-field values, never `null` or a missing field. Only real values are stored, so this never contains `null` or empty values. */
       customFieldValues: {
         [key: string]: string | string[] | boolean | number;
@@ -10909,6 +11505,23 @@ export interface components {
       withdrawn_at: string | null;
       updated_at: string;
       revision: number;
+    };
+    MarketingTopic: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'marketing_topic';
+      /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+      key: string;
+      /** @description The topic’s name. */
+      name: string;
+      /** @description Add new marketing sign-ups: a sign-up that names no topic (a newsletter form without `topics`, or the marketing checkbox on the job alert form, at checkout or on sign-up) also gets this topic. A sign-up that names topics gets only those, and someone who removed this topic themselves is never added back. Turning it on adds no one who already signed up. Topics created before this setting existed have it off. */
+      addNewSignups: boolean;
+      /** @description Time at which the topic was created. ISO 8601 datetime. */
+      createdAt: string;
+      /** @description Time at which the topic was removed, or null while it is live. ISO 8601 datetime. */
+      archivedAt: string | null;
     };
     MatchBackfillCompanyBody: {
       /** @description Zero-based index into the short-lived candidates array from list (needs_match). Re-validated server-side. */
@@ -11053,7 +11666,9 @@ export interface components {
         | 'custom_objects.records_import'
         | 'exports.generate'
         | 'candidates.remove'
-        | 'employers.remove';
+        | 'employers.remove'
+        | 'email_layouts.compile'
+        | 'email_layouts.publish';
       /**
        * @description Current state of the operation.
        * @enum {string}
@@ -11090,7 +11705,8 @@ export interface components {
           | 'import'
           | 'employer'
           | 'candidate'
-          | 'custom_object_type';
+          | 'custom_object_type'
+          | 'email_layout';
         id: string;
       } | null;
     };
@@ -11259,6 +11875,8 @@ export interface components {
       passwordProtectionEnabled?: boolean;
       jobAlertsEnabled?: boolean;
       jobRecommendationsEnabled: boolean;
+      /** @description The board's IANA time zone, such as `Europe/Berlin`, used for anyone whose own time zone is unknown. `null` or absent when none is set. */
+      timeZone?: string | null;
       recommendedTalentEnabled: boolean;
       candidatesEnabled?: boolean;
       employersEnabled?: boolean;
@@ -11421,6 +12039,8 @@ export interface components {
       jobAlertsEnabled?: boolean;
       /** @description Whether signed-in candidates can see personalized job recommendations. Absent board config defaults to `true`. */
       jobRecommendationsEnabled?: boolean;
+      /** @description The board's IANA time zone, such as `Europe/Berlin`, used for anyone whose own time zone is unknown. Stored in its canonical spelling; a name that is not a time zone is refused with 400. Pass `null` or an empty string to clear. */
+      timeZone?: string | unknown;
       /** @description Whether employers can see recommended talent matches for their jobs. Absent board config defaults to `false`. */
       recommendedTalentEnabled?: boolean;
       /** @description Whether candidate profiles are enabled on the board. */
@@ -11474,7 +12094,7 @@ export interface components {
       educationVerificationEnabled?: boolean;
       /** @description Switch the board's public MCP server at `<board origin>/mcp` on or off. When on, it serves only while the board has no password and is on a plan with API access. Absent board config means `true`. */
       mcpEnabled?: boolean;
-      /** @description Tools the board's MCP server leaves out, by name; every other tool is offered. Replaces the whole list: send `[]` to offer every tool. `get_company_salaries` is offered only while the board shows salaries, and `get_posting_plans` and `post_job_public` only while anyone can post a job on the board (posting not limited to members, and at least one public job plan that is free or paid by card). */
+      /** @description Tools the board's MCP server leaves out, by name; every other tool is offered. Replaces the whole list: send `[]` to offer every tool. `get_company_salaries` is offered only while the board shows salaries, and `get_posting_plans` and `post_job_public` only while anyone can post a job on the board (posting not limited to members, and at least one public job plan that is free or paid by card). The job seeker account tools (`get_my_profile`, `get_saved_jobs`, `list_job_alerts`, `list_my_applications`, `get_recommended_jobs`, `get_apply_link`, `get_my_access`, `get_job_access_link`) are offered only while job seekers can sign in to the board, and only on the board's own domains, where the person signs in to use them. Of those, `list_job_alerts` also needs job alerts on, `list_my_applications` applications on the board, `get_recommended_jobs` job recommendations, and `get_my_access` and `get_job_access_link` a job access paywall that sells access to job listings. */
       mcpDisabledTools?: (
         | 'search_jobs'
         | 'get_job'
@@ -11487,6 +12107,14 @@ export interface components {
         | 'get_company_salaries'
         | 'get_posting_plans'
         | 'post_job_public'
+        | 'get_my_profile'
+        | 'get_saved_jobs'
+        | 'list_job_alerts'
+        | 'list_my_applications'
+        | 'get_recommended_jobs'
+        | 'get_apply_link'
+        | 'get_my_access'
+        | 'get_job_access_link'
       )[];
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
@@ -12742,6 +13370,10 @@ export interface components {
       /** @description True when the company is excluded from backfill after this call. */
       excluded_from_backfill: boolean;
     };
+    RestoreEmailLayoutVersionBody: {
+      /** @description The `draft.revision` you read. The request is refused with 409 when the draft has changed since, so two editors never overwrite each other. */
+      baseRevision: number;
+    };
     ScalarProfileCustomFieldDefinition: components['schemas']['ProfileCustomFieldDefinition'] & {
       /** @enum {string} */
       type?:
@@ -13664,6 +14296,41 @@ export interface components {
       /** Format: date-time */
       decidedAt: string | null;
     };
+    TestEmailLayoutBody: {
+      /**
+       * @description The email to render with the template, as listed by `GET /v1/email-templates`. Job alert and job match digests are not accepted.
+       * @enum {string}
+       */
+      emailType:
+        | 'board-magic-link'
+        | 'board-email-verification'
+        | 'board-password-reset'
+        | 'board-work-email-verification'
+        | 'job-alert-subscription-confirmation'
+        | 'company-access-approved'
+        | 'company-access-rejected'
+        | 'public-job-submission-customer'
+        | 'public-job-submission-pending'
+        | 'public-job-submission-approved'
+        | 'billing-verification'
+        | 'board-new-message'
+        | 'board-job-invoice-on-issue'
+        | 'board-job-invoice-on-payment'
+        | 'board-email-change'
+        | 'board-email-changed-notice'
+        | 'board-account-deleted'
+        | 'board-company-invite'
+        | 'board-new-application'
+        | 'board-digital-product-purchase'
+        | 'board-digital-product-copy-ready'
+        | 'board-digital-product-updated'
+        | 'board-digital-product-download-link'
+        | 'board-tip-receipt'
+        | 'board-item-verification-code'
+        | 'board-item-verification-expiring'
+        | 'board-item-verification-lapsed'
+        | 'board-item-verification-decided';
+    };
     Todo: {
       /** @description Stable to-do id. Setup to-dos use the step name, for example `setup-payments`. */
       id: string;
@@ -14055,6 +14722,16 @@ export interface components {
       /** @description Mailbox before the `@`. Normalized to lowercase. */
       senderLocalPart?: string;
     };
+    UpdateEmailLayoutBody: {
+      /** @description Template name shown in the dashboard, 1 to 80 characters. */
+      name: string;
+    };
+    UpdateEmailLayoutDraftBody: {
+      /** @description The `draft.revision` you read. The request is refused with 409 when the draft has changed since, so two editors never overwrite each other. */
+      baseRevision: number;
+      /** @description Every source file of the template, replacing the draft’s. React Email TSX that may import only `react`, `@react-email/components`, the layout kit (`Content`, `Footer`, `Preview`, `BrandHead`, `BrandHeader`, `brand`) and its own files. At most 10 files and 64 KB in all. */
+      files: components['schemas']['EmailLayoutFile'][];
+    };
     UpdateEmployerMembershipBody: {
       /**
        * @description The new company role. `admin` manages the company team and profile; `member` does not.
@@ -14249,6 +14926,12 @@ export interface components {
       name?: string;
       slug?: string;
       sourceLocale?: string;
+    };
+    UpdateMarketingTopicBody: {
+      /** @description The new name, 1 to 60 characters. Unchanged when omitted. */
+      name?: string;
+      /** @description Add new marketing sign-ups: a sign-up that names no topic (a newsletter form without `topics`, or the marketing checkbox on the job alert form, at checkout or on sign-up) also gets this topic. A sign-up that names topics gets only those, and someone who removed this topic themselves is never added back. Turning it on adds no one who already signed up. Unchanged when omitted. */
+      addNewSignups?: boolean;
     };
     UpdateMemberBody: {
       /**
@@ -14467,6 +15150,7 @@ export interface components {
       name?: string;
     };
     UpdateTaxonomySettingsBody: {
+      /** @description What automatic tagging does with a tag that doesn't match your list, per taxonomy. Only the taxonomies you pass change; a change applies to tags that arrive after it. */
       unmatchedTagMode?: {
         /**
          * @description `create` adds a tag that matches no term to your list (the default). `ask` adds nothing and puts the tag in Suggested for you to answer.
@@ -19149,6 +19833,35 @@ export interface operations {
       };
     };
   };
+  getCampaignReadiness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CampaignReadiness'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listCandidates: {
     parameters: {
       query?: {
@@ -23812,6 +24525,187 @@ export interface operations {
       };
     };
   };
+  getMarketingEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BulkEmailDomain'];
+        };
+      };
+      /** @description The board has no bulk sending domain (`email_domains_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createMarketingEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['CreateBulkEmailDomainBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BulkEmailDomain'];
+        };
+      };
+      /** @description The hostname is malformed or is not a subdomain of the sending domain (`email_domains_invalid_hostname`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has a bulk sending domain (`email_domains_already_exists`), or has no verified sending domain (`email_domains_sending_domain_required`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteMarketingEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no bulk sending domain (`email_domains_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  verifyMarketingEmailDomain: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BulkEmailDomain'];
+        };
+      };
+      /** @description The plan does not include custom sender domains (`email_domains_plan_required`; Basic and above). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no bulk sending domain (`email_domains_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getEmailDomain: {
     parameters: {
       query?: never;
@@ -23987,6 +24881,551 @@ export interface operations {
       };
       /** @description The email provider failed or is unavailable (`email_domains_provider_error`). Retry later. */
       502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listEmailLayouts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/email-layouts */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['EmailLayoutSummary'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEmailLayoutBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayout'];
+        };
+      };
+      /** @description The request can’t apply (`email_layouts_invalid_request`): a name of the wrong length, the limit of 50 templates, or the System template, which can’t be deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayout'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The request can’t apply (`email_layouts_invalid_request`): a name of the wrong length, the limit of 50 templates, or the System template, which can’t be deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Emails still use the template (`email_layouts_in_use`). Assign them another template first. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEmailLayoutBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayout'];
+        };
+      };
+      /** @description The request can’t apply (`email_layouts_invalid_request`): a name of the wrong length, the limit of 50 templates, or the System template, which can’t be deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateEmailLayoutDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEmailLayoutDraftBody'];
+      };
+    };
+    responses: {
+      /** @description Compile operation started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OperationResource'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The draft changed since `baseRevision` (`email_layouts_revision_conflict`). Read the template again and retry. Or a compile of this template is still running (`email_layouts_operation_in_progress`): wait for its operation to finish. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The request body is larger than 1 MB. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  duplicateEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DuplicateEmailLayoutBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayout'];
+        };
+      };
+      /** @description The request can’t apply (`email_layouts_invalid_request`): a name of the wrong length, the limit of 50 templates, or the System template, which can’t be deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  publishEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Publish operation started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OperationResource'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A publish of this template is still running (`email_layouts_operation_in_progress`): wait for its operation to finish. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  testEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TestEmailLayoutBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayoutTest'];
+        };
+      };
+      /** @description The email can’t use a template (`email_layouts_invalid_request`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The member making the request is no longer an active member of the board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The draft doesn’t compile or can’t render an email (`email_layouts_draft_unrenderable`), the member has no email address (`email_layouts_no_test_recipient`), or the board is not set up yet (`email_layouts_board_not_configured`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has sent 20 test emails in the last hour (`email_layouts_test_rate_limited`). The `Retry-After` header gives the seconds to wait. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listEmailLayoutVersions: {
+    parameters: {
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 50, and the default is 25.
+         * @example 25
+         */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/email-layouts/system/versions */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['EmailLayoutVersionSummary'][];
+          };
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmailLayoutVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+        /** @description The version id, as returned by the versions list. */
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayoutVersion'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  restoreEmailLayoutVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The template id, or `system` for the board’s System template, which every email uses unless it is assigned another template. */
+        id: string;
+        /** @description The version id, as returned by the versions list. */
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RestoreEmailLayoutVersionBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailLayout'];
+        };
+      };
+      /** @description No template or version with this id on the board (`email_layouts_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The draft changed since `baseRevision` (`email_layouts_revision_conflict`). Read the template again and retry. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -27779,6 +29218,192 @@ export interface operations {
       };
       /** @description Rate limited. */
       429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listMarketingTopics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/marketing-topics */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['MarketingTopic'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateMarketingTopicBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The key is taken, by a live or a removed topic (`marketing_topics_key_taken`), or the board already has 20 topics (`marketing_topics_limit_reached`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description No topic with this key. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No live topic with this key. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateMarketingTopicBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No live topic with this key. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -31820,7 +33445,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description The subscriber has already confirmed (`subscribers_already_confirmed`) or is unsubscribed (`subscribers_already_unsubscribed`). */
+      /** @description The subscriber has already confirmed (`subscribers_already_confirmed`), is unsubscribed (`subscribers_already_unsubscribed`), or their address is suppressed after a hard bounce, a spam report or a refused send (`subscribers_email_suppressed`). Only a new address clears a suppression; nothing is sent. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -32872,6 +34497,41 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTaxonomiesRule: {
+    parameters: {
+      query: {
+        /** @description The taxonomy: `category`, `skill` or `market`. */
+        kind: 'category' | 'skill' | 'market';
+      };
+      header?: never;
+      path: {
+        /** @description The rule id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TaxonomyRule'];
+        };
+      };
+      /** @description Not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
