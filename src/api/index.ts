@@ -80,6 +80,13 @@ export {
   type EmailDomainsClient,
 } from './email-domains.js';
 export {
+  createEmailLayoutsClient,
+  type EmailLayoutsClient,
+  type CreateEmailLayoutBody,
+  type UpdateEmailLayoutDraftBody,
+  type EmailLayoutVersionListQuery,
+} from './email-layouts.js';
+export {
   createRedirectsClient,
   type RedirectsClient,
   type RedirectListQuery,
