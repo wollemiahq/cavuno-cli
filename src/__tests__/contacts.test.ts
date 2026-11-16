@@ -13,6 +13,9 @@ const client = vi.hoisted(() => ({
   resubscribe: vi.fn(),
   removeSubscription: vi.fn(),
   removeJobAlert: vi.fn(),
+  topic: vi.fn(),
+  addTopic: vi.fn(),
+  removeTopic: vi.fn(),
 }));
 
 vi.mock('../api/contacts.js', () => ({
@@ -122,6 +125,13 @@ describe('cavuno contacts', () => {
       'removeJobAlert',
       () => ['c1', 'a1', idem()],
     ],
+    [['topic', 'c1', 'weekly'], 'topic', () => ['c1', 'weekly']],
+    [['add-topic', 'c1', 'weekly'], 'addTopic', () => ['c1', 'weekly', idem()]],
+    [
+      ['remove-topic', 'c1', 'weekly', '--yes'],
+      'removeTopic',
+      () => ['c1', 'weekly', idem()],
+    ],
   ] as const)(
     '%j calls %s with its arguments in order',
     async (argv, method, args) => {
@@ -146,11 +156,15 @@ describe('cavuno contacts', () => {
       '--yes',
     );
     await expect(runCli('resubscribe', 'c1')).rejects.toThrow('--yes');
+    await expect(runCli('remove-topic', 'c1', 'weekly')).rejects.toThrow(
+      '--yes',
+    );
 
     expect(client.unsubscribe).not.toHaveBeenCalled();
     expect(client.removeSubscription).not.toHaveBeenCalled();
     expect(client.removeJobAlert).not.toHaveBeenCalled();
     expect(client.resubscribe).not.toHaveBeenCalled();
+    expect(client.removeTopic).not.toHaveBeenCalled();
   });
 
   it('removes one subscription with --yes and prints nothing for the 204', async () => {
