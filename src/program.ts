@@ -13,6 +13,7 @@ import { registerCouponsCommand } from './commands/coupons.js';
 import { registerDistributionCommand } from './commands/distribution.js';
 import { registerDomainsCommand } from './commands/domains.js';
 import { registerEmailDomainsCommand } from './commands/email-domains.js';
+import { registerEmailLayoutsCommand } from './commands/email-layouts.js';
 import { registerEmployerSubscriptionsCommand } from './commands/employer-subscriptions.js';
 import { registerEmployersCommand } from './commands/employers.js';
 import { registerFeedbackCommand } from './commands/feedback.js';
@@ -51,6 +52,7 @@ export const PUBLIC_GROUPS = [
   'media',
   'domains',
   'email-domains',
+  'email-layouts',
   'operations',
   'taxonomies',
   'candidates',
@@ -110,6 +112,7 @@ export function createCliProgram(version: string) {
   registerCompaniesCommand(program);
   registerDomainsCommand(program);
   registerEmailDomainsCommand(program);
+  registerEmailLayoutsCommand(program);
   registerBlogCommand(program);
   registerCandidatesCommand(program);
   registerEmployersCommand(program);
