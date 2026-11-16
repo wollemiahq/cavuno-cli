@@ -997,6 +997,26 @@ export interface paths {
     patch: operations['updateBlogTag'];
     trace?: never;
   };
+  '/campaign-readiness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve campaign readiness
+     * @description Retrieves what your Board needs before it can send email campaigns: a paid plan, a verified sending domain, a verified bulk subdomain and a mailing address. Each item's status says whether it's done, and `blocking_item` names the first one left.
+     */
+    get: operations['getCampaignReadiness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/candidates': {
     parameters: {
       query?: never;
@@ -3907,6 +3927,58 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/marketing-topics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List marketing topics
+     * @description The board’s live marketing topics, oldest first: the kinds of marketing email people can choose, such as a weekly newsletter. A person’s marketing consent covers all of them; topics only narrow what they get. At most 20, so the list is never paginated.
+     */
+    get: operations['listMarketingTopics'];
+    put?: never;
+    /**
+     * Create a marketing topic
+     * @description Adds a topic sign-up forms can offer. Create it before writing a form that uses its key. A board has at most 20 live topics.
+     */
+    post: operations['createMarketingTopic'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/marketing-topics/{key}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a marketing topic
+     * @description Retrieves a topic by key, including a removed one (with `archivedAt` set), so you can read back a create, rename or removal.
+     */
+    get: operations['getMarketingTopic'];
+    put?: never;
+    post?: never;
+    /**
+     * Remove a marketing topic
+     * @description Removes a topic from sign-up forms and email preferences. It is archived, not deleted: people’s choices stay as history, and its key can’t be reused. It can’t be undone.
+     */
+    delete: operations['deleteMarketingTopic'];
+    options?: never;
+    head?: never;
+    /**
+     * Rename a marketing topic
+     * @description Changes a live topic’s name. Its key never changes.
+     */
+    patch: operations['updateMarketingTopic'];
     trace?: never;
   };
   '/me': {
@@ -7578,6 +7650,36 @@ export interface components {
       /** @description Ordered Cavuno company IDs (max 100). Partial success is returned per item. */
       companyIds: string[];
     };
+    CampaignReadiness: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign_readiness';
+      /** @description True when every item is complete and campaigns can be sent. */
+      ready: boolean;
+      blocking_item: components['schemas']['CampaignReadinessItemKey'];
+      /** @description Every item, in setup order: plan, sending_domain, bulk_domain, mailing_address. */
+      items: components['schemas']['CampaignReadinessItem'][];
+    };
+    CampaignReadinessItem: {
+      key: components['schemas']['CampaignReadinessItemKey'] & unknown;
+      /**
+       * @description complete; pending (a domain is added and waiting on its DNS records); failed (the last check of a domain failed); or missing (not set up yet).
+       * @enum {string}
+       */
+      status: 'complete' | 'pending' | 'failed' | 'missing';
+    };
+    /**
+     * @description The first item that is not complete, in the order of `items`. Null when ready.
+     * @enum {string|null}
+     */
+    CampaignReadinessItemKey:
+      | 'plan'
+      | 'sending_domain'
+      | 'bulk_domain'
+      | 'mailing_address'
+      | null;
     Candidate: {
       /** @description Unique identifier for the candidate. */
       id: string;
@@ -7613,6 +7715,18 @@ export interface components {
        * @description ISO 8601 timestamp when sign-in was disabled, or `null` when the candidate can sign in. Deactivate revokes all sessions, blocks sign-in, and hides the profile from talent surfaces; profile and application history are preserved. Sign-in returns once neither an operator deactivation nor a membership deactivation (`POST /candidates/reconcile` with `active: false`) is in effect; the candidate then signs in again to establish a new session.
        */
       deactivatedAt: string | null;
+      /**
+       * @description Whether the candidate appears in the board's talent directory, and if not, why. `listed_public`: shown to everyone who can browse the directory. `listed_signed_in`: shown only to signed-in viewers who can browse it (profile visibility logged-in only). `hidden`: profile visibility is hidden or was never set. `deactivated`: sign-in is disabled (see `deactivatedAt`). `incomplete_profile`: visible, but the profile has none of headline, skills, location, bio, work experience, education, or languages, so there is nothing to list; it is listed shortly after one is added. `pending`: a profile change is still being applied to talent search. This usually takes seconds; a failing update is retried for several hours. `sync_failed`: updating talent search failed after every retry, so the directory may not reflect this profile; the candidate's next profile change tries again. Describes the candidate only: it does not reflect whether the board's talent directory is turned on. Operator-only; never shown to employers or the public.
+       * @enum {string}
+       */
+      talentDirectoryStatus:
+        | 'listed_public'
+        | 'listed_signed_in'
+        | 'hidden'
+        | 'deactivated'
+        | 'incomplete_profile'
+        | 'pending'
+        | 'sync_failed';
       profile: components['schemas']['AdminCandidateProfile'];
       /** @description Number of jobs the candidate has saved. Values are capped at 1,000 in write-operation responses (reconcile/deactivate/reactivate/create/update); GET detail returns 422 `candidate_resource_limit` beyond the cap. */
       savedJobCount: number;
@@ -8306,14 +8420,15 @@ export interface components {
        */
       object: 'contact_email';
       /**
-       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, or a job alert sign-up confirmation.
+       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, or a newsletter sign-up confirmation (`board.subscribe`).
        * @enum {string}
        */
       kind:
         | 'job_alert_digest'
         | 'job_matches_digest'
         | 'import_confirmation'
-        | 'job_alert_confirmation';
+        | 'job_alert_confirmation'
+        | 'subscribe_confirmation';
       /** @description The email's subject line. */
       subject: string;
       /**
@@ -8881,6 +8996,12 @@ export interface components {
       slug?: string;
       aliasSlugs?: string[];
       sourceLocale?: string;
+    };
+    CreateMarketingTopicBody: {
+      /** @description What people see on sign-up forms and their email preferences, such as `Weekly newsletter`. 1 to 60 characters. */
+      name: string;
+      /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. Defaults to the name in lowercase with dashes (`weekly-newsletter`). */
+      key?: string;
     };
     CreatePlanBody: {
       /** @description Display name for the plan. */
@@ -10389,8 +10510,6 @@ export interface components {
       resolvedCollectionFields: components['schemas']['ResolvedJobCollectionField'][];
       /** @description Long-form description of the role (HTML), or `null` if not specified. */
       description: string | null;
-      /** @description Where candidates apply, or `null` if not specified. An HTTPS URL or `mailto:` URI. */
-      applicationUrl: string | null;
       /** @description Hierarchical permit selection authored by the caller. Lossless round-trip with the input: `[{type:"world_region",value:"EMEA"}]` goes in and comes out the same. The three `remoteWorkPermit*` and `remoteWorldwide` fields below are read-only derived projections of this list. */
       remotePermits: {
         type: string;
@@ -10852,6 +10971,8 @@ export interface components {
       categories: string[];
       /** @description External identifier supplied by the caller on create, used for deduplication via `GET /v1/jobs?externalId=...`. `null` when no external identifier was set. */
       externalId: string | null;
+      /** @description Where candidates apply, or `null` if not specified. An HTTPS URL or `mailto:` URI. To find jobs with a given application URL, filter with `GET /v1/jobs?applicationUrl=...` instead of reading every job. */
+      applicationUrl: string | null;
       /** @description Board-defined custom-field values for this job, keyed by the field `key` (the definitions are published at `GET /v1/settings/job-form`). Each value is returned as stored: a string (`short_text` / `long_text` / a `single_select` option key), a string array (`multi_select` option keys), a boolean, or a number. Always an object: `{}` when the job has no custom-field values, never `null` or a missing field. Only real values are stored, so this never contains `null` or empty values. */
       customFieldValues: {
         [key: string]: string | string[] | boolean | number;
@@ -10909,6 +11030,21 @@ export interface components {
       withdrawn_at: string | null;
       updated_at: string;
       revision: number;
+    };
+    MarketingTopic: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'marketing_topic';
+      /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+      key: string;
+      /** @description The topic’s name. */
+      name: string;
+      /** @description Time at which the topic was created. ISO 8601 datetime. */
+      createdAt: string;
+      /** @description Time at which the topic was removed, or null while it is live. ISO 8601 datetime. */
+      archivedAt: string | null;
     };
     MatchBackfillCompanyBody: {
       /** @description Zero-based index into the short-lived candidates array from list (needs_match). Re-validated server-side. */
@@ -11259,6 +11395,8 @@ export interface components {
       passwordProtectionEnabled?: boolean;
       jobAlertsEnabled?: boolean;
       jobRecommendationsEnabled: boolean;
+      /** @description The board's IANA time zone, such as `Europe/Berlin`, used for anyone whose own time zone is unknown. `null` or absent when none is set. */
+      timeZone?: string | null;
       recommendedTalentEnabled: boolean;
       candidatesEnabled?: boolean;
       employersEnabled?: boolean;
@@ -11421,6 +11559,8 @@ export interface components {
       jobAlertsEnabled?: boolean;
       /** @description Whether signed-in candidates can see personalized job recommendations. Absent board config defaults to `true`. */
       jobRecommendationsEnabled?: boolean;
+      /** @description The board's IANA time zone, such as `Europe/Berlin`, used for anyone whose own time zone is unknown. Stored in its canonical spelling; a name that is not a time zone is refused with 400. Pass `null` or an empty string to clear. */
+      timeZone?: string | unknown;
       /** @description Whether employers can see recommended talent matches for their jobs. Absent board config defaults to `false`. */
       recommendedTalentEnabled?: boolean;
       /** @description Whether candidate profiles are enabled on the board. */
@@ -11474,7 +11614,7 @@ export interface components {
       educationVerificationEnabled?: boolean;
       /** @description Switch the board's public MCP server at `<board origin>/mcp` on or off. When on, it serves only while the board has no password and is on a plan with API access. Absent board config means `true`. */
       mcpEnabled?: boolean;
-      /** @description Tools the board's MCP server leaves out, by name; every other tool is offered. Replaces the whole list: send `[]` to offer every tool. `get_company_salaries` is offered only while the board shows salaries, and `get_posting_plans` and `post_job_public` only while anyone can post a job on the board (posting not limited to members, and at least one public job plan that is free or paid by card). */
+      /** @description Tools the board's MCP server leaves out, by name; every other tool is offered. Replaces the whole list: send `[]` to offer every tool. `get_company_salaries` is offered only while the board shows salaries, and `get_posting_plans` and `post_job_public` only while anyone can post a job on the board (posting not limited to members, and at least one public job plan that is free or paid by card). `get_my_profile` is offered only while job seekers can sign in to the board, and only on the board's own domains, where the person signs in to use it. */
       mcpDisabledTools?: (
         | 'search_jobs'
         | 'get_job'
@@ -11487,6 +11627,7 @@ export interface components {
         | 'get_company_salaries'
         | 'get_posting_plans'
         | 'post_job_public'
+        | 'get_my_profile'
       )[];
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
@@ -14249,6 +14390,10 @@ export interface components {
       name?: string;
       slug?: string;
       sourceLocale?: string;
+    };
+    UpdateMarketingTopicBody: {
+      /** @description The new name, 1 to 60 characters. */
+      name: string;
     };
     UpdateMemberBody: {
       /**
@@ -19140,6 +19285,35 @@ export interface operations {
       };
       /** @description Another tag already uses the same slug. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCampaignReadiness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CampaignReadiness'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
@@ -27779,6 +27953,192 @@ export interface operations {
       };
       /** @description Rate limited. */
       429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listMarketingTopics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/marketing-topics */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['MarketingTopic'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateMarketingTopicBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The key is taken, by a live or a removed topic (`marketing_topics_key_taken`), or the board already has 20 topics (`marketing_topics_limit_reached`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description No topic with this key. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No live topic with this key. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateMarketingTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The topic’s key: 1 to 48 lowercase letters, digits and dashes, starting with a letter or digit. Fixed once created, and never reused after the topic is removed. */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateMarketingTopicBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MarketingTopic'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No live topic with this key. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
