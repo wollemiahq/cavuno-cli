@@ -1,6 +1,6 @@
 {
-  "version": "1.24.0",
-  "generatedAt": "2026-11-12T06:11:13.017Z",
+  "version": "1.25.0",
+  "generatedAt": "2026-11-16T07:27:53.159Z",
   "groups": [
     {
       "name": "auth",
@@ -2662,6 +2662,289 @@
             "cavuno email-domains remove ed_123 --yes"
           ],
           "mapsTo": "DELETE /v1/email-domains/:id"
+        }
+      ]
+    },
+    {
+      "name": "email-layouts",
+      "description": "Design the email templates your board emails use. `system` names the System template.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List the email templates, System first.",
+          "synopsis": "cavuno email-layouts list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno email-layouts list"
+          ],
+          "mapsTo": "GET /v1/email-layouts"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a template with its draft source and problems.",
+          "synopsis": "cavuno email-layouts get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno email-layouts get system"
+          ],
+          "mapsTo": "GET /v1/email-layouts/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a template as a copy of System or another template.",
+          "synopsis": "cavuno email-layouts create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Template name (required)",
+              "required": true
+            },
+            {
+              "flags": "--copy-from <id>",
+              "description": "Template to copy (defaults to system)",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts create --name \"Plain\""
+          ],
+          "mapsTo": "POST /v1/email-layouts"
+        },
+        {
+          "name": "duplicate",
+          "description": "Create a new template from this template’s draft.",
+          "synopsis": "cavuno email-layouts duplicate <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "Name of the copy",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts duplicate system --name \"Plain\""
+          ],
+          "mapsTo": "POST /v1/email-layouts/:id/duplicate"
+        },
+        {
+          "name": "rename",
+          "description": "Rename a template.",
+          "synopsis": "cavuno email-layouts rename <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--name <name>",
+              "description": "New name (required)",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts rename el_123 --name \"Plain\""
+          ],
+          "mapsTo": "PATCH /v1/email-layouts/:id"
+        },
+        {
+          "name": "draft",
+          "description": "Replace the draft with the .ts/.tsx files in a directory and compile it. Prints the compile operation.",
+          "synopsis": "cavuno email-layouts draft <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--dir <path>",
+              "description": "Directory holding template.tsx",
+              "required": true
+            },
+            {
+              "flags": "--base-revision <n>",
+              "description": "The draft.revision you read",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts draft system --dir ./template --base-revision 3"
+          ],
+          "mapsTo": "PUT /v1/email-layouts/:id/draft"
+        },
+        {
+          "name": "publish",
+          "description": "Check the draft against every email that can use it and make it live. Prints the publish operation.",
+          "synopsis": "cavuno email-layouts publish <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno email-layouts publish system"
+          ],
+          "mapsTo": "POST /v1/email-layouts/:id/publish"
+        },
+        {
+          "name": "versions",
+          "description": "List published versions, newest first.",
+          "synopsis": "cavuno email-layouts versions <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-50 (default 25)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "nextCursor from the previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts versions system"
+          ],
+          "mapsTo": "GET /v1/email-layouts/:id/versions"
+        },
+        {
+          "name": "version",
+          "description": "Fetch a published version with its source and HTML.",
+          "synopsis": "cavuno email-layouts version <id> <versionId>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "versionId",
+              "description": "Version ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno email-layouts version system elv_123"
+          ],
+          "mapsTo": "GET /v1/email-layouts/:id/versions/:versionId"
+        },
+        {
+          "name": "restore",
+          "description": "Copy a version into the draft. Publish it to make it live again.",
+          "synopsis": "cavuno email-layouts restore <id> <versionId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "versionId",
+              "description": "Version ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--base-revision <n>",
+              "description": "The draft.revision you read",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts restore system elv_123 --base-revision 4"
+          ],
+          "mapsTo": "POST /v1/email-layouts/:id/versions/:versionId/restore"
+        },
+        {
+          "name": "test",
+          "description": "Send yourself one email rendered with the template’s draft.",
+          "synopsis": "cavuno email-layouts test <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--email-type <type>",
+              "description": "Email to render, for example board-magic-link",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts test system --email-type board-magic-link"
+          ],
+          "mapsTo": "POST /v1/email-layouts/:id/test"
+        },
+        {
+          "name": "remove",
+          "description": "Delete a template and its versions.",
+          "synopsis": "cavuno email-layouts remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Template ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno email-layouts remove el_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/email-layouts/:id"
         }
       ]
     },
@@ -6273,7 +6556,12 @@
             },
             {
               "flags": "--source <source>",
-              "description": "form | import | job_alert_form | sign_up",
+              "description": "form | import | checkout | job_alert_form | sign_up",
+              "required": false
+            },
+            {
+              "flags": "--buyer <buyer>",
+              "description": "true: only people who paid for a product or tipped; false: the rest",
               "required": false
             },
             {
@@ -6541,6 +6829,95 @@
             "cavuno contacts remove-job-alert boardUsers_01EXAMPLE jobAlerts_01EXAMPLE --yes"
           ],
           "mapsTo": "DELETE /v1/contacts/:id/job-alerts/:alertId"
+        },
+        {
+          "name": "topic",
+          "description": "Fetch one of a contact's marketing topics and its status.",
+          "synopsis": "cavuno contacts topic <id> <key>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "key",
+              "description": "Marketing topic key",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno contacts topic boardUsers_01EXAMPLE hiring-tips"
+          ],
+          "mapsTo": "GET /v1/contacts/:id/topics/:key"
+        },
+        {
+          "name": "add-topic",
+          "description": "Put a contact on one marketing topic. Only for a contact whose marketing consent is granted and confirmed, and never a topic they removed themselves (409). Create the topic first with `POST /v1/marketing-topics`.",
+          "synopsis": "cavuno contacts add-topic <id> <key> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "key",
+              "description": "Marketing topic key",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts add-topic boardUsers_01EXAMPLE hiring-tips"
+          ],
+          "mapsTo": "POST /v1/contacts/:id/topics"
+        },
+        {
+          "name": "remove-topic",
+          "description": "Take a contact off one marketing topic. The rest of their marketing stays as it is.",
+          "synopsis": "cavuno contacts remove-topic <id> <key> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "key",
+              "description": "Marketing topic key",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts remove-topic boardUsers_01EXAMPLE hiring-tips --yes"
+          ],
+          "mapsTo": "DELETE /v1/contacts/:id/topics/:key"
         }
       ]
     },
