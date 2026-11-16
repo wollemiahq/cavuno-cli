@@ -3,6 +3,26 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.25.0 — 2026-11-16
+
+- **`cavuno email-layouts`** designs the email templates your board's emails
+  use. `list`, `get`, `versions` and `version` read them; `create`,
+  `duplicate`, `rename` and `remove` manage them (`system` names the System
+  template). `draft --dir` replaces a template's draft with the files in a
+  directory and compiles it, `publish` checks the draft against every email
+  that can use it and makes it live, `restore` copies a published version
+  back into the draft, and `test --email-type` sends you one email rendered
+  with the draft. `draft` and `restore` take `--base-revision`, the draft
+  revision you read.
+- **`cavuno contacts topic`**, **`add-topic`** and **`remove-topic`** read,
+  add and remove one of a contact's marketing topics. `add-topic` works only
+  for a contact whose marketing consent is granted and confirmed, and is
+  refused with 409 for a topic they removed themselves; `remove-topic` needs
+  `--yes`.
+- **`cavuno contacts list`** gains `--buyer true|false`, and `--source`
+  accepts `checkout`.
+- `email_domains_sending_domain_required` exits with code 7.
+
 ## 1.24.0 — 2026-11-12
 
 - **`cavuno contacts`** works with everyone the board can email, one row per
