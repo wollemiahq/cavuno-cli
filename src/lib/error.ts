@@ -78,6 +78,7 @@ const EXIT_CODE_BY_REASON: Record<string, number> = {
   email_domains_already_exists: 7,
   email_domains_not_verified: 7,
   email_domains_primary_domain_required: 7,
+  email_domains_sending_domain_required: 7,
   //
   operations_not_found: 4,
   operations_already_terminal: 7,
