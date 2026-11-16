@@ -113,13 +113,19 @@ export function registerContactsCommand(root: Command): void {
       )
       .option(
         '--source <source>',
-        'form | import | job_alert_form | sign_up',
+        'form | import | checkout | job_alert_form | sign_up',
         choice('--source', [
           'form',
           'import',
+          'checkout',
           'job_alert_form',
           'sign_up',
         ] as const),
+      )
+      .option(
+        '--buyer <buyer>',
+        'true: only people who paid for a product or tipped; false: the rest',
+        choice('--buyer', ['true', 'false'] as const),
       )
       .option('--limit <n>', 'Page size 1-100 (default 50)', parseLimit)
       .option('--cursor <cursor>', 'Pagination cursor')
@@ -331,6 +337,67 @@ export function registerContactsCommand(root: Command): void {
       mapsTo: 'DELETE /v1/contacts/:id/job-alerts/:alertId',
       examples: [
         'cavuno contacts remove-job-alert boardUsers_01EXAMPLE jobAlerts_01EXAMPLE --yes',
+      ],
+    },
+  );
+
+  annotate(
+    contacts
+      .command('topic')
+      .description("Fetch one of a contact's marketing topics and its status.")
+      .argument('<id>', 'Contact ID')
+      .argument('<key>', 'Marketing topic key')
+      .action(async function (this: Command, id: string, key: string) {
+        await run(this, getClient(this).topic(id, key));
+      }),
+    {
+      mapsTo: 'GET /v1/contacts/:id/topics/:key',
+      examples: ['cavuno contacts topic boardUsers_01EXAMPLE hiring-tips'],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      contacts
+        .command('add-topic')
+        .description(
+          'Put a contact on one marketing topic. Only for a contact whose marketing consent is granted and confirmed, and never a topic they removed themselves (409). Create the topic first with `POST /v1/marketing-topics`.',
+        )
+        .argument('<id>', 'Contact ID')
+        .argument('<key>', 'Marketing topic key'),
+    ).action(async function (this: Command, id: string, key: string) {
+      const idempotency = resolveIdempotency(this.opts<IdempotencyOptions>());
+      await run(this, getClient(this).addTopic(id, key, idempotency));
+    }),
+    {
+      mapsTo: 'POST /v1/contacts/:id/topics',
+      examples: ['cavuno contacts add-topic boardUsers_01EXAMPLE hiring-tips'],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      withYesOption(
+        contacts
+          .command('remove-topic')
+          .description(
+            'Take a contact off one marketing topic. The rest of their marketing stays as it is.',
+          )
+          .argument('<id>', 'Contact ID')
+          .argument('<key>', 'Marketing topic key'),
+      ),
+    ).action(async function (this: Command, id: string, key: string) {
+      await confirmOrAbort({
+        message: `Remove contact ${id} from topic ${key}?`,
+        yes: this.opts<ConfirmOptions>().yes,
+      });
+      const idempotency = resolveIdempotency(this.opts<IdempotencyOptions>());
+      await run(this, getClient(this).removeTopic(id, key, idempotency));
+    }),
+    {
+      mapsTo: 'DELETE /v1/contacts/:id/topics/:key',
+      examples: [
+        'cavuno contacts remove-topic boardUsers_01EXAMPLE hiring-tips --yes',
       ],
     },
   );
