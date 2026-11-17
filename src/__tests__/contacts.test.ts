@@ -9,6 +9,7 @@ const client = vi.hoisted(() => ({
   jobAlerts: vi.fn(),
   jobAlert: vi.fn(),
   subscription: vi.fn(),
+  remove: vi.fn(),
   unsubscribe: vi.fn(),
   resubscribe: vi.fn(),
   removeSubscription: vi.fn(),
@@ -113,6 +114,7 @@ describe('cavuno contacts', () => {
       'subscription',
       () => ['c1', 'marketing'],
     ],
+    [['delete', 'c1', '--yes'], 'remove', () => ['c1', idem()]],
     [['unsubscribe', 'c1', '--yes'], 'unsubscribe', () => ['c1', idem()]],
     [['resubscribe', 'c1', '--yes'], 'resubscribe', () => ['c1', idem()]],
     [
