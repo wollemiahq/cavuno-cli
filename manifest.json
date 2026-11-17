@@ -1,6 +1,6 @@
 {
-  "version": "1.25.0",
-  "generatedAt": "2026-11-16T07:27:53.159Z",
+  "version": "1.28.0",
+  "generatedAt": "2026-11-17T05:51:59.354Z",
   "groups": [
     {
       "name": "auth",
@@ -6541,7 +6541,7 @@
             },
             {
               "flags": "--status <status>",
-              "description": "subscribed | pending | waitlisted | unsubscribed | suppressed",
+              "description": "subscribed | pending | waitlisted | unsubscribed | not_subscribed | suppressed",
               "required": false
             },
             {
@@ -6561,7 +6561,7 @@
             },
             {
               "flags": "--buyer <buyer>",
-              "description": "true: only people who paid for a product or tipped; false: the rest",
+              "description": "true: only people who paid for a digital product; false: the rest",
               "required": false
             },
             {
@@ -6730,6 +6730,35 @@
             "cavuno contacts unsubscribe boardUsers_01EXAMPLE --yes"
           ],
           "mapsTo": "POST /v1/contacts/:id/unsubscribe"
+        },
+        {
+          "name": "delete",
+          "description": "Permanently erase a contact for a deletion request: their record, subscriptions, and sign-up and consent evidence. Their purchases stay for tax and refunds. A contact with a candidate or employer account is refused (409); delete them with `candidates delete` or `employers delete`. Returns a contacts.remove operation to poll.",
+          "synopsis": "cavuno contacts delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Contact ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno contacts delete boardUsers_01EXAMPLE --yes"
+          ],
+          "mapsTo": "DELETE /v1/contacts/:id"
         },
         {
           "name": "resubscribe",
