@@ -9336,8 +9336,13 @@ export interface components {
       email: string;
     };
     CreateInboxTicketNoteBody: {
-      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+      /** @description The message, up to 100,000 characters. Plain text with its line breaks kept, unless `bodyFormat` is `markdown`. */
       body: string;
+      /**
+       * @description How to read `body`. `text` (the default) sends it exactly as written. `markdown` formats bold, italics, lists, quotes and links; raw HTML is shown as text and never rendered. A `markdown` reply can be up to 4,000 characters, and one line of a `markdown` message can open up to 20 nested quotes or lists.
+       * @enum {string}
+       */
+      bodyFormat?: 'text' | 'markdown';
     };
     CreateInvitationBody: {
       /**
@@ -10852,7 +10857,7 @@ export interface components {
       /** @description The message text. */
       body: string;
       /**
-       * @description `text` for plain text. `markdown` when an incoming HTML email was converted to Markdown.
+       * @description `text` for plain text. `markdown` when a reply or note was written as Markdown, or an incoming HTML email was converted to Markdown.
        * @enum {string}
        */
       bodyFormat: 'text' | 'markdown';
@@ -13298,8 +13303,13 @@ export interface components {
       origin: string;
     };
     ReplyToInboxTicketBody: {
-      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+      /** @description The message, up to 100,000 characters. Plain text with its line breaks kept, unless `bodyFormat` is `markdown`. */
       body: string;
+      /**
+       * @description How to read `body`. `text` (the default) sends it exactly as written. `markdown` formats bold, italics, lists, quotes and links; raw HTML is shown as text and never rendered. A `markdown` reply can be up to 4,000 characters, and one line of a `markdown` message can open up to 20 nested quotes or lists.
+       * @enum {string}
+       */
+      bodyFormat?: 'text' | 'markdown';
     };
     ReportingConnect: {
       /**
