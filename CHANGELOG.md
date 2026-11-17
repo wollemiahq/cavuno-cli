@@ -3,6 +3,11 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.26.0 — 2026-11-17
+
+- **`cavuno contacts list --buyer true`** lists people who paid for a
+  digital product. Leaving a tip no longer makes someone a buyer.
+
 ## 1.25.0 — 2026-11-16
 
 - **`cavuno email-layouts`** designs the email templates your board's emails
