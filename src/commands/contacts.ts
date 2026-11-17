@@ -92,12 +92,13 @@ export function registerContactsCommand(root: Command): void {
       .option('--search <query>', 'Case-insensitive substring match on email')
       .option(
         '--status <status>',
-        'subscribed | pending | waitlisted | unsubscribed | suppressed',
+        'subscribed | pending | waitlisted | unsubscribed | not_subscribed | suppressed',
         choice('--status', [
           'subscribed',
           'pending',
           'waitlisted',
           'unsubscribed',
+          'not_subscribed',
           'suppressed',
         ] as const),
       )
@@ -124,7 +125,7 @@ export function registerContactsCommand(root: Command): void {
       )
       .option(
         '--buyer <buyer>',
-        'true: only people who paid for a product or tipped; false: the rest',
+        'true: only people who paid for a digital product; false: the rest',
         choice('--buyer', ['true', 'false'] as const),
       )
       .option('--limit <n>', 'Page size 1-100 (default 50)', parseLimit)
@@ -249,6 +250,30 @@ export function registerContactsCommand(root: Command): void {
     {
       mapsTo: 'POST /v1/contacts/:id/unsubscribe',
       examples: ['cavuno contacts unsubscribe boardUsers_01EXAMPLE --yes'],
+    },
+  );
+
+  annotate(
+    withIdempotencyOption(
+      withYesOption(
+        contacts
+          .command('delete')
+          .description(
+            'Permanently erase a contact for a deletion request: their record, subscriptions, and sign-up and consent evidence. Their purchases stay for tax and refunds. A contact with a candidate or employer account is refused (409); delete them with `candidates delete` or `employers delete`. Returns a contacts.remove operation to poll.',
+          )
+          .argument('<id>', 'Contact ID'),
+      ),
+    ).action(async function (this: Command, id: string) {
+      await confirmOrAbort({
+        message: `Permanently erase contact ${id}?`,
+        yes: this.opts<ConfirmOptions>().yes,
+      });
+      const idempotency = resolveIdempotency(this.opts<IdempotencyOptions>());
+      await run(this, getClient(this).remove(id, idempotency));
+    }),
+    {
+      mapsTo: 'DELETE /v1/contacts/:id',
+      examples: ['cavuno contacts delete boardUsers_01EXAMPLE --yes'],
     },
   );
 
