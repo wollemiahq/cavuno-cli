@@ -1324,7 +1324,7 @@ export interface paths {
     };
     /**
      * List companies
-     * @description Returns a list of your companies. The companies are returned sorted by creation date, with the most recently created companies appearing first.
+     * @description Returns a list of your companies. The companies are returned sorted by creation date, with the most recently created companies appearing first. Each company carries `jobCount` and `publishedJobCount`. To get how many companies there are, use `GET /v1/companies/count` rather than paging through this list.
      */
     get: operations['listCompanies'];
     put?: never;
@@ -1353,6 +1353,26 @@ export interface paths {
      * @description Runs up to 100 company operations in a single request, with a 5 MB request body limit. Each sub-operation runs independently. Idempotency keys are honored on the batch itself, not on individual sub-operations.
      */
     post: operations['batchCompanies'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/companies/count': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Count companies
+     * @description Returns how many companies the account has. Use it to answer how many companies a board has instead of paging through `GET /v1/companies`. Cheap: reads a maintained total, not the company list. For job counts per company, read `jobCount` and `publishedJobCount` on each company. Requires `companies.read`.
+     */
+    get: operations['countCompanies'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -3991,7 +4011,7 @@ export interface paths {
     };
     /**
      * Export jobs
-     * @description Exports the account’s jobs. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `jobs.read`.
+     * @description Exports the account’s jobs. `format=json` returns an inline list of export rows (max 10,000; fields mirror the CSV columns, camelCase). For large boards, or when the caller cannot take a large response (MCP), page it: pass `limit` and follow `nextCursor` until `hasMore` is false. `status` and `updatedSince` filter both formats. `format=csv` (default) returns `202` with an `exports.generate` operation — poll it, then download the CSV from `GET /v1/operations/{id}/download` once it succeeds. Requires `jobs.read`.
      */
     get: operations['exportJobs'];
     put?: never;
@@ -8526,10 +8546,6 @@ export interface components {
       description: string | null;
       /** @description Whether automated backfill of jobs from this company is supported, or `null` if not yet evaluated. */
       canBackfill: boolean | null;
-      /** @description Total number of jobs at this company across all statuses. */
-      jobCount: number;
-      /** @description Number of currently-published jobs at this company. */
-      publishedJobCount: number;
     };
     CompanyClaim: {
       id: string;
@@ -8544,6 +8560,12 @@ export interface components {
       status: string;
       /** @description ISO-8601 timestamp the claim was created. */
       requestedAt: string;
+    };
+    CompanyCount: {
+      /** @enum {string} */
+      object: 'company_count';
+      /** @description Number of companies on the board: every company `GET /v1/companies` lists (deleted and removed companies are not counted; blocked companies that keep their profile are). The same total the dashboard Companies list shows. `null` while the count is still being built for this board; page `GET /v1/companies` in that case. */
+      companies: number | null;
     };
     CompanyPlanAssignment: {
       /** @description The plan assignment ID. */
@@ -8748,6 +8770,10 @@ export interface components {
       revision: number;
       /** @description The `id` of the company this company is a subsidiary of, or `null` for a top-level company. List a company's subsidiaries with `GET /v1/companies?parentCompanyId={id}`. */
       parentCompanyId: string | null;
+      /** @description Total number of jobs at this company across all statuses. */
+      jobCount: number;
+      /** @description Number of jobs at this company whose status is `published`, including published jobs past their `expiresAt` that the expiry sweep has not reached yet. */
+      publishedJobCount: number;
       /** @description Public + admin URLs for this company. `public` may be `null` if the company lacks a slug. */
       links: components['schemas']['ResourceLinks'] & {
         /**
@@ -8845,7 +8871,7 @@ export interface components {
       } | null;
       /** @description The person's tags, such as `audience:employer`, oldest first. Sign-up forms add them. */
       tags: string[];
-      /** @description Whether the person paid for a product or tipped on the board. Recorded from checkouts completed after this field shipped: for the signed-in buyer of a product, else for the person with the checkout email address (for a tip, the one Stripe collected) when they were already on the board or ticked the marketing checkbox. */
+      /** @description Whether the person paid for a digital product on the board: the signed-in buyer of a paid purchase, else the person with the purchase email address. A free claim, a tip or a job post does not count, and a refund does not undo it. A purchase made by someone who had no record on the board at the time, and who did not tick its marketing checkbox, is not counted, even if they join later. */
       isBuyer: boolean;
     };
     ContactActivity: {
@@ -9653,8 +9679,11 @@ export interface components {
        * @description ISO-8601 expiry for the promotion code.
        */
       expiresAt?: string;
+      /** @description Only allow customers with no earlier successful payment or invoice to use the code. Read it back from restrictions.firstTimeTransaction. */
       firstTimeTransaction?: boolean;
+      /** @description Minimum order amount in the currency major unit (e.g. 50 for $50). Applied only together with minimumAmountCurrency. */
       minimumAmount?: number;
+      /** @description ISO currency of minimumAmount, e.g. "usd". Applied only together with minimumAmount. */
       minimumAmountCurrency?: string;
     };
     CreateRedirectBody: {
@@ -12310,6 +12339,11 @@ export interface components {
         | 'get_my_access'
         | 'get_job_access_link'
         | 'get_billing_portal_link'
+        | 'list_my_companies'
+        | 'get_company_profile'
+        | 'list_company_jobs'
+        | 'get_company_job'
+        | 'list_applicants'
       )[];
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
@@ -12979,6 +13013,15 @@ export interface components {
       timesRedeemed: number;
       /** @description ISO-8601 time the code stops working, or null. */
       expiresAt: string | null;
+      /** @description Conditions a checkout must meet before the code applies. */
+      restrictions: {
+        /** @description True when the code only works for customers with no earlier successful payment or invoice. */
+        firstTimeTransaction: boolean;
+        /** @description Minimum order amount in the currency major unit (e.g. 50 for $50), or null for no minimum. */
+        minimumAmount: number | null;
+        /** @description Lowercase ISO currency of minimumAmount, or null for no minimum. */
+        minimumAmountCurrency: string | null;
+      };
     };
     PublishEmailTemplateBody: {
       /** @description Subject line, up to 200 characters. May use the tokens listed in `subjectTokens`, written as `{{token}}`. */
@@ -19167,6 +19210,10 @@ export interface operations {
       query?: {
         /** @description Export format. `json` streams an inline list of blog author export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -19461,6 +19508,10 @@ export interface operations {
       query?: {
         /** @description Export format. `json` streams an inline list of blog post export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -19886,6 +19937,10 @@ export interface operations {
       query?: {
         /** @description Export format. `json` streams an inline list of blog tag export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -20183,6 +20238,10 @@ export interface operations {
       query?: {
         /** @description Export format. `json` streams an inline list of candidate export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -21081,11 +21140,44 @@ export interface operations {
       };
     };
   };
+  countCompanies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyCount'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   exportCompanies: {
     parameters: {
       query?: {
         /** @description Export format. `json` streams an inline list of company export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -22633,7 +22725,7 @@ export interface operations {
         role?: 'candidate' | 'employer' | 'subscriber';
         /** @description Only contacts whose `source.kind` is this. */
         source?: 'form' | 'import' | 'checkout' | 'job_alert_form' | 'sign_up';
-        /** @description `true`: only contacts who paid for a product or tipped on the board (`isBuyer`); `false`: only those who did not. */
+        /** @description `true`: only contacts who paid for a digital product on the board (`isBuyer`); `false`: only those who did not. */
         buyer?: 'true' | 'false';
       };
       header?: never;
@@ -26224,6 +26316,10 @@ export interface operations {
       query?: {
         /** @description Export format. `json` streams an inline list of employer export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -28978,8 +29074,21 @@ export interface operations {
   exportJobs: {
     parameters: {
       query?: {
-        /** @description Export format. `json` streams an inline list of job export rows (capped at 10,000 rows); `csv` (default) starts an async `exports.generate` operation. */
+        /** @description Export format. `json` streams an inline list of job export rows (capped at 10,000 rows), or one page of them with `limit`/`cursor`; `csv` (default) starts an async `exports.generate` operation. */
         format?: 'csv' | 'json';
+        /** @description Only export jobs with this status. One of `draft`, `published`, `expired`, `archived`, or `pending_approval`. */
+        status?:
+          | 'draft'
+          | 'published'
+          | 'expired'
+          | 'archived'
+          | 'pending_approval';
+        /** @description Only export jobs whose `updatedAt` is at or after this time (ISO 8601 datetime). Rows come newest first. `updatedAt` is the time a job was created or last edited, not a change log: some changes do not move it, including publishing from the dashboard or after payment, expiry at `expiresAt`, and backfill updates and reposts. Jobs with no `updatedAt` (`null` in the export) never match, and deleted jobs are not exported. Use it to pick up recent edits: pass the time you started the previous export, since a job edited during a paged export moves ahead of the cursor. To keep an exact copy of the board, also re-export periodically without `updatedSince`. */
+        updatedSince?: string;
+        /** @description With `format=json`, return one page of at most this many rows (1–1,000) instead of the whole table, with `hasMore` and `nextCursor`. A page can hold fewer rows than asked, so follow `nextCursor` until `hasMore` is false. Job pages hold at most 50 rows. */
+        limit?: number;
+        /** @description With `format=json`, the `nextCursor` of the previous page. Send the same filters with it. */
+        cursor?: string;
       };
       header?: never;
       path?: never;
@@ -28987,7 +29096,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Inline JSON export (`format=json`). */
+      /** @description Inline JSON export (`format=json`): the whole table, or one page with `limit`/`cursor`. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -33641,7 +33750,7 @@ export interface operations {
            */
           file: string;
           /**
-           * @description Whether to send a double-opt-in confirmation email to imported unconfirmed subscribers.
+           * @description Whether to send a double-opt-in confirmation email to imported unconfirmed subscribers. A subscriber whose address is suppressed (hard bounce, spam report or refused send) is not emailed.
            * @default true
            */
           sendConfirmation?: boolean;
