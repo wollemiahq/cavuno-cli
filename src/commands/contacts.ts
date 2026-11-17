@@ -124,7 +124,7 @@ export function registerContactsCommand(root: Command): void {
       )
       .option(
         '--buyer <buyer>',
-        'true: only people who paid for a product or tipped; false: the rest',
+        'true: only people who paid for a digital product; false: the rest',
         choice('--buyer', ['true', 'false'] as const),
       )
       .option('--limit <n>', 'Page size 1-100 (default 50)', parseLimit)

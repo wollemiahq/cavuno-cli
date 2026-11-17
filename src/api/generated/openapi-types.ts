@@ -8845,7 +8845,7 @@ export interface components {
       } | null;
       /** @description The person's tags, such as `audience:employer`, oldest first. Sign-up forms add them. */
       tags: string[];
-      /** @description Whether the person paid for a product or tipped on the board. Recorded from checkouts completed after this field shipped: for the signed-in buyer of a product, else for the person with the checkout email address (for a tip, the one Stripe collected) when they were already on the board or ticked the marketing checkbox. */
+      /** @description Whether the person paid for a digital product on the board: the signed-in buyer of a paid purchase, else the person with the purchase email address. A free claim, a tip or a job post does not count, and a refund does not undo it. A purchase made by someone who had no record on the board at the time, and who did not tick its marketing checkbox, is not counted, even if they join later. */
       isBuyer: boolean;
     };
     ContactActivity: {
@@ -22633,7 +22633,7 @@ export interface operations {
         role?: 'candidate' | 'employer' | 'subscriber';
         /** @description Only contacts whose `source.kind` is this. */
         source?: 'form' | 'import' | 'checkout' | 'job_alert_form' | 'sign_up';
-        /** @description `true`: only contacts who paid for a product or tipped on the board (`isBuyer`); `false`: only those who did not. */
+        /** @description `true`: only contacts who paid for a digital product on the board (`isBuyer`); `false`: only those who did not. */
         buyer?: 'true' | 'false';
       };
       header?: never;
