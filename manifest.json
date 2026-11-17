@@ -1,6 +1,6 @@
 {
-  "version": "1.25.0",
-  "generatedAt": "2026-11-16T07:27:53.159Z",
+  "version": "1.27.0",
+  "generatedAt": "2026-11-17T02:49:21.877Z",
   "groups": [
     {
       "name": "auth",
@@ -6541,7 +6541,7 @@
             },
             {
               "flags": "--status <status>",
-              "description": "subscribed | pending | waitlisted | unsubscribed | suppressed",
+              "description": "subscribed | pending | waitlisted | unsubscribed | not_subscribed | suppressed",
               "required": false
             },
             {
@@ -6561,7 +6561,7 @@
             },
             {
               "flags": "--buyer <buyer>",
-              "description": "true: only people who paid for a product or tipped; false: the rest",
+              "description": "true: only people who paid for a digital product; false: the rest",
               "required": false
             },
             {
