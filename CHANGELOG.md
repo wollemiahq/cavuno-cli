@@ -3,6 +3,26 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.28.0 — 2026-11-17
+
+- **`cavuno contacts delete`** erases a contact for a deletion request:
+  their record, subscriptions, and sign-up and consent evidence. Their
+  purchases stay for tax and refunds but no longer make them a contact; a
+  new purchase does. Someone with a candidate or employer account is deleted
+  with `cavuno candidates delete` or `cavuno employers delete` instead.
+
+## 1.27.0 — 2026-11-17
+
+- **`cavuno contacts list --status not_subscribed`** lists buyers with no
+  subscription. Every paid digital product buyer is now a contact; one with
+  no subscription has this status and gets no job alert, job match or
+  marketing email.
+
+## 1.26.0 — 2026-11-17
+
+- **`cavuno contacts list --buyer true`** lists people who paid for a
+  digital product. Leaving a tip no longer makes someone a buyer.
+
 ## 1.25.0 — 2026-11-16
 
 - **`cavuno email-layouts`** designs the email templates your board's emails

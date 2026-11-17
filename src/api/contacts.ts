@@ -46,6 +46,11 @@ export function createContactsClient(opts: CavunoClientOptions) {
       c.GET('/contacts/{id}/subscriptions/{kind}', {
         params: { path: { id, kind } },
       }),
+    remove: (id: string, idempotency: IdempotencyOptions) =>
+      c.DELETE('/contacts/{id}', {
+        ...contact(id),
+        headers: headers(idempotency),
+      }),
     unsubscribe: (id: string, idempotency: IdempotencyOptions) =>
       c.POST('/contacts/{id}/unsubscribe', {
         ...contact(id),
