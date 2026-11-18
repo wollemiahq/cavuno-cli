@@ -3,6 +3,13 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.29.0 — 2026-11-18
+
+- No command changes. The bundled Operator API types add the inbox's saved
+  replies (list, get, create, update and delete) and the deliverability read,
+  and inbox replies and notes take `bodyFormat`: `text` (the default) or
+  `markdown`, which formats bold, italics, lists, quotes and links.
+
 ## 1.28.0 — 2026-11-17
 
 - **`cavuno contacts delete`** erases a contact for a deletion request:
