@@ -3,6 +3,11 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.29.1 — 2026-11-18
+
+- No command, API or behavior changes. This release only corrects the
+  published changelog.
+
 ## 1.29.0 — 2026-11-18
 
 - No command changes. The bundled Operator API types add the inbox's saved
