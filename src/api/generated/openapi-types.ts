@@ -468,7 +468,7 @@ export interface paths {
     };
     /**
      * Get Backfill settings
-     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the "Posted within" age filter, the worldwide-remote exclusion, the pay requirement and the sponsored-jobs switch. Requires `backfill.read`.
+     * @description Return the Board-wide Backfill controls from the dashboard Backfill settings: the job limit, the feed job limit, the "Posted within" age filter, the worldwide-remote exclusion, the pay requirement, the sponsored-jobs switch, the Board-wide job filters, the board context and the excluded title terms. Requires `backfill.read`.
      */
     get: operations['getBackfillSettings'];
     put?: never;
@@ -478,7 +478,7 @@ export interface paths {
     head?: never;
     /**
      * Update Backfill settings
-     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `maxJobAgeDays`, `excludeWorldwideRemote` and `requireSalary` are saved together; `sponsoredJobsEnabled` is applied after them. Changing `sponsoredJobsEnabled` before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Turning on `excludeWorldwideRemote` also cleans up matching jobs already on the Board, in the background; `requireSalary` changes only what Backfill imports next. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
+     * @description Change one or more Board-wide Backfill controls with the same rules as the dashboard. Omitted fields are unchanged and a field set to its current value is a no-op. `jobLimit`, `feedJobsLimit`, `maxJobAgeDays`, `excludeWorldwideRemote` and `requireSalary` are saved together; then `boardContext`, `sponsoredJobsEnabled`, `filters` and `excludedTitleTerms` are applied in that order. `filters` and `excludedTitleTerms` replace the saved values as a whole. Changing `sponsoredJobsEnabled`, or setting `filters`, `boardContext` or `excludedTitleTerms`, before Backfill is set up returns `backfill_not_configured` (409) without saving anything. Turning on `excludeWorldwideRemote` also cleans up matching jobs already on the Board, in the background; `requireSalary` changes only what Backfill imports next. Safe to retry: setting the same values again changes nothing. An `Idempotency-Key` header is honored when sent. Requires `backfill.manage`.
      */
     patch: operations['updateBackfillSettings'];
     trace?: never;
@@ -2351,6 +2351,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/deliverability': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve deliverability
+     * @description Retrieves how your Board's email is being delivered over the last 7 or 30 days: sent, delivered, deferred, bounced, spam reports and unsubscribes, by day and by mailbox provider, why mail bounced or was delayed, the marketing email status, and today's warm-up limit. Counts every email, or one email by `email`.
+     */
+    get: operations['getDeliverability'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/development-origins': {
     parameters: {
       query?: never;
@@ -3436,6 +3456,46 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/inbox/saved-replies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List inbox saved replies */
+    get: operations['listInboxSavedReplies'];
+    put?: never;
+    /** Create an inbox saved reply */
+    post: operations['createInboxSavedReply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/inbox/saved-replies/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve an inbox saved reply */
+    get: operations['getInboxSavedReply'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an inbox saved reply
+     * @description Permanently deletes it.
+     */
+    delete: operations['deleteInboxSavedReply'];
+    options?: never;
+    head?: never;
+    /** Update an inbox saved reply */
+    patch: operations['updateInboxSavedReply'];
     trace?: never;
   };
   '/inbox/settings': {
@@ -4583,18 +4643,18 @@ export interface paths {
     };
     /**
      * Retrieve a page intro
-     * @description Returns the intro and meta overrides written for one category or location page, with their placeholders filled, and as written in the `*Template` fields. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Returns the intro and meta overrides written for one category or location page, with their placeholders filled, and as written in the `*Template` fields. With `locale`, returns the copy the page shows in that language and each field's `translation` status; without it, `translations` lists the page in each of the board's other Interface locales. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     get: operations['getPageContent'];
     /**
      * Set a page intro
-     * @description Sets the intro and meta overrides of one category or location page as a merge patch: omitted fields keep their value, `null` clears one, and the last write wins. The page shows them on page 1 with no filters, and the board's public category and place resolutions return them as `introHtml`, `metaTitle` and `metaDescription`. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Sets the intro and meta overrides of one category or location page as a merge patch: omitted fields keep their value, `null` clears one, and the last write wins. With `locale`, sets the owner's translation of those fields into that language instead (`null` resets a field to the automatic translation); the board-language copy is unchanged. The page shows them on page 1 with no filters, and the board's public category and place resolutions return them as `introHtml`, `metaTitle` and `metaDescription`. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     put: operations['updatePageContent'];
     post?: never;
     /**
      * Delete a page intro
-     * @description Removes the intro and meta overrides of one category or location page. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
+     * @description Removes the intro and meta overrides of one category or location page, with their translations. With `locale`, resets the page's translation into that language to the automatic one instead. Address the page with exactly one of `category` or `place`. An unknown slug is a 404.
      */
     delete: operations['deletePageContent'];
     options?: never;
@@ -5952,7 +6012,7 @@ export interface paths {
     post?: never;
     /**
      * Delete a category
-     * @description Deletes the category and its direct children only (1-level cascade). Grandchildren are not removed.
+     * @description Deletes the category and its direct children only (1-level cascade); grandchildren are not removed. Their alias slugs and custom page content are deleted too, and the categories are removed from every job that carries them in the background. Their slugs are blocked so imported jobs cannot add them back; creating a category with the same slug lifts the block, but a slug that human review had already retired cannot be re-created.
      */
     delete: operations['deleteTaxonomiesCategory'];
     options?: never;
@@ -6121,7 +6181,7 @@ export interface paths {
     post?: never;
     /**
      * Delete a market
-     * @description Deletes the market taxonomy row. Companies may retain stale market slugs (by design).
+     * @description Deletes the market and its alias slugs, and detaches it from every company that carries it in the background. Its slugs are blocked so company enrichment cannot add the market back; creating a market with the same slug lifts the block, but a slug that human review had already retired cannot be re-created.
      */
     delete: operations['deleteTaxonomiesMarket'];
     options?: never;
@@ -6405,7 +6465,7 @@ export interface paths {
     post?: never;
     /**
      * Delete a skill
-     * @description Deletes the skill. Jobs may retain stale skill slugs (by design).
+     * @description Deletes the skill and its alias slugs, and removes it from every job that carries it in the background. Its slugs are blocked so imported jobs cannot add the skill back; creating a skill with the same slug lifts the block, but a slug that human review had already retired cannot be re-created.
      */
     delete: operations['deleteTaxonomiesSkill'];
     options?: never;
@@ -7418,8 +7478,10 @@ export interface components {
     BackfillSettings: {
       /** @enum {string} */
       object: 'backfill_settings';
-      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      /** @description Most Backfill jobs (from rules, companies and sponsored jobs) live on the Board at once (1–100,000). Jobs from feeds count toward `feedJobsLimit` instead. `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
       jobLimit: number | null;
+      /** @description Most jobs from all of the Board's feeds combined live on the Board at once (1–100,000). Each feed's own `jobLimit` still applies. `null` means no Board limit for feeds; the plan's job limit still applies. Takes effect on the next feed sync; jobs already live are not removed. */
+      feedJobsLimit: number | null;
       /** @description "Posted within": Backfill imports a job only if it was posted within this many days at the time it is imported (1–365); imported jobs then stay as they age. `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that were too old when imported and deletes those awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
       maxJobAgeDays: number | null;
       /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
@@ -7430,6 +7492,38 @@ export interface components {
       sponsoredJobsEnabled: boolean;
       /** @description Whether `sponsoredJobsEnabled` can be changed on this Board. `false` until Backfill is set up; a PATCH that changes it then returns `backfill_not_configured`. */
       sponsoredJobsConfigurable: boolean;
+      /** @description Board-wide job filters from Backfill settings. Backfill imports only jobs that match them, from company sources and from every Backfill rule; a rule's own filters narrow further. An omitted key means no filter on it. On PATCH the object replaces the whole filter set: a key you leave out is cleared, and `{}` clears every filter. Empty until Backfill is set up (`sponsoredJobsConfigurable` is `false`); a PATCH that sets it then returns `backfill_not_configured`. */
+      filters: {
+        /** @description ISO 3166-1 alpha-2 country codes jobs must be in. */
+        countries?: string[];
+        /** @description ISO 3166-2 subdivision codes jobs must be in. */
+        subdivisions?: string[];
+        /** @description Seniority levels jobs must have. */
+        seniorities?: (
+          | 'entry_level'
+          | 'associate'
+          | 'mid_level'
+          | 'senior'
+          | 'director'
+          | 'executive'
+        )[];
+        /** @description Employment types jobs must have. */
+        employmentTypes?: (
+          | 'full_time'
+          | 'part_time'
+          | 'contract'
+          | 'internship'
+          | 'temporary'
+          | 'volunteer'
+          | 'other'
+        )[];
+        /** @description Work arrangements jobs must have: remote, hybrid, onsite. */
+        workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
+      };
+      /** @description The board context from Backfill settings: a description of the Board (up to 500 characters) that Backfill uses to keep only relevant jobs. Surrounding whitespace is trimmed; `null` or an empty string clears it. Null when not set or when Backfill is not set up; a PATCH that sets it before Backfill is set up returns `backfill_not_configured`. */
+      boardContext: string | null;
+      /** @description Terms Backfill skips when they appear in the title of a job from a company source (up to 100). Matching ignores case; terms are stored lowercased, trimmed and without duplicates. On PATCH the list replaces the saved one, and `[]` clears it. Empty until Backfill is set up (`sponsoredJobsConfigurable` is `false`); a PATCH that sets it then returns `backfill_not_configured`. */
+      excludedTitleTerms: string[];
     };
     BackfillStatus: {
       /** @enum {string} */
@@ -7461,8 +7555,10 @@ export interface components {
         /** @description Work arrangements jobs must have: remote, hybrid, onsite. */
         workplaceTypes?: string[];
       } | null;
-      /** @description Most published Backfill jobs the Board allows. Null when only the plan limit applies. */
+      /** @description Most published Backfill jobs (from rules, companies and sponsored jobs) the Board allows. Jobs from feeds count toward `feedJobsLimit` instead. Null when only the plan limit applies. */
       jobLimit: number | null;
+      /** @description Most published jobs from all of the Board's feeds combined the Board allows. Null when there is no Board limit for feeds. */
+      feedJobsLimit: number | null;
       /** @description Backfill skips jobs first published more than this many days ago. Null when there is no age limit. */
       maxAgeDays: number | null;
       /** @description True when Backfill skips jobs that are remote worldwide. */
@@ -9335,9 +9431,36 @@ export interface components {
       /** @description The address to invite. Lowercased and trimmed before use. */
       email: string;
     };
-    CreateInboxTicketNoteBody: {
-      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+    CreateInboxSavedReplyBody: {
+      /** @description Searched in the composer. */
+      title: string;
+      /** @description Markdown. Fills `{first_name}`, `{my_name}`, `{board_name}`. */
       body: string;
+      /**
+       * @description Composer: `reply` or `note`.
+       * @default reply
+       * @enum {string}
+       */
+      availableIn: 'reply' | 'note';
+      /**
+       * @description `true`: only you see it.
+       * @default false
+       */
+      onlyMe: boolean;
+      /**
+       * @description Run on send. One per type; not `close` and `snooze`.
+       * @default []
+       */
+      actions: components['schemas']['InboxSavedReplyAction'][];
+    };
+    CreateInboxTicketNoteBody: {
+      /** @description The message, up to 100,000 characters. Plain text with its line breaks kept, unless `bodyFormat` is `markdown`. */
+      body: string;
+      /**
+       * @description How to read `body`. `text` (the default) sends it exactly as written. `markdown` formats bold, italics, lists, quotes and links; raw HTML is shown as text and never rendered. A `markdown` reply can be up to 4,000 characters, and one line of a `markdown` message can open up to 20 nested quotes or lists.
+       * @enum {string}
+       */
+      bodyFormat?: 'text' | 'markdown';
     };
     CreateInvitationBody: {
       /**
@@ -9963,6 +10086,128 @@ export interface components {
       note?: string;
       /** @description Required for `verify`: the `currentHash` you read with the item. Refused with 409 when the item changed since. */
       expectedHash?: string;
+    };
+    Deliverability: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'deliverability';
+      /** @description The email counted: `all`, or its key. */
+      email: string;
+      /** @description The first UTC day counted (YYYY-MM-DD). */
+      from: string;
+      /** @description The last UTC day counted, today (YYYY-MM-DD). */
+      to: string;
+      /** @description The first day this email was counted, which may be before `from`. Null when it has never been sent. */
+      counted_since: string | null;
+      /** @description The Board's marketing email status. */
+      status: {
+        /**
+         * @description Marketing email health, as `GET /v1/sending-health` reports it. Only marketing email is ever paused.
+         * @enum {string}
+         */
+        state: 'healthy' | 'warning' | 'paused';
+        /**
+         * @description Why marketing email is paused. Null unless paused.
+         * @enum {string|null}
+         */
+        pause_reason: 'spam_rate' | 'bounce_rate' | null;
+        /**
+         * @description The window the rates are judged over. Null while there are too few deliveries to judge.
+         * @enum {string|null}
+         */
+        window: '7d' | '30d' | null;
+        /** @description Marketing spam reports per delivery to a provider that sends reports, as a fraction. Warns above 0.001 (0.1%), pauses above 0.003 (0.3%). */
+        spam_rate: number | null;
+        /** @description Marketing hard bounces per attempted delivery, as a fraction. Pauses above 0.02 (2%). */
+        hard_bounce_rate: number | null;
+      };
+      /** @description Today's warm-up of the bulk sending domain. Null when the Board has none or its warm-up has ended. */
+      warm_up: {
+        /** @description Today's marketing email limit from the bulk sending domain. Marketing email over it goes out the next day, most engaged people first. Sign-in links and receipts have no limit. */
+        limit_today: number;
+        /** @description Marketing emails sent under the limit today. */
+        sent_today: number;
+      } | null;
+      /** @description Counts over the whole range. */
+      totals: {
+        /** @description Emails handed to the mail server for delivery. */
+        sent: number;
+        /** @description Emails the recipient's mail server accepted. */
+        delivered: number;
+        /** @description Emails delayed at least once. Each email counts once, however often it is retried. */
+        deferred: number;
+        /** @description Bounces of every kind, hard or refused. */
+        bounced: number;
+        /** @description Bounces to addresses that do not exist. */
+        hard_bounced: number;
+        /** @description Spam reports from recipients. */
+        spam_reported: number;
+        /** @description Deliveries to mailbox providers that send spam reports back. Gmail sends none, so its spam reports are always 0. */
+        feedback_delivered: number;
+        /** @description Unsubscribes from this email. */
+        unsubscribed: number;
+      };
+      /** @description One entry per day that sent anything, oldest first. */
+      daily: components['schemas']['DeliverabilityDay'][];
+      /** @description Counts over the range for each mailbox provider. */
+      providers: components['schemas']['DeliverabilityProvider'][];
+      /** @description Why mail bounced or was delayed, most common first. */
+      reasons: {
+        /**
+         * @description Whether mail bounced or was delayed.
+         * @enum {string}
+         */
+        kind: 'bounced' | 'delayed';
+        /** @description The mail server's reason, as PostShiba groups it. */
+        classification: string;
+        /** @description Emails with this reason. */
+        count: number;
+        /** @description The latest explanation given, with addresses removed. Null when none was given. */
+        last_reason: string | null;
+      }[];
+    };
+    DeliverabilityDay: {
+      /** @description The UTC day (YYYY-MM-DD). */
+      date: string;
+      /** @description Emails handed to the mail server for delivery. */
+      sent: number;
+      /** @description Emails the recipient's mail server accepted. */
+      delivered: number;
+      /** @description Emails delayed at least once. Each email counts once, however often it is retried. */
+      deferred: number;
+      /** @description Bounces of every kind, hard or refused. */
+      bounced: number;
+      /** @description Spam reports from recipients. */
+      spam_reported: number;
+      /** @description Unsubscribes from this email. */
+      unsubscribed: number;
+    };
+    DeliverabilityProvider: {
+      /**
+       * @description The mailbox provider, from the recipient address.
+       * @enum {string}
+       */
+      provider: 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'other';
+      /** @description Emails handed to the mail server for delivery. */
+      sent: number;
+      /** @description Emails the recipient's mail server accepted. */
+      delivered: number;
+      /** @description Emails delayed at least once. Each email counts once, however often it is retried. */
+      deferred: number;
+      /** @description Bounces of every kind, hard or refused. */
+      bounced: number;
+      /** @description Bounces to addresses that do not exist. */
+      hard_bounced: number;
+      /** @description Spam reports from recipients. */
+      spam_reported: number;
+      /** @description Deliveries to mailbox providers that send spam reports back. Gmail sends none, so its spam reports are always 0. */
+      feedback_delivered: number;
+      /** @description The provider is accepting mail slowly from many senders, not just this Board. Delays there don't count against its status. */
+      slow_for_many_senders: boolean;
+      /** @description Marketing emails waiting at the provider now. They retry on their own. */
+      waiting: number;
     };
     DevelopmentOrigin: {
       id: string;
@@ -10852,7 +11097,7 @@ export interface components {
       /** @description The message text. */
       body: string;
       /**
-       * @description `text` for plain text. `markdown` when an incoming HTML email was converted to Markdown.
+       * @description `text` for plain text. `markdown` when a reply or note was written as Markdown, or an incoming HTML email was converted to Markdown.
        * @enum {string}
        */
       bodyFormat: 'text' | 'markdown';
@@ -10881,6 +11126,46 @@ export interface components {
       /** @description Time at which the message was created. ISO 8601 datetime. */
       createdAt: string;
     };
+    InboxSavedReply: {
+      id: string;
+      /** @enum {string} */
+      object: 'inbox_saved_reply';
+      title: string;
+      body: string;
+      /** @enum {string} */
+      availableIn: 'reply' | 'note';
+      onlyMe: boolean;
+      actions: components['schemas']['InboxSavedReplyAction'][];
+      usageCount: number;
+      lastUsedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+    };
+    InboxSavedReplyAction:
+      | {
+          /** @enum {string} */
+          type: 'close';
+        }
+      | {
+          /** @enum {string} */
+          type: 'snooze';
+          /**
+           * @description When it reopens.
+           * @enum {string}
+           */
+          preset:
+            | 'later_today'
+            | 'tomorrow'
+            | 'monday'
+            | 'one_week'
+            | 'one_month';
+        }
+      | {
+          /** @enum {string} */
+          type: 'assign';
+          /** @description A member’s user ID. */
+          assigneeUserId: string;
+        };
     InboxSettings: {
       /**
        * @description String representing the object's type. Objects of the same type share the same value.
@@ -12172,6 +12457,15 @@ export interface components {
       employerCompanyDeletionEnabled?: boolean;
       /** @enum {string} */
       talentAccessModel?: 'paid_messaging' | 'paid_unlocks_and_messaging';
+      /** @description Free profile unlocks each employer gets before paying (`paid_unlocks_and_messaging` boards). Absent means `0` (none). */
+      talentFreeUnlockCount?: number;
+      /** @description Free new conversations each employer gets before paying. Absent means `0` (none). */
+      talentFreeMessageCount?: number;
+      /**
+       * @description Who the free unlocks and conversations are counted for: `company` (shared by everyone at a company) or `recruiter` (each recruiter at a company). Absent means `company`.
+       * @enum {string}
+       */
+      talentFreeAllowanceScope?: 'company' | 'recruiter';
       /**
        * @description Board language. Absent means `en`.
        * @enum {string}
@@ -12233,7 +12527,44 @@ export interface components {
       /** @enum {string} */
       source: 'human' | 'llm';
       updatedAt: string;
+      /** @description The language the copy above is in, when the request passed `locale`. Absent otherwise. */
+      locale?: string;
+      /** @description How each field reads in `locale`, when the request passed it. Absent otherwise. */
+      translation?: {
+        intro: components['schemas']['PageContentTranslationField'];
+        metaTitle: components['schemas']['PageContentTranslationField'] &
+          unknown;
+        metaDescription: components['schemas']['PageContentTranslationField'] &
+          unknown;
+      };
+      /** @description The page in each of the board's Interface locales other than its board language, one entry per locale; `[]` when the board has none. Present on GET without `locale`, absent otherwise. To edit or reset one language, PUT or DELETE with that `locale`. */
+      translations?: components['schemas']['PageContentLocaleSummary'][];
     };
+    PageContentLocaleSummary: {
+      /** @description The Interface locale, e.g. `de`. Pass it as `locale` to read, edit (PUT) or reset (DELETE) this translation. */
+      locale: string;
+      /**
+       * @description `edited`: at least one field is the owner's translation. `outdated`: edited, but the board-language text changed since; review it. `auto`: machine translated, with no owner edits. `not_translated`: no field is translated yet, so the page shows the board-language text. `translating`: a machine translation into this locale is running now, usually for a few seconds after the page is saved; read again for the result.
+       * @enum {string}
+       */
+      status: 'edited' | 'outdated' | 'auto' | 'not_translated' | 'translating';
+      /** @description The translated title override as written, placeholders included; `null` when the page has none or it is not translated yet. */
+      metaTitle: string | null;
+      /** @description The translated meta description override as written, placeholders included; `null` when the page has none or it is not translated yet. */
+      metaDescription: string | null;
+      /** @description The translated intro markdown as written, placeholders included; `null` when the page has none or it is not translated yet. */
+      intro: string | null;
+    };
+    /** @description The intro in `locale`; `null` when the page has no intro. */
+    PageContentTranslationField: {
+      /**
+       * @description `edited`: the owner's translation. `auto`: machine translated. `pending`: not translated yet, so the page shows the board-language text.
+       * @enum {string}
+       */
+      status: 'auto' | 'edited' | 'pending';
+      /** @description True when the board-language text changed after the owner edited this translation. The edit keeps showing; review it. */
+      sourceChanged: boolean;
+    } | null;
     PatchReportingIntegrationBody: {
       /** @description Whether collection is enabled for this integration. */
       enabled?: boolean;
@@ -12430,6 +12761,15 @@ export interface components {
        * @enum {string}
        */
       talentAccessModel?: 'paid_messaging' | 'paid_unlocks_and_messaging';
+      /** @description Free profile unlocks each employer gets before paying, like the job paywall preview. Used only once the employer has no paid unlock credit left; after the last one employers see the paid talent plans. `0` turns it off. A positive value needs `talentAccessModel` `paid_unlocks_and_messaging`, already set or in the same request. Lowering it never re-locks profiles already unlocked. */
+      talentFreeUnlockCount?: number;
+      /** @description Free new conversations each employer gets before paying. Used only once the employer has no paid message credit left; replies in an existing conversation are always free. `0` turns it off. A positive value needs a `talentAccessModel`, already set or in the same request. On `paid_unlocks_and_messaging` the candidate must still be unlocked first. */
+      talentFreeMessageCount?: number;
+      /**
+       * @description Who `talentFreeUnlockCount` and `talentFreeMessageCount` are counted for: `company` (one allowance shared by everyone at a company, the default) or `recruiter` (each recruiter at a company gets their own).
+       * @enum {string}
+       */
+      talentFreeAllowanceScope?: 'company' | 'recruiter';
       /**
        * @description Board language. On a hosted board the new language applies immediately. On a site built with the AI website builder the language lives in the site code: a change starts a translation of your site that is published when it is ready (usually a few minutes), so `config.language` keeps the current value and the response carries the pending `languageChange`. Sending the current language changes nothing.
        * @enum {string}
@@ -13096,7 +13436,7 @@ export interface components {
       /** @description The page's meta description, used in place of the board's description template. May use the placeholders `{{category}}` (category pages) or `{{location}}` (location pages), `{{board_name}}`, `{{count}}`, `{{job_label}}`, `{{salary_range}}` and `{{salary_count}}`, filled with the page's live values when read; a sentence whose placeholder has no value, or does not apply to the page, is left out. Omit to keep; `null` clears it. */
       metaDescription?: string | null;
       /**
-       * @description `llm` marks an AI draft a person approved. Defaults to `human`.
+       * @description `llm` marks an AI draft a person approved. Defaults to `human`. Ignored with `locale`: a translation written through the API is always the owner's.
        * @default human
        * @enum {string}
        */
@@ -13298,8 +13638,13 @@ export interface components {
       origin: string;
     };
     ReplyToInboxTicketBody: {
-      /** @description The message as plain text, up to 100,000 characters. Line breaks are kept. */
+      /** @description The message, up to 100,000 characters. Plain text with its line breaks kept, unless `bodyFormat` is `markdown`. */
       body: string;
+      /**
+       * @description How to read `body`. `text` (the default) sends it exactly as written. `markdown` formats bold, italics, lists, quotes and links; raw HTML is shown as text and never rendered. A `markdown` reply can be up to 4,000 characters, and one line of a `markdown` message can open up to 20 nested quotes or lists.
+       * @enum {string}
+       */
+      bodyFormat?: 'text' | 'markdown';
     };
     ReportingConnect: {
       /**
@@ -14781,8 +15126,10 @@ export interface components {
       jobLimit?: number | null;
     };
     UpdateBackfillSettingsBody: {
-      /** @description Most Backfill jobs live on the Board at once (1–100,000). `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
+      /** @description Most Backfill jobs (from rules, companies and sponsored jobs) live on the Board at once (1–100,000). Jobs from feeds count toward `feedJobsLimit` instead. `null` means no Board limit; the plan's job limit still applies. Takes effect on the next sync; jobs already live are not removed. */
       jobLimit?: number | null;
+      /** @description Most jobs from all of the Board's feeds combined live on the Board at once (1–100,000). Each feed's own `jobLimit` still applies. `null` means no Board limit for feeds; the plan's job limit still applies. Takes effect on the next feed sync; jobs already live are not removed. */
+      feedJobsLimit?: number | null;
       /** @description "Posted within": Backfill imports a job only if it was posted within this many days at the time it is imported (1–365); imported jobs then stay as they age. `null` turns the age filter off. Tightening (or first setting) it expires live Backfill jobs that were too old when imported and deletes those awaiting review, in the background; loosening or clearing it does not bring expired jobs back. */
       maxJobAgeDays?: number | null;
       /** @description Skip remote jobs open to candidates anywhere in the world. Turning it on also expires the worldwide remote Backfill jobs already live and deletes those awaiting review, in the background. */
@@ -14791,6 +15138,38 @@ export interface components {
       requireSalary?: boolean;
       /** @description Include sponsored (pay-per-click) jobs in Backfill. Turning it on also switches country gating to sponsored-only when the Board has no gating mode yet. Either direction starts a sponsored-jobs sync in the background. */
       sponsoredJobsEnabled?: boolean;
+      /** @description Board-wide job filters from Backfill settings. Backfill imports only jobs that match them, from company sources and from every Backfill rule; a rule's own filters narrow further. An omitted key means no filter on it. On PATCH the object replaces the whole filter set: a key you leave out is cleared, and `{}` clears every filter. Empty until Backfill is set up (`sponsoredJobsConfigurable` is `false`); a PATCH that sets it then returns `backfill_not_configured`. */
+      filters?: {
+        /** @description ISO 3166-1 alpha-2 country codes jobs must be in. */
+        countries?: string[];
+        /** @description ISO 3166-2 subdivision codes jobs must be in. */
+        subdivisions?: string[];
+        /** @description Seniority levels jobs must have. */
+        seniorities?: (
+          | 'entry_level'
+          | 'associate'
+          | 'mid_level'
+          | 'senior'
+          | 'director'
+          | 'executive'
+        )[];
+        /** @description Employment types jobs must have. */
+        employmentTypes?: (
+          | 'full_time'
+          | 'part_time'
+          | 'contract'
+          | 'internship'
+          | 'temporary'
+          | 'volunteer'
+          | 'other'
+        )[];
+        /** @description Work arrangements jobs must have: remote, hybrid, onsite. */
+        workplaceTypes?: ('remote' | 'hybrid' | 'onsite')[];
+      };
+      /** @description The board context from Backfill settings: a description of the Board (up to 500 characters) that Backfill uses to keep only relevant jobs. Surrounding whitespace is trimmed; `null` or an empty string clears it. Null when not set or when Backfill is not set up; a PATCH that sets it before Backfill is set up returns `backfill_not_configured`. */
+      boardContext?: string | null;
+      /** @description Terms Backfill skips when they appear in the title of a job from a company source (up to 100). Matching ignores case; terms are stored lowercased, trimmed and without duplicates. On PATCH the list replaces the saved one, and `[]` clears it. Empty until Backfill is set up (`sponsoredJobsConfigurable` is `false`); a PATCH that sets it then returns `backfill_not_configured`. */
+      excludedTitleTerms?: string[];
     };
     UpdateBlogPostBody: {
       slug?: string;
@@ -15019,6 +15398,21 @@ export interface components {
        * @enum {string}
        */
       role: 'admin' | 'member';
+    };
+    UpdateInboxSavedReplyBody: {
+      /** @description Searched in the composer. */
+      title?: string;
+      /** @description Markdown. Fills `{first_name}`, `{my_name}`, `{board_name}`. */
+      body?: string;
+      /**
+       * @description Composer: `reply` or `note`.
+       * @enum {string}
+       */
+      availableIn?: 'reply' | 'note';
+      /** @description `true`: only you see it. */
+      onlyMe?: boolean;
+      /** @description Run on send. One per type; not `close` and `snooze`. */
+      actions?: components['schemas']['InboxSavedReplyAction'][];
     };
     UpdateInboxSettingsBody: {
       /** @description Turns the Inbox and the board’s public Contact page on or off. Turning it off requires disconnecting forwarding and any custom receiving address first. */
@@ -18104,7 +18498,8 @@ export interface operations {
           | 'import_batch'
           | 'invoice'
           | 'backfill'
-          | 'inbox_ticket';
+          | 'inbox_ticket'
+          | 'inbox_saved_reply';
         /** @description Only return entries at or after this time. ISO 8601 datetime. On the Grow plan entries older than 90 days are never returned. */
         from?: string;
         /** @description Only return entries at or before this time. ISO 8601 datetime. */
@@ -24178,6 +24573,40 @@ export interface operations {
       };
     };
   };
+  getDeliverability: {
+    parameters: {
+      query?: {
+        /** @description The last 7 or 30 UTC days, today included. Defaults to 30. */
+        days?: '7' | '30';
+        /** @description Which email to count: `all` (default), or one email by its key, such as `job-alert-digest`, `job-recommendation-digest`, `import-confirmation` or `board-magic-link`. */
+        email?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Deliverability'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listDevelopmentOrigins: {
     parameters: {
       query?: never;
@@ -27329,6 +27758,264 @@ export interface operations {
         };
       };
       /** @description Import already confirmed or terminal. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listInboxSavedReplies: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/inbox/saved-replies */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['InboxSavedReply'][];
+          };
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createInboxSavedReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateInboxSavedReplyBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxSavedReply'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getInboxSavedReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved reply ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxSavedReply'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteInboxSavedReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved reply ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateInboxSavedReply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved reply ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateInboxSavedReplyBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InboxSavedReply'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Inbox is turned off for this board. */
       409: {
         headers: {
           [name: string]: unknown;
@@ -30674,6 +31361,8 @@ export interface operations {
         category?: string;
         /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias, or `remote`, `hybrid` or `on-site` for a work arrangement page. */
         place?: string;
+        /** @description One of the board's Interface locales (not its board language), e.g. `de`: read, set or reset the page's translation into that language instead of its board-language copy. GET returns the copy the page shows in that language with each field's `translation` status; PUT writes the owner's translation of the fields it sends (`null` resets a field to the automatic translation); DELETE resets every field to the automatic translation. A language the board does not offer is a 400. */
+        locale?: string;
       };
       header?: never;
       path?: never;
@@ -30688,6 +31377,15 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['PageContent'];
+        };
+      };
+      /** @description `locale` is not one of the board's Interface locales. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
         };
       };
       /** @description Unknown page, or the page has no intro and no meta overrides. */
@@ -30708,6 +31406,8 @@ export interface operations {
         category?: string;
         /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias, or `remote`, `hybrid` or `on-site` for a work arrangement page. */
         place?: string;
+        /** @description One of the board's Interface locales (not its board language), e.g. `de`: read, set or reset the page's translation into that language instead of its board-language copy. GET returns the copy the page shows in that language with each field's `translation` status; PUT writes the owner's translation of the fields it sends (`null` resets a field to the automatic translation); DELETE resets every field to the automatic translation. A language the board does not offer is a 400. */
+        locale?: string;
       };
       header?: never;
       path?: never;
@@ -30728,6 +31428,15 @@ export interface operations {
           'application/json': components['schemas']['PageContent'];
         };
       };
+      /** @description `locale` is not one of the board's Interface locales, or names a field the page has no board-language text for. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
       /** @description Unknown page. */
       404: {
         headers: {
@@ -30746,6 +31455,8 @@ export interface operations {
         category?: string;
         /** @description Slug of the location page: the place's `slug`, `canonicalSlug` or a merged-away alias, or `remote`, `hybrid` or `on-site` for a work arrangement page. */
         place?: string;
+        /** @description One of the board's Interface locales (not its board language), e.g. `de`: read, set or reset the page's translation into that language instead of its board-language copy. GET returns the copy the page shows in that language with each field's `translation` status; PUT writes the owner's translation of the fields it sends (`null` resets a field to the automatic translation); DELETE resets every field to the automatic translation. A language the board does not offer is a 400. */
+        locale?: string;
       };
       header?: never;
       path?: never;
