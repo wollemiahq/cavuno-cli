@@ -1,6 +1,6 @@
 {
   "version": "1.29.1",
-  "generatedAt": "2026-11-17T05:51:59.354Z",
+  "generatedAt": "2026-11-19T02:00:17.555Z",
   "groups": [
     {
       "name": "auth",
@@ -2945,6 +2945,142 @@
             "cavuno email-layouts remove el_123 --yes"
           ],
           "mapsTo": "DELETE /v1/email-layouts/:id"
+        }
+      ]
+    },
+    {
+      "name": "system-emails",
+      "description": "Reword the emails your board sends, and choose the template each uses.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List the system emails, with recipient and template.",
+          "synopsis": "cavuno system-emails list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno system-emails list"
+          ],
+          "mapsTo": "GET /v1/system-emails"
+        },
+        {
+          "name": "get",
+          "description": "Fetch the wording in effect for one email.",
+          "synopsis": "cavuno system-emails get <type>",
+          "arguments": [
+            {
+              "name": "type",
+              "description": "Email type, such as board-magic-link",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno system-emails get board-magic-link"
+          ],
+          "mapsTo": "GET /v1/system-emails/:type"
+        },
+        {
+          "name": "publish",
+          "description": "Publish new wording for an email.",
+          "synopsis": "cavuno system-emails publish <type> [options]",
+          "arguments": [
+            {
+              "name": "type",
+              "description": "Email type",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--subject <text>",
+              "description": "Subject line (required)",
+              "required": true
+            },
+            {
+              "flags": "--body-file <path>",
+              "description": "File with the body HTML (required)",
+              "required": true
+            },
+            {
+              "flags": "--preview <text>",
+              "description": "Inbox preview text",
+              "required": false,
+              "defaultValue": ""
+            }
+          ],
+          "examples": [
+            "cavuno system-emails publish board-magic-link --subject \"Log in to {{board_name}}\" --body-file body.html"
+          ],
+          "mapsTo": "PUT /v1/system-emails/:type"
+        },
+        {
+          "name": "set-layout",
+          "description": "Choose the template an email is sent with.",
+          "synopsis": "cavuno system-emails set-layout <type> <layoutId>",
+          "arguments": [
+            {
+              "name": "type",
+              "description": "Email type",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "layoutId",
+              "description": "Template ID, or system",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno system-emails set-layout board-magic-link system"
+          ],
+          "mapsTo": "PUT /v1/system-emails/:type/layout"
+        },
+        {
+          "name": "test",
+          "description": "Send the email in effect to your own inbox.",
+          "synopsis": "cavuno system-emails test <type>",
+          "arguments": [
+            {
+              "name": "type",
+              "description": "Email type",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno system-emails test board-magic-link"
+          ],
+          "mapsTo": "POST /v1/system-emails/:type/test"
+        },
+        {
+          "name": "reset",
+          "description": "Go back to the default wording.",
+          "synopsis": "cavuno system-emails reset <type> [options]",
+          "arguments": [
+            {
+              "name": "type",
+              "description": "Email type",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno system-emails reset board-magic-link --yes"
+          ],
+          "mapsTo": "DELETE /v1/system-emails/:type"
         }
       ]
     },
