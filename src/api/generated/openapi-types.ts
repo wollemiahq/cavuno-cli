@@ -2857,7 +2857,7 @@ export interface paths {
     put?: never;
     /**
      * Publish an email template design
-     * @description Starts an asynchronous `email_layouts.publish` operation. It renders every email that can use the template with sample data and the board’s brand, and makes the draft live as a new version only when each one renders, keeps its footer and required links, and stays under 100 KB. Otherwise the operation fails with `email_layouts_publish_refused`, its `error.message` lists every problem, one per line, and the published version keeps sending. Once it succeeds, the template’s `currentVersionId` is the new version. The newest 50 versions are kept.
+     * @description Starts an asynchronous `email_layouts.publish` operation. It renders every email that can use the template with sample data and the board’s brand, and makes the draft live as a new version only when each one renders, keeps its footer and required links, and stays under 100 KB. Otherwise the operation fails with `email_layouts_publish_refused`, its `error.message` lists every problem, one per line, and the published version keeps sending. Once it succeeds, the template’s `currentVersionId` is the new version, and the version’s `review` holds the AI content review of the published template. The newest 50 versions are kept.
      */
     post: operations['publishEmailLayout'];
     delete?: never;
@@ -2955,7 +2955,8 @@ export interface paths {
     };
     /**
      * List email templates
-     * @description Returns every email your board sends that you can customize, one entry per type, whether or not you have customized it. Each entry lists the tokens you can use and the tokens the body must contain, so you can write a valid template. The list is short and returned in one page.
+     * @deprecated
+     * @description Deprecated: use `GET /v1/system-emails`. Returns every email your board sends that you can customize, one entry per type, whether or not you have customized it. Each entry lists the tokens you can use and the tokens the body must contain, so you can write a valid template. The list is short and returned in one page.
      */
     get: operations['listEmailTemplates'];
     put?: never;
@@ -2975,18 +2976,21 @@ export interface paths {
     };
     /**
      * Retrieve an email template
-     * @description Retrieves the template in effect for one email type: your published version when `customized` is `true`, otherwise the default template that the dashboard editor starts from.
+     * @deprecated
+     * @description Deprecated: use `GET /v1/system-emails/{type}`. Retrieves the template in effect for one email type: your published version when `customized` is `true`, otherwise the default template that the dashboard editor starts from.
      */
     get: operations['getEmailTemplate'];
     /**
      * Publish an email template
-     * @description Publishes your version of an email, replacing any version published before. It is used for every email of this type sent from then on. Send all three fields. The template is checked the same way as in the dashboard editor: length limits, only the tokens listed for this type, and every required body token present.
+     * @deprecated
+     * @description Deprecated: use `PUT /v1/system-emails/{type}`, which takes the same body. Publishes your version of an email, replacing any version published before. It is used for every email of this type sent from then on. Send all three fields. The template is checked the same way as in the dashboard editor: length limits, only the tokens listed for this type, and every required body token present.
      */
     put: operations['publishEmailTemplate'];
     post?: never;
     /**
      * Reset an email template
-     * @description Deletes your published version so the default template is sent again. Succeeds when the email was not customized.
+     * @deprecated
+     * @description Deprecated: use `DELETE /v1/system-emails/{type}`. Deletes your published version so the default template is sent again. Succeeds when the email was not customized.
      */
     delete: operations['resetEmailTemplate'];
     options?: never;
@@ -3005,7 +3009,8 @@ export interface paths {
     put?: never;
     /**
      * Send a test email
-     * @description Sends the email in effect for this type, with sample values for its tokens and your board’s branding, to the email address of the member making the request (for an API key, the member who created it). Use it to check a template after publishing. A board can send 20 test emails an hour, shared with the dashboard editor.
+     * @deprecated
+     * @description Deprecated: use `POST /v1/system-emails/{type}/test`. Sends the email in effect for this type, with sample values for its tokens and your board’s branding, to the email address of the member making the request (for an API key, the member who created it). Use it to check a template after publishing. A board can send 20 test emails an hour, shared with the dashboard editor.
      */
     post: operations['testEmailTemplate'];
     delete?: never;
@@ -3268,6 +3273,26 @@ export interface paths {
      * @description Sets an approved member's role on the company team to `admin` or `member`. A company always keeps at least one admin, so demoting the last admin is refused: make someone else an admin first. Setting the role it already has changes nothing. Requires `companies.manage`.
      */
     patch: operations['updateEmployersMembership'];
+    trace?: never;
+  };
+  '/employers/memberships/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore an employer's company access
+     * @description Reinstates a removed or rejected membership as `member` (`admin` if the company has none) and emails the employer. A pending claim is refused. Requires `companies.manage`.
+     */
+    post: operations['restoreEmployerMembership'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/employers/{id}': {
@@ -5932,6 +5957,94 @@ export interface paths {
      * @description Admin-initiated unsubscribe: sets `unsubscribedAt` and deactivates the subscriber’s alerts. Requires `alerts.manage`.
      */
     post: operations['unsubscribeSubscriber'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/system-emails': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List system emails
+     * @description Returns every email your board sends that you can reword, one entry per type, whether or not you have changed it: who receives it, which email template it uses, and the tokens you can use. The list is short and returned in one page.
+     */
+    get: operations['listSystemEmails'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/system-emails/{type}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a system email
+     * @description Retrieves the wording in effect for one email type: your published wording when `customized` is `true`, otherwise the default.
+     */
+    get: operations['getSystemEmail'];
+    /**
+     * Publish a system email
+     * @description Publishes your wording of an email, replacing any wording published before. It is used for every email of this type sent from then on. Send all three fields. The wording is checked the same way as in the dashboard: length limits, only the tokens listed for this type, every required body token present, the button kept on the email’s main link, and links only to the email’s own links or the board’s contact address.
+     */
+    put: operations['publishSystemEmail'];
+    post?: never;
+    /**
+     * Reset a system email
+     * @description Deletes your published wording so the default is sent again. Succeeds when the email was not customized. The email keeps its template.
+     */
+    delete: operations['resetSystemEmail'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/system-emails/{type}/layout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Choose a system email’s template
+     * @description Sets the email template this email is sent with. The template must be published. The job alert and job recommendation digests can’t use a template yet.
+     */
+    put: operations['updateSystemEmailLayout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/system-emails/{type}/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send a test system email
+     * @description Sends the email in effect for this type, with sample values for its tokens and your board’s branding, to the email address of the member making the request (for an API key, the member who created it). A board can send 20 test emails an hour, shared with the dashboard.
+     */
+    post: operations['testSystemEmail'];
     delete?: never;
     options?: never;
     head?: never;
@@ -9012,7 +9125,7 @@ export interface components {
        */
       object: 'contact_email';
       /**
-       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, or a newsletter sign-up confirmation (`board.subscribe`).
+       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, a newsletter sign-up confirmation (`board.subscribe`), a sign-in link, an email verification, a password reset, a tip receipt, or a digital product purchase receipt. Sign-in links, verifications, resets and receipts are listed only when the address already belongs to a person on the board.
        * @enum {string}
        */
       kind:
@@ -9020,7 +9133,12 @@ export interface components {
         | 'job_matches_digest'
         | 'import_confirmation'
         | 'job_alert_confirmation'
-        | 'subscribe_confirmation';
+        | 'subscribe_confirmation'
+        | 'sign_in_link'
+        | 'email_verification'
+        | 'password_reset'
+        | 'tip_receipt'
+        | 'purchase_receipt';
       /** @description The email's subject line. */
       subject: string;
       /**
@@ -10681,6 +10799,35 @@ export interface components {
       sourceHash: string;
       /** @description SHA-256 of the compiled HTML. */
       htmlHash: string;
+      /** @description The AI content review of the version, run on the template rendered with the sign-in link email. Null when the review couldn’t run. */
+      review: {
+        /**
+         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @enum {string}
+         */
+        outcome: 'allow' | 'hold' | 'block';
+        /** @description Why, when the outcome isn’t `allow`. */
+        reasons: {
+          /**
+           * @description What the review found.
+           * @enum {string}
+           */
+          code:
+            | 'credential_harvesting'
+            | 'impersonation'
+            | 'link_text_mismatch'
+            | 'lookalike_domain'
+            | 'job_scam'
+            | 'promotional_in_system_email'
+            | 'unrelated_to_board';
+          /** @description What is wrong, in a sentence. */
+          message: string;
+          /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Time the content was reviewed. ISO 8601 datetime. */
+        reviewedAt: string;
+      } | null;
       /** @description The version’s source files. */
       files: {
         /** @description File name. */
@@ -10718,6 +10865,35 @@ export interface components {
       sourceHash: string;
       /** @description SHA-256 of the compiled HTML. */
       htmlHash: string;
+      /** @description The AI content review of the version, run on the template rendered with the sign-in link email. Null when the review couldn’t run. */
+      review: {
+        /**
+         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @enum {string}
+         */
+        outcome: 'allow' | 'hold' | 'block';
+        /** @description Why, when the outcome isn’t `allow`. */
+        reasons: {
+          /**
+           * @description What the review found.
+           * @enum {string}
+           */
+          code:
+            | 'credential_harvesting'
+            | 'impersonation'
+            | 'link_text_mismatch'
+            | 'lookalike_domain'
+            | 'job_scam'
+            | 'promotional_in_system_email'
+            | 'unrelated_to_board';
+          /** @description What is wrong, in a sentence. */
+          message: string;
+          /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Time the content was reviewed. ISO 8601 datetime. */
+        reviewedAt: string;
+      } | null;
     };
     EmailTemplate: {
       /** @description Unique identifier for the email template. Same as `type`. */
@@ -12394,6 +12570,8 @@ export interface components {
       impressumEnabled?: boolean;
       requireApprovalFreeJobs?: boolean;
       postingRequiresMembership?: boolean;
+      /** @enum {string} */
+      employerApproval?: 'automatic' | 'manual';
       requireApprovalAggregatedJobs?: boolean;
       registrationWallEnabled?: boolean;
       nativeApplicationsEnabled?: boolean;
@@ -12610,6 +12788,11 @@ export interface components {
       requireApprovalFreeJobs?: boolean;
       /** @description When true, only companies with an active plan assignment can post jobs, and priced job-posting plans are hidden from the public pricing page (members still buy them when they post). Absent means anyone can post. */
       postingRequiresMembership?: boolean;
+      /**
+       * @description `automatic` (default) approves an employer whose verified email matches the company website. `manual`: an operator approves every employer, and a company an employer adds stays off the public board until then.
+       * @enum {string}
+       */
+      employerApproval?: 'automatic' | 'manual';
       /** @description Whether aggregated jobs (e.g. those sourced or imported from upstream sources) require admin approval before they appear on the public board. */
       requireApprovalAggregatedJobs?: boolean;
       /** @description Whether visitors must sign in to view jobs. */
@@ -13393,6 +13576,14 @@ export interface components {
        * @description New explicit expiry as an ISO 8601 datetime. Pass `null` to clear the explicit expiry, or omit the field to preserve an existing expiry. An ordinary published job without an explicit expiry receives the board's `defaultJobDurationDays` from its publication time (30 days when unset). Sponsored jobs may have no expiry.
        */
       expiresAt?: string | null;
+    };
+    PublishSystemEmailBody: {
+      /** @description Subject line, up to 200 characters. May use the tokens listed in `subjectTokens`, written as `{{token}}`. */
+      subject: string;
+      /** @description Inbox preview text, up to 150 characters. May use the tokens listed in `subjectTokens`. An empty string sends the default preview text. */
+      previewText: string;
+      /** @description Body HTML, up to 100 KB, in the same shape as the default body returned by the retrieve endpoint (paragraphs, headings, links and buttons; the email’s template adds the header, footer and brand around it). May use the tokens listed in `bodyTokens` and must contain every token in `requiredBodyTokens`. When the default body has a button, keep a button (`data-id="react-email-button"`) linking to the same token. Every link must be one of this email’s `*_url` tokens or a `mailto:` to the board’s contact or reply-to address. */
+      bodyHtml: string;
     };
     PutCandidatePaywallBody: {
       /** @enum {string} */
@@ -14662,6 +14853,105 @@ export interface components {
       /** @description The subscriber's alerts. */
       alerts: components['schemas']['SubscriberAlert'][];
     };
+    SystemEmail: {
+      /** @description Unique identifier for the system email. Same as `type`. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'system_email';
+      /** @description The system email type. */
+      type: string;
+      /** @description Display name of the email. */
+      name: string;
+      /** @description When the email is sent. */
+      description: string;
+      /**
+       * @description Who receives the email: `everyone`, `job_seekers`, `employers` or `buyers`.
+       * @enum {string}
+       */
+      recipient: 'everyone' | 'job_seekers' | 'employers' | 'buyers';
+      /** @description Whether the recipient can turn this email off in their notification preferences. */
+      recipientCanMute: boolean;
+      /** @description The email template this email uses: an id from `GET /v1/email-layouts`, or `system` for the System template. `null` for the job alert and job recommendation digests, which have their own design. */
+      layoutId: string | null;
+      /** @description Whether the board has published its own wording. When `false`, the default wording is sent. */
+      customized: boolean;
+      /** @description Time the wording was last published, or `null` when the default is in use. ISO 8601 datetime. */
+      updatedAt: string | null;
+      /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
+      subjectTokens: string[];
+      /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
+      bodyTokens: string[];
+      /** @description Tokens `bodyHtml` must contain, without braces. A publish without them is rejected. */
+      requiredBodyTokens: string[];
+      /** @description Subject line in effect, with tokens unexpanded. */
+      subject: string;
+      /** @description Inbox preview text in effect, with tokens unexpanded. */
+      previewText: string;
+      /** @description Body HTML in effect, with tokens unexpanded. Edit it and send it back with the publish endpoint. */
+      bodyHtml: string;
+    };
+    SystemEmailLayout: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'system_email_layout';
+      /** @description The system email type. */
+      type: string;
+      /** @description The email template the email now uses, or `system` for the System template. */
+      layoutId: string;
+    };
+    SystemEmailSummary: {
+      /** @description Unique identifier for the system email. Same as `type`. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'system_email';
+      /** @description The system email type. */
+      type: string;
+      /** @description Display name of the email. */
+      name: string;
+      /** @description When the email is sent. */
+      description: string;
+      /**
+       * @description Who receives the email: `everyone`, `job_seekers`, `employers` or `buyers`.
+       * @enum {string}
+       */
+      recipient: 'everyone' | 'job_seekers' | 'employers' | 'buyers';
+      /** @description Whether the recipient can turn this email off in their notification preferences. */
+      recipientCanMute: boolean;
+      /** @description The email template this email uses: an id from `GET /v1/email-layouts`, or `system` for the System template. `null` for the job alert and job recommendation digests, which have their own design. */
+      layoutId: string | null;
+      /** @description Whether the board has published its own wording. When `false`, the default wording is sent. */
+      customized: boolean;
+      /** @description Time the wording was last published, or `null` when the default is in use. ISO 8601 datetime. */
+      updatedAt: string | null;
+      /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
+      subjectTokens: string[];
+      /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
+      bodyTokens: string[];
+      /** @description Tokens `bodyHtml` must contain, without braces. A publish without them is rejected. */
+      requiredBodyTokens: string[];
+    };
+    SystemEmailTest: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'system_email_test';
+      /** @description The system email type that was sent. */
+      type: string;
+      /**
+       * @description Always `true` when the test was sent.
+       * @enum {boolean}
+       */
+      sent: true;
+    };
     TaxonomyMerge: {
       id: string;
       /** @enum {string} */
@@ -14955,7 +15245,10 @@ export interface components {
         | 'board-item-verification-code'
         | 'board-item-verification-expiring'
         | 'board-item-verification-lapsed'
-        | 'board-item-verification-decided';
+        | 'board-item-verification-decided'
+        | 'newsletter-subscription-confirmation'
+        | 'public-job-submission-rejected'
+        | 'board-sso-link-proof';
     };
     Todo: {
       /** @description Stable to-do id. Setup to-dos use the step name, for example `setup-payments`. */
@@ -15806,6 +16099,13 @@ export interface components {
       offeredToCandidates?: boolean;
       /** @description Switch the connection on or off for employers, with the same rules as `offeredToCandidates`. */
       offeredToEmployers?: boolean;
+    };
+    UpdateSystemEmailLayoutBody: {
+      /**
+       * @description The email template to use, as returned in `id` by `GET /v1/email-layouts`. `system` puts the email back on the System template. The template must have been published.
+       * @example system
+       */
+      layoutId: string;
     };
     UpdateTagBody: {
       /** @description URL-friendly slug for the tag. Auto-generated from `name` when omitted. */
@@ -26391,7 +26691,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
         type: string;
       };
       cookie?: never;
@@ -26423,7 +26723,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
         type: string;
       };
       cookie?: never;
@@ -26443,7 +26743,7 @@ export interface operations {
           'application/json': components['schemas']['EmailTemplate'];
         };
       };
-      /** @description The subject, preview text or body was rejected (`email_templates_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, or puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`). `error.details` names the `field`, the `reason` and the `token`. */
+      /** @description The subject, preview text or body was rejected (`email_templates_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`), drops the button that links to the email’s main link (`reason: missing_cta`), or links somewhere other than the email’s own links or the board’s contact address (`reason: link_not_allowed`). `error.details` names the `field`, the `reason`, and the `token` or `href`. */
       400: {
         headers: {
           [name: string]: unknown;
@@ -26468,7 +26768,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
         type: string;
       };
       cookie?: never;
@@ -26498,7 +26798,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
         type: string;
       };
       cookie?: never;
@@ -27280,6 +27580,56 @@ export interface operations {
       };
       /** @description The membership is not approved, or the change would leave the company without an admin. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  restoreEmployerMembership: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The membership id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmployerMembership'];
+        };
+      };
+      /** @description The membership is a pending claim. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Employer accounts are disabled on this board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Membership not found. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -34760,6 +35110,254 @@ export interface operations {
       };
       /** @description The subscriber is already unsubscribed. */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listSystemEmails: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/system-emails */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['SystemEmailSummary'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getSystemEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SystemEmail'];
+        };
+      };
+      /** @description No system email has this type (`system_emails_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  publishSystemEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PublishSystemEmailBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SystemEmail'];
+        };
+      };
+      /** @description The subject, preview text or body was rejected (`system_emails_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`), drops the button that links to the email’s main link (`reason: missing_cta`), or links somewhere other than the email’s own links or the board’s contact address (`reason: link_not_allowed`). `error.details` names the `field`, the `reason`, and the `token` or `href`. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No system email has this type (`system_emails_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  resetSystemEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No system email has this type (`system_emails_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateSystemEmailLayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateSystemEmailLayoutBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SystemEmailLayout'];
+        };
+      };
+      /** @description The email can’t use that template (`system_emails_invalid_layout`): the template doesn’t exist on this board, has never been published, or the email is a digest. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No system email has this type (`system_emails_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  testSystemEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        type: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SystemEmailTest'];
+        };
+      };
+      /** @description The member making the request is no longer an active member of the board. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No system email has this type (`system_emails_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The member has no email address (`system_emails_no_test_recipient`), or the board is not set up yet (`system_emails_board_not_configured`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has sent 20 test emails in the last hour (`system_emails_test_rate_limited`). The `Retry-After` header gives the seconds to wait. */
+      429: {
         headers: {
           [name: string]: unknown;
         };
