@@ -87,6 +87,11 @@ export {
   type EmailLayoutVersionListQuery,
 } from './email-layouts.js';
 export {
+  createSystemEmailsClient,
+  type SystemEmailsClient,
+  type PublishSystemEmailBody,
+} from './system-emails.js';
+export {
   createRedirectsClient,
   type RedirectsClient,
   type RedirectListQuery,
