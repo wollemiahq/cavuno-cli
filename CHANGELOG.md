@@ -3,6 +3,14 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.30.0 — 2026-11-23
+
+- **`cavuno system-emails`** manages the wording of a board's system emails
+  (sign-in links, receipts and the like): `list`, `get <type>`,
+  `publish <type>` with a subject, body and inbox preview, `set-layout` to
+  choose the template an email is sent with, `test` to send the email in
+  effect to your own inbox, and `reset` to go back to the default wording.
+
 ## 1.29.1 — 2026-11-18
 
 - No command, API or behavior changes. This release only corrects the

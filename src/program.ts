@@ -34,6 +34,7 @@ import { registerReportingCommand } from './commands/reporting.js';
 import { registerSalesLedPlansCommand } from './commands/sales-led-plans.js';
 import { registerSettingsCommand } from './commands/settings.js';
 import { registerSubscribersCommand } from './commands/subscribers.js';
+import { registerSystemEmailsCommand } from './commands/system-emails.js';
 import { registerTaxonomiesCommand } from './commands/taxonomies.js';
 import { registerTodosCommand } from './commands/todos.js';
 import { registerTransactionsCommand } from './commands/transactions.js';
@@ -53,6 +54,7 @@ export const PUBLIC_GROUPS = [
   'domains',
   'email-domains',
   'email-layouts',
+  'system-emails',
   'operations',
   'taxonomies',
   'candidates',
@@ -113,6 +115,7 @@ export function createCliProgram(version: string) {
   registerDomainsCommand(program);
   registerEmailDomainsCommand(program);
   registerEmailLayoutsCommand(program);
+  registerSystemEmailsCommand(program);
   registerBlogCommand(program);
   registerCandidatesCommand(program);
   registerEmployersCommand(program);
