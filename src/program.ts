@@ -6,6 +6,7 @@ import { registerBackfillCommand } from './commands/backfill.js';
 import { registerBillingCommand } from './commands/billing.js';
 import { registerBlogCommand } from './commands/blog.js';
 import { registerBuilderCommand } from './commands/builder.js';
+import { registerCampaignsCommand } from './commands/campaigns.js';
 import { registerCandidatesCommand } from './commands/candidates.js';
 import { registerCompaniesCommand } from './commands/companies.js';
 import { registerContactsCommand } from './commands/contacts.js';
@@ -55,6 +56,7 @@ export const PUBLIC_GROUPS = [
   'email-domains',
   'email-layouts',
   'system-emails',
+  'campaigns',
   'operations',
   'taxonomies',
   'candidates',
@@ -116,6 +118,7 @@ export function createCliProgram(version: string) {
   registerEmailDomainsCommand(program);
   registerEmailLayoutsCommand(program);
   registerSystemEmailsCommand(program);
+  registerCampaignsCommand(program);
   registerBlogCommand(program);
   registerCandidatesCommand(program);
   registerEmployersCommand(program);
