@@ -1017,6 +1017,198 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/campaigns': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List campaigns
+     * @description The board’s email campaigns, the most recently edited first, without their body or checks. Requires `emails.read`.
+     */
+    get: operations['listCampaigns'];
+    put?: never;
+    /**
+     * Create a campaign
+     * @description Creates a draft campaign, on the board’s Newsletter template unless `layoutId` names another. Nothing is sent. Requires `emails.manage`.
+     */
+    post: operations['createCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a campaign
+     * @description Retrieves a campaign with its body and its latest pre-send checks. Requires `emails.read`.
+     */
+    get: operations['getCampaign'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a campaign
+     * @description Deletes a draft campaign. It can’t be undone. A board that can’t send campaigns any more can still delete its drafts. Requires `emails.manage`.
+     */
+    delete: operations['deleteCampaign'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a campaign
+     * @description Changes a draft campaign. Only the fields given change. Requires `emails.manage`.
+     */
+    patch: operations['updateCampaign'];
+    trace?: never;
+  };
+  '/campaigns/{id}/duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Duplicate a campaign
+     * @description Creates a draft with the campaign’s name (with “copy” added), content, template, audience and fallbacks, from a campaign in any status. Requires `emails.manage`.
+     */
+    post: operations['duplicateCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a campaign report
+     * @description How a campaign went: sent, delivered, bounced, marked as spam and unsubscribed, each with a rate, and who it skipped by reason. Delivery events arrive over the minutes after each send. Opens aren’t counted. Requires `emails.read`.
+     */
+    get: operations['getCampaignReport'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/schedule': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Schedule a campaign
+     * @description Schedules a draft to start sending at `sendAt`, or now. It needs pre-send checks run on the campaign as it is now with nothing blocking (`POST /v1/campaigns/{id}/verify`), so what sends is what was checked. When the time comes the campaign is checked again; if it can’t send it goes back to draft, with `delivery.draftReason` saying why, and the board’s owners are emailed. Sending is spread over up to 12 hours, to people with marketing consent and a confirmed address, checked as each batch sends. Requires `emails.manage`.
+     */
+    post: operations['scheduleCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/stop': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Stop sending a campaign
+     * @description Stops a sending campaign: the emails not yet sent are never sent, including any still queued. Who it already reached keeps it. It can’t be resumed; duplicate it to send again. Requires `emails.manage`.
+     */
+    post: operations['stopCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send a test of a campaign
+     * @description Sends the campaign, rendered on its template with its footer, to the email address of the member making the request (for an API key, the member who created it). Tokens show that member’s own contact details where the board has them, else the fallback or a sample. A board can send 20 test emails an hour, shared with the other test sends. Requires `emails.manage`.
+     */
+    post: operations['testCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/unschedule': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unschedule a campaign
+     * @description Takes a scheduled campaign back to draft before it starts sending. Requires `emails.manage`.
+     */
+    post: operations['unscheduleCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/campaigns/{id}/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Check a campaign before sending
+     * @description Starts an asynchronous `campaigns.verify` operation with the checks run before a campaign sends: who the audience reaches and skips, tokens with no value and no fallback, every link, and a deliverability check of the email sent with sample data from the board’s bulk domain. When the operation succeeds, the campaign’s `checks` hold the result (`GET /v1/campaigns/{id}`); the deliverability verdict appears there when it arrives, within about two minutes. An unchanged campaign reuses its deliverability pass. Requires `emails.manage`.
+     */
+    post: operations['verifyCampaign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/candidates': {
     parameters: {
       query?: never;
@@ -1887,6 +2079,46 @@ export interface paths {
     get: operations['listContacts'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/contacts/batch/tags': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Tag or untag contacts
+     * @description Adds and removes tags on up to 200 contacts at once. Tags are labels: they never give anyone email they didn’t sign up for. Requires `alerts.manage`.
+     */
+    post: operations['batchUpdateContactTags'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/contacts/batch/topics': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add contacts to a marketing topic
+     * @description Adds a marketing topic to up to 200 contacts at once. Only contacts whose marketing consent is granted and confirmed get it, and never someone who removed the topic themselves; the others are counted in `skipped`. Requires `alerts.manage`.
+     */
+    post: operations['batchAddContactsToTopic'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3377,6 +3609,167 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/help/articles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List help articles
+     * @description Returns one page of help articles without their bodies, ordered by category and then by position inside the category. Filter by `categoryId` or `status`. Follow `nextCursor` while `hasMore` is true.
+     */
+    get: operations['listHelpArticles'];
+    put?: never;
+    /**
+     * Create a help article
+     * @description Creates a help article as a draft, last in its category. Publish it with `POST /v1/help/articles/{id}/publish`. A board can have up to 500.
+     */
+    post: operations['createHelpArticle'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/help/articles/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a help article
+     * @description Returns a help article with its body and, when a published article has edits waiting, its `unpublishedChanges`.
+     */
+    get: operations['getHelpArticle'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a help article
+     * @description Permanently deletes a help article, with its body and any unpublished changes.
+     */
+    delete: operations['deleteHelpArticle'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a help article
+     * @description Updates a help article. On a draft, `title`, `summary` and `html` change in place. On a published article they do not change what is live: the edit waits in `unpublishedChanges` until `POST /v1/help/articles/{id}/publish` makes it live or `POST /v1/help/articles/{id}/discard-changes` drops it. `slug`, `categoryId` and `position` always apply at once.
+     */
+    patch: operations['updateHelpArticle'];
+    trace?: never;
+  };
+  '/help/articles/{id}/discard-changes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Discard unpublished changes to a help article
+     * @description Drops the unpublished changes of a published article; what is live stays as it is. Takes no request body. An article with no unpublished changes is returned unchanged.
+     */
+    post: operations['discardHelpArticleChanges'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/help/articles/{id}/publish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish a help article
+     * @description Makes a draft live, or makes the unpublished changes of a published article live. Takes no request body. `publishedAt` is set on the first publish and kept afterwards. An article with nothing to publish is returned unchanged. What would go live needs content: an `html` with no text, image or embed is refused with `help_invalid_request`.
+     */
+    post: operations['publishHelpArticle'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/help/articles/{id}/unpublish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unpublish a help article
+     * @description Returns a published article to a draft. Takes no request body. Unpublished changes become the content of the draft, so the newest text is kept. A draft is returned unchanged.
+     */
+    post: operations['unpublishHelpArticle'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/help/categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List help categories
+     * @description Returns one page of help categories in display order, each with its article count. Follow `nextCursor` while `hasMore` is true.
+     */
+    get: operations['listHelpCategories'];
+    put?: never;
+    /**
+     * Create a help category
+     * @description Creates a help category after the existing ones. A board can have up to 50.
+     */
+    post: operations['createHelpCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/help/categories/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve a help category */
+    get: operations['getHelpCategory'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a help category
+     * @description Permanently deletes a help category that has no articles. One that still has articles is refused with `help_category_not_empty`: move or delete its articles first.
+     */
+    delete: operations['deleteHelpCategory'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a help category
+     * @description Updates a help category. Send `position` to move it; the other categories are renumbered.
+     */
+    patch: operations['updateHelpCategory'];
     trace?: never;
   };
   '/imports': {
@@ -5459,6 +5852,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/settings/digital-product-offers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve offer settings
+     * @description Retrieves how your board offers another digital product after each purchase or free claim: the largest discount and how long it lasts. Offers are always on once Stripe is connected and the board has a second product; each product can choose its own offer (`digitalProduct.offerPlanId`), otherwise Cavuno picks the most similar product the buyer doesn't own, else the best seller.
+     */
+    get: operations['getDigitalProductOfferSettings'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update offer settings
+     * @description Updates the largest discount on offers after a purchase and how long it lasts. Fields you leave out keep their value. Offers already shown keep the discount they were shown with.
+     */
+    patch: operations['updateDigitalProductOfferSettings'];
+    trace?: never;
+  };
   '/settings/form-layouts': {
     parameters: {
       query?: never;
@@ -5997,7 +6414,7 @@ export interface paths {
     get: operations['getSystemEmail'];
     /**
      * Publish a system email
-     * @description Publishes your wording of an email, replacing any wording published before. It is used for every email of this type sent from then on. Send all three fields. The wording is checked the same way as in the dashboard: length limits, only the tokens listed for this type, every required body token present, the button kept on the email’s main link, and links only to the email’s own links or the board’s contact address.
+     * @description Publishes your wording of an email, replacing any wording published before. It is used for every email of this type sent from then on. Send all three fields. The wording is checked the same way as in the dashboard: length limits, only the tokens listed for this type, every required body token present, the button kept on the email’s main link, and links only to the email’s own links or the board’s contact address. Shortly after, an AI content review reads the email as sent and records its verdict in `review`. The verdict is recorded only: it doesn’t stop or undo a publish.
      */
     put: operations['publishSystemEmail'];
     post?: never;
@@ -6049,6 +6466,54 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/tags': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List tags
+     * @description The board’s tags, A to Z: labels on people, added by sign-up forms, imports, the dashboard and `POST /v1/contacts/batch/tags`. A tag is created the first time it’s used. A board has at most 500 tags, so the list is never paginated. Requires `alerts.read`.
+     */
+    get: operations['listTags'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tags/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a tag
+     * @description Retrieves a tag with how many people have it. Requires `alerts.read`.
+     */
+    get: operations['getTag'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a tag
+     * @description Deletes a tag and takes it off everyone who has it. It disappears at once; people lose it in the background. It can’t be undone. Requires `alerts.manage`.
+     */
+    delete: operations['deleteTag'];
+    options?: never;
+    head?: never;
+    /**
+     * Rename a tag
+     * @description Renames a tag. Everyone who has it keeps it, and campaigns and filters that use it follow the new slug. Requires `alerts.manage`.
+     */
+    patch: operations['updateTag'];
     trace?: never;
   };
   '/taxonomies/categories': {
@@ -6765,11 +7230,115 @@ export interface paths {
     };
     /**
      * List to-dos
-     * @description Lists the to-dos on your Board’s Home, in the order Home shows them, including done ones. While the Board is being set up these are its setup steps: name the Board, brand it, source jobs, set up payments, connect a domain and publish. Steps that do not apply to the Board are left out. The list is the same one Home and Companion show.
+     * @description Lists the to-dos on your Board’s Home, in the order Home shows them, including done ones. While the Board is being set up these are its setup steps: name the Board, brand it, source jobs, set up payments, connect a domain and publish. Once setup is complete they are followed by the starter to-dos: reach 100 live jobs, update the homepage and About page (Website builder sites only), add social links, connect Google Search Console and publish 5 blog posts. Steps that do not apply to the Board are left out. After those come the Board’s own to-dos: open ones in the operator’s order (work from the top), then closed ones (done and canceled), newest first. Closed to-dos page: while `hasMore` is true, pass `nextCursor` as `cursor` for more of them; later pages hold only closed to-dos. When a to-do’s `lastCommentAt` is newer than your last read, read its comments first: someone may have answered you. Work on the to-dos assigned to you (`assignedToYou`) or not assigned, and leave the others to their assignee. The list is the same one Home and Companion show.
      */
     get: operations['listTodos'];
     put?: never;
+    /**
+     * Add a to-do
+     * @description Adds a to-do to the bottom of the Board’s own to-dos on Home. Send an `Idempotency-Key` header so a retry does not add it twice. Before adding one, check `GET /v1/todos`: do not repeat an open setup or starter to-do. Give it a `doneWhen` when the goal is a number Cavuno tracks, so it ticks itself.
+     */
+    post: operations['createTodo'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/todos/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a to-do
+     * @description Retrieves one to-do by id: a setup or starter to-do by its step name, or one of the Board’s own to-dos.
+     */
+    get: operations['getTodo'];
+    put?: never;
     post?: never;
+    /**
+     * Delete a to-do
+     * @description Removes an own to-do without completing it. Setup and starter to-dos cannot be removed.
+     */
+    delete: operations['deleteTodo'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a to-do
+     * @description Updates an own to-do’s title, description, status or assignee, as a person would in the dashboard. To hand it to the operator, comment what you need, set `status: "needs_review"` and assign it to them; once they answer, they assign it back or change the status. Setup and starter to-dos take no writes: they tick themselves once the work is done.
+     */
+    patch: operations['updateTodo'];
+    trace?: never;
+  };
+  '/todos/{id}/comments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List to-do comments
+     * @description Lists an own to-do’s activity, newest first: comments (a reply names its thread in `parentId`), status changes and assignment changes. While `hasMore` is true, pass `nextCursor` as `cursor` for older ones.
+     */
+    get: operations['listTodoComments'];
+    put?: never;
+    /**
+     * Comment on a to-do
+     * @description Posts a comment, or a reply with `parentId`, on an own to-do. A comment changes nothing else: to hand the to-do to someone, also set its status and assignee with `PATCH /v1/todos/{id}`. Send an `Idempotency-Key` header so a retry does not post it twice.
+     */
+    post: operations['createTodoComment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/todos/{id}/comments/{commentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a to-do comment
+     * @description Returns one comment or activity line of an own to-do, a deleted one included (with `deletedAt` set).
+     */
+    get: operations['getTodoComment'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a to-do comment
+     * @description Deletes a comment you wrote on an own to-do, or any comment when you act for the Board’s owner. Its words go and cannot be restored; the comment stays in the activity with `deletedAt` set, so its replies keep their thread.
+     */
+    delete: operations['deleteTodoComment'];
+    options?: never;
+    head?: never;
+    /**
+     * Edit a to-do comment
+     * @description Changes the words of a comment you wrote on an own to-do; Home marks it edited. Status and assignment lines cannot be edited. Read it back with `GET /v1/todos/{id}/comments`.
+     */
+    patch: operations['updateTodoComment'];
+    trace?: never;
+  };
+  '/todos/{id}/reorder': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reorder a to-do
+     * @description Moves an open own to-do directly above (`before`) or below (`after`) another open own to-do. The order is the operator’s priority; agents should work from the top and reorder only when asked.
+     */
+    post: operations['reorderTodo'];
     delete?: never;
     options?: never;
     head?: never;
@@ -6910,6 +7479,26 @@ export interface paths {
      * @description Voids an open job posting invoice so it can no longer be paid. When the job was set to publish on payment, its unpublished draft is archived; when it was published on issue, the job is moved back to draft. This cannot be undone. Requires `plans.manage`.
      */
     post: operations['voidTransactionInvoice'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/translation-coverage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve translation coverage
+     * @description How much of the board's translated content shows in each of its Interface locales: pages required, pages translated, and whether the rest are being translated.
+     */
+    get: operations['getTranslationCoverage'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -7717,6 +8306,20 @@ export interface components {
       /** @description True when more blocked jobs remain; they are unblocked in background batches shortly after the response. */
       continuing: boolean;
     };
+    BatchContactTagsBody: {
+      /** @description The contacts to change, up to 200. Send a larger selection in several calls. An ID on another board counts as `not_found`. */
+      contactIds: string[];
+      /** @description Tags to put on each contact, such as `audience:employer`: lowercase letters, digits, `_` and `-`, with one optional `namespace:` part, each part up to 32 characters. An unknown tag is created. A board holds 500 tags and a person 50; past either, the contact is skipped. At most 10 across `add` and `remove`. */
+      add?: string[];
+      /** @description Tags to take off each contact. A tag the contact doesn’t have is ignored. */
+      remove?: string[];
+    };
+    BatchContactTopicsBody: {
+      /** @description The contacts to change, up to 200. Send a larger selection in several calls. An ID on another board counts as `not_found`. */
+      contactIds: string[];
+      /** @description The key of the live marketing topic to add the contacts to. */
+      key: string;
+    };
     BatchRequestBody: {
       /** @description Array of sub-operations to execute. Each entry runs independently and reports its result on the corresponding entry of the response `data` array. Sub-operation `id` values must be unique within the batch. Up to 100 entries. */
       operations: (
@@ -8344,6 +8947,181 @@ export interface components {
       lastCheckedAt: string | null;
       createdAt: string;
     };
+    Campaign: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign';
+      /** @description Campaign ID. */
+      id: string;
+      /** @description Name in the dashboard. */
+      name: string;
+      status: components['schemas']['CampaignStatus'];
+      /** @description Subject line. */
+      subject: string;
+      /** @description Inbox preview text. */
+      previewText: string;
+      /** @description The id of the email template it renders on. */
+      layoutId: string;
+      audience: components['schemas']['CampaignAudience'];
+      /** @description Goes up on every edit; pass it as `baseRevision`. */
+      revision: number;
+      /** @description ISO 8601 datetime. */
+      createdAt: string;
+      /** @description ISO 8601 datetime. */
+      updatedAt: string;
+      /** @description The email’s content as stored. */
+      bodyHtml: string;
+      /** @description What each token shows for a recipient with no value. */
+      tokenFallbacks: {
+        [key: string]: string;
+      };
+      checks: components['schemas']['CampaignChecks'];
+      delivery: components['schemas']['CampaignDelivery'];
+    };
+    /** @description Who the campaign goes to. Only people with marketing consent and a confirmed address receive it, checked again when it sends. */
+    CampaignAudience: {
+      /** @description One marketing topic’s people (`GET /v1/marketing-topics`). Absent means everyone who agreed to marketing. */
+      topicKey?: string;
+      include?: components['schemas']['CampaignContactFilter'];
+      exclude?: components['schemas']['CampaignContactFilter'] & unknown;
+    };
+    /** @description The latest pre-send checks (`POST /v1/campaigns/{id}/verify`), or null before the first. */
+    CampaignChecks: {
+      /** @description True while the campaign and its template’s published version are what the checks ran on. Run them again after an edit. */
+      current: boolean;
+      /** @description When the checks ran. ISO 8601 datetime. */
+      checkedAt: string;
+      /** @description What would stop the campaign sending. `deliverability_pending` clears once the deliverability check’s verdict arrives, within about two minutes. */
+      blocking: (
+        | 'unknown_tokens'
+        | 'missing_token_values'
+        | 'broken_links'
+        | 'deliverability'
+        | 'deliverability_pending'
+      )[];
+      /** @description The bulk sending domain the deliverability check sent from, or null when the board has none verified. */
+      domain: string | null;
+      /** @description Tokens used that campaigns don’t offer. */
+      unknownTokens: string[];
+      /** @description Each token used, with its fallback. */
+      tokens: {
+        token: string;
+        fallback: string | null;
+        /** @description Recipients with no value for the token, who see the fallback. */
+        missingValues: number;
+      }[];
+      /** @description Every link was fetched, from Cavuno’s servers. */
+      links: {
+        checked: number;
+        /** @description Links past the first 50, not checked. */
+        unchecked: number;
+        broken: {
+          /** @description The link as it appears in the email. */
+          url: string;
+          /**
+           * @description http_error: answered 4xx or 5xx; refused_address: a private or reserved address; timeout; unreachable; too_many_redirects; unsupported_link: not an https: or mailto: link.
+           * @enum {string}
+           */
+          reason:
+            | 'http_error'
+            | 'refused_address'
+            | 'timeout'
+            | 'unreachable'
+            | 'too_many_redirects'
+            | 'unsupported_link';
+          /** @description The HTTP status, if any. */
+          status?: number;
+        }[];
+      };
+      /** @description Who it reaches, counted now; sending checks each person again. */
+      audience: {
+        /** @description People it would be sent to now. */
+        recipients: number;
+        /** @description People in the audience it would skip, by reason: an unconfirmed address, no marketing consent, a suppressed address, waitlisted, or a domain that can’t receive mail. */
+        skipped: {
+          unconfirmed: number;
+          no_consent: number;
+          suppressed: number;
+          waitlisted: number;
+          no_mail_records: number;
+        };
+      };
+      /** @description The email, rendered with sample data, sent from the bulk domain to a deliverability checker. */
+      deliverability: {
+        /**
+         * @description pending; passed; blocked (a check failed); held (it reads as spam, for review); skipped (outside production).
+         * @enum {string}
+         */
+        status: 'pending' | 'passed' | 'blocked' | 'held' | 'skipped';
+        failures: string[];
+        warnings: string[];
+        reportUrl: string | null;
+        checkedAt: string | null;
+      };
+    } | null;
+    /** @description Only people who match this filter. */
+    CampaignContactFilter: {
+      /** @description People with any of these roles. */
+      roles?: ('candidate' | 'employer' | 'subscriber')[];
+      /** @description People who came from any of these sources (the contact list’s Source). */
+      sources?: (
+        | 'form'
+        | 'import'
+        | 'checkout'
+        | 'job_alert_form'
+        | 'sign_up'
+      )[];
+      /** @description People with any of these tag slugs (`GET /v1/tags`), at most 10. */
+      tags?: string[];
+    };
+    /** @description Where the campaign is in sending. */
+    CampaignDelivery: {
+      /** @description ISO 8601 datetime, when it is scheduled to start, or null when it isn’t scheduled. */
+      sendAt: string | null;
+      /** @description ISO 8601 datetime, when it started sending, or null. */
+      startedAt: string | null;
+      /** @description ISO 8601 datetime, when it finished sending to everyone, or null. */
+      finishedAt: string | null;
+      /** @description Emails sent so far. Sending is spread over up to 12 hours. */
+      sentCount: number;
+      /**
+       * @description Why a sending campaign is waiting: the board can’t send campaigns right now (`not_ready`, stopped after 7 days), or its spam rate passed 0.1% (`board_warning`, until the 24-hour recheck clears it). Null while it sends.
+       * @enum {string|null}
+       */
+      pausedReason: 'not_ready' | 'board_warning' | null;
+      /** @description ISO 8601 datetime, when it stopped, or null. */
+      stoppedAt: string | null;
+      /**
+       * @description Why it stopped before everyone got it: Stop sending (`operator`); its own spam rate passed 0.3% or hard bounces 2% after 100 deliveries (`health`); the board’s marketing email was paused (`board_paused`); 7 days paused while the board couldn’t send (`not_ready`); or its topic was archived (`topic_archived`).
+       * @enum {string|null}
+       */
+      stoppedReason:
+        | 'operator'
+        | 'health'
+        | 'board_paused'
+        | 'not_ready'
+        | 'topic_archived'
+        | null;
+      /** @description Why a scheduled campaign went back to draft when its send time came, or null. The board’s owners are emailed when it does. */
+      draftReason: {
+        /**
+         * @description Campaign sending isn’t on for the board (`sending_off`); the board can’t send campaigns (`not_ready`); its template changed since the checks (`checks_stale`); it needs a review before it sends (`review_required`); or it failed to render (`render_failed`).
+         * @enum {string}
+         */
+        reason:
+          | 'sending_off'
+          | 'not_ready'
+          | 'checks_stale'
+          | 'review_required'
+          | 'render_failed';
+        /** @description For `not_ready`, the first readiness item missing. */
+        blockingItem: string | null;
+        /** @description ISO 8601 datetime. */
+        at: string;
+      } | null;
+    };
     CampaignReadiness: {
       /**
        * @description String representing the object's type. Objects of the same type share the same value.
@@ -8374,6 +9152,107 @@ export interface components {
       | 'bulk_domain'
       | 'mailing_address'
       | null;
+    CampaignReport: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign_report';
+      /** @description Campaign ID. */
+      campaignId: string;
+      status: components['schemas']['CampaignStatus'];
+      /** @description Emails sent. */
+      sent: number;
+      /** @description Emails the recipient’s server accepted. */
+      delivered: number;
+      /** @description Emails that bounced, soft or hard. */
+      bounced: number;
+      /** @description Emails that bounced permanently. */
+      hardBounced: number;
+      /** @description Recipients who marked it as spam. */
+      spamReported: number;
+      /** @description Recipients who unsubscribed with its link. */
+      unsubscribed: number;
+      /** @description Each count as a rate. */
+      rates: {
+        /** @description Delivered over sent, from 0 to 1; null before there’s anything to divide by. */
+        delivered: number | null;
+        /** @description Bounced over sent, from 0 to 1; null before there’s anything to divide by. */
+        bounced: number | null;
+        /** @description Marked as spam over delivered, from 0 to 1; null before there’s anything to divide by. */
+        spamReported: number | null;
+        /** @description Unsubscribed over delivered, from 0 to 1; null before there’s anything to divide by. */
+        unsubscribed: number | null;
+      };
+      skipped: components['schemas']['CampaignSkipped'];
+      /** @description ISO 8601 datetime, when it started sending, or null. */
+      startedAt: string | null;
+      /** @description ISO 8601 datetime, when it finished sending to everyone, or null. */
+      finishedAt: string | null;
+      /**
+       * @description Why it stopped before everyone got it: Stop sending (`operator`); its own spam rate passed 0.3% or hard bounces 2% after 100 deliveries (`health`); the board’s marketing email was paused (`board_paused`); 7 days paused while the board couldn’t send (`not_ready`); or its topic was archived (`topic_archived`).
+       * @enum {string|null}
+       */
+      stoppedReason:
+        | 'operator'
+        | 'health'
+        | 'board_paused'
+        | 'not_ready'
+        | 'topic_archived'
+        | null;
+    };
+    /** @description People in the audience it skipped when their batch sent, by reason, or null before it starts. */
+    CampaignSkipped: {
+      unconfirmed: number;
+      no_consent: number;
+      suppressed: number;
+      waitlisted: number;
+      no_mail_records: number;
+    } | null;
+    /**
+     * @description `draft` until it is scheduled; then `scheduled`, `sending`, `sent`, or `stopped` when sending was stopped before everyone got it.
+     * @enum {string}
+     */
+    CampaignStatus: 'draft' | 'scheduled' | 'sending' | 'sent' | 'stopped';
+    CampaignSummary: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign';
+      /** @description Campaign ID. */
+      id: string;
+      /** @description Name in the dashboard. */
+      name: string;
+      status: components['schemas']['CampaignStatus'];
+      /** @description Subject line. */
+      subject: string;
+      /** @description Inbox preview text. */
+      previewText: string;
+      /** @description The id of the email template it renders on. */
+      layoutId: string;
+      audience: components['schemas']['CampaignAudience'];
+      /** @description Goes up on every edit; pass it as `baseRevision`. */
+      revision: number;
+      /** @description ISO 8601 datetime. */
+      createdAt: string;
+      /** @description ISO 8601 datetime. */
+      updatedAt: string;
+    };
+    CampaignTest: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'campaign_test';
+      /** @description Campaign ID. */
+      campaignId: string;
+      /**
+       * @description The test was handed to the mail provider.
+       * @enum {boolean}
+       */
+      sent: true;
+    };
     Candidate: {
       /** @description Unique identifier for the candidate. */
       id: string;
@@ -9116,6 +9995,21 @@ export interface components {
       /** @description More about the entry, by `kind`: the import file name (`imported`, and `confirmation_sent` or `confirmation_expired` for an import), the alert label (`job_alert_created`), `job_alerts` or `job_matches` (`waitlisted`), `job_alerts` (`unsubscribed`), the consent source (`marketing_granted`), the suppression reason (`suppressed`), or the audit action (`operator_action`). `null` when there is nothing more. */
       detail: string | null;
     };
+    ContactBatchResult: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'contact_batch_result';
+      /** @description Contacts the call changed. */
+      changed: number;
+      /** @description Contacts that already were as asked, so nothing changed. */
+      unchanged: number;
+      /** @description Contacts left as they were, counted by reason: `not_found`, `board_cap` (the board has 500 tags), `person_cap` (the contact has 50 tags), `consent_required` (marketing not granted and confirmed) or `removed_by_person` (they removed the topic themselves). */
+      skipped: {
+        [key: string]: number;
+      };
+    };
     ContactEmail: {
       /** @description Unique identifier for the email. */
       id: string;
@@ -9138,7 +10032,8 @@ export interface components {
         | 'email_verification'
         | 'password_reset'
         | 'tip_receipt'
-        | 'purchase_receipt';
+        | 'purchase_receipt'
+        | 'campaign';
       /** @description The email's subject line. */
       subject: string;
       /**
@@ -9369,6 +10264,26 @@ export interface components {
       /** @description Hostname for marketing email, a subdomain of the board’s verified sending domain. Defaults to `updates.<sending domain>`. Normalized to lowercase. */
       domain?: string;
     };
+    CreateCampaignBody: {
+      /** @description Name in the dashboard, never shown to recipients. Up to 200 characters. */
+      name?: string;
+      /** @description Subject line, up to 200 characters. Tokens are written `{{first_name}}`, `{{email}}`, `{{board_name}}` and `{{board_url}}`; anything else between double braces is refused. */
+      subject?: string;
+      /** @description Inbox preview text, up to 150 characters. */
+      previewText?: string;
+      /** @description The email’s content as HTML, placed inside its template. It is sanitised as system email wording is; links must be `https:` or `mailto:` (or start with `{{board_url}}`). The footer, with the unsubscribe link and the board’s mailing address, is added when it sends. Tokens are written `{{first_name}}`, `{{email}}`, `{{board_name}}` and `{{board_url}}`; anything else between double braces is refused. Up to 80000 characters. */
+      bodyHtml?: string;
+      /** @description The email template it renders on: `newsletter` (the board’s Newsletter template), `system`, or the id of a published template (`GET /v1/email-layouts`). It renders with the template’s published version until it sends. Defaults to `newsletter`. */
+      layoutId?: string;
+      audience?: components['schemas']['CampaignAudience'];
+      /** @description What a token shows for a recipient with no value, such as `{ "first_name": "there" }`. Up to 100 characters each; an empty one is removed. Replaces the stored fallbacks. */
+      tokenFallbacks?: {
+        first_name?: string;
+        email?: string;
+        board_name?: string;
+        board_url?: string;
+      };
+    };
     CreateCandidateBody: {
       /**
        * Format: email
@@ -9548,6 +10463,26 @@ export interface components {
       companyId: string;
       /** @description The address to invite. Lowercased and trimmed before use. */
       email: string;
+    };
+    CreateHelpArticleBody: {
+      /** @description ID of the help category the article goes in. It is added last. */
+      categoryId: string;
+      /** @description Article title, up to 200 characters. */
+      title: string;
+      /** @description URL slug: lowercase letters, numbers and hyphens. Made from the title when omitted. One already in use gets a numeric suffix. */
+      slug?: string;
+      /** @description Short text about the article, up to 300 characters. */
+      summary?: string;
+      /** @description Article body as HTML, up to 200,000 characters. It is sanitized before it is stored, so the returned `html` can differ from what was sent. */
+      html?: string;
+    };
+    CreateHelpCategoryBody: {
+      /** @description Category name, up to 200 characters. */
+      title: string;
+      /** @description URL slug: lowercase letters, numbers and hyphens. Made from the title when omitted. One already in use gets a numeric suffix. */
+      slug?: string;
+      /** @description Short text about the category, up to 300 characters. */
+      description?: string;
     };
     CreateInboxSavedReplyBody: {
       /** @description Searched in the composer. */
@@ -9777,6 +10712,8 @@ export interface components {
       key?: string;
       /** @description Add new marketing sign-ups: a sign-up that names no topic (a newsletter form without `topics`, or the marketing checkbox on the job alert form, at checkout or on sign-up) also gets this topic. A sign-up that names topics gets only those, and someone who removed this topic themselves is never added back. Turning it on adds no one who already signed up. Defaults to `true`. */
       addNewSignups?: boolean;
+      /** @description Also add everyone who gets the board’s marketing now: people whose marketing consent is granted and confirmed, except suppressed addresses and anyone who removed this topic themselves. They are added in the background after the topic is created, so they may not all have it yet when the response returns. Defaults to `false`: only new sign-ups get the topic. */
+      addExisting?: boolean;
     };
     CreatePlanBody: {
       /** @description Display name for the plan. */
@@ -9883,6 +10820,10 @@ export interface components {
       /** @description E-book or e-publication: books, newspapers, magazines, sheet music or maps delivered as files. Sets the product's Stripe tax code to `txcd_10302000` (digital books) instead of the one picked from its files. Some countries charge a lower VAT rate on these; it applies when the board collects tax with Stripe Tax. */
       isEbook?: boolean;
       questions?: components['schemas']['PlanDigitalProductQuestion'][] | null;
+      /** @description Plan id of another digital product of this board to offer after this one is bought; it may be unlisted. `null` lets Cavuno choose (the most similar product, else the best seller). */
+      offerPlanId?: string | null;
+      /** @description The largest discount, 0 to 90, when this product is offered after another purchase. 0 keeps it at full price; `null` uses the board's maximum discount. */
+      offerMaxDiscountPercent?: number | null;
     };
     CreatePlanFileLinkBody: {
       displayName: string;
@@ -10040,6 +10981,35 @@ export interface components {
       metaDescription?: string;
       /** @description The display name of the tag. */
       name: string;
+    };
+    CreateTodoBody: {
+      /** @description The to-do as it reads on Home, in a few words. */
+      title: string;
+      /** @description Detail: what to do and why, for example the numbers behind a suggestion. Put work you did for the to-do here, such as a drafted email, so the operator can read it. Markdown (paragraphs, lists, links, bold and italic); anything Home’s editor cannot show is dropped. */
+      description?: string | null;
+      /** @description Makes the to-do tick itself, as Cavuno, once the number reaches the target. It cannot then be completed by hand. Use it when the goal is a number Cavuno tracks, for example 250 live jobs. */
+      doneWhen?: {
+        /**
+         * @description The number to watch. `liveJobs`: published jobs. `publishedPosts`: published blog posts. `postsByReadyAuthor`: published posts credited to an author with a photo and bio. `companies`, `candidates`: profiles on the Board. `socialLinks`, `searchConsoleConnected`: 1 once set up, else 0. Posts count up to 50. More metrics may be added.
+         * @enum {string}
+         */
+        metric:
+          | 'liveJobs'
+          | 'publishedPosts'
+          | 'postsByReadyAuthor'
+          | 'companies'
+          | 'candidates'
+          | 'socialLinks'
+          | 'searchConsoleConnected';
+        /** @description The target. 1 for `socialLinks` and `searchConsoleConnected`. */
+        atLeast: number;
+      };
+    };
+    CreateTodoCommentBody: {
+      /** @description The comment, in plain text. For a question, one sentence naming what only the operator can do or answer, and the dashboard page if they act on one. Put drafts and findings in the to-do’s `description`. */
+      body: string;
+      /** @description Reply in this comment’s thread. A reply to a reply goes in the same thread. Leave it out to start a thread. */
+      parentId?: string;
     };
     CreateWebhookEndpointBody: {
       /**
@@ -10339,6 +11309,14 @@ export interface components {
        */
       kind: 'loopback' | 'https' | 'wildcard';
       createdAt: string;
+    };
+    DigitalProductOfferSettings: {
+      /** @enum {string} */
+      object: 'settings_digital_product_offers';
+      /** @description The largest discount, 0 to 90. Defaults to 0. */
+      discountPercent: number;
+      /** @description How long the discount lasts, in hours; null for no time limit. Defaults to 72. */
+      offerHours: number | null;
     };
     DistributionFeed: {
       /** @description Unique identifier for the feed. */
@@ -10697,10 +11675,10 @@ export interface components {
       /** @description What the template designs. `layout`: the frame around a system email’s wording. */
       kind: string;
       /**
-       * @description `system` for the System template, which can’t be deleted; otherwise `null`.
+       * @description `system` for the System template and `newsletter` for the Newsletter template campaigns use, neither of which can be deleted; otherwise `null`.
        * @enum {string|null}
        */
-      role: 'system' | null;
+      role: 'system' | 'newsletter' | null;
       /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
       currentVersionId: string | null;
       /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
@@ -10745,10 +11723,10 @@ export interface components {
       /** @description What the template designs. `layout`: the frame around a system email’s wording. */
       kind: string;
       /**
-       * @description `system` for the System template, which can’t be deleted; otherwise `null`.
+       * @description `system` for the System template and `newsletter` for the Newsletter template campaigns use, neither of which can be deleted; otherwise `null`.
        * @enum {string|null}
        */
-      role: 'system' | null;
+      role: 'system' | 'newsletter' | null;
       /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
       currentVersionId: string | null;
       /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
@@ -11171,6 +12149,50 @@ export interface components {
       job: components['schemas']['FormLayoutField'][];
       company: components['schemas']['FormLayoutField'][];
       talent: components['schemas']['FormLayoutField'][];
+    };
+    HelpArticle: components['schemas']['HelpArticleSummary'] & {
+      /** @description The live body as sanitized HTML. For a draft, its current body. `null` when empty. */
+      html: string | null;
+      /** @description What publishing would make live; a field that was not edited shows its live value. `null` when no edits wait. */
+      unpublishedChanges: {
+        title: string;
+        summary: string | null;
+        html: string | null;
+      } | null;
+    };
+    HelpArticleSummary: {
+      id: string;
+      /** @enum {string} */
+      object: 'help_article';
+      categoryId: string;
+      /** @description 0-based index inside its category. */
+      position: number;
+      /** @enum {string} */
+      status: 'draft' | 'published';
+      slug: string;
+      /** @description The live title. For a draft, its current title. */
+      title: string;
+      summary: string | null;
+      /** @description When the article was first published. `null` if it never was. */
+      publishedAt: string | null;
+      /** @description Whether a published article has edits to its title, summary or body that are not live yet. */
+      hasUnpublishedChanges: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
+    HelpCategory: {
+      id: string;
+      /** @enum {string} */
+      object: 'help_category';
+      title: string;
+      slug: string;
+      description: string | null;
+      /** @description 0-based index among the board's categories. */
+      position: number;
+      /** @description Articles in the category, drafts included. */
+      articleCount: number;
+      createdAt: string;
+      updatedAt: string;
     };
     Import: {
       id: string;
@@ -12349,7 +13371,8 @@ export interface components {
         | 'employers.remove'
         | 'contacts.remove'
         | 'email_layouts.compile'
-        | 'email_layouts.publish';
+        | 'email_layouts.publish'
+        | 'campaigns.verify';
       /**
        * @description Current state of the operation.
        * @enum {string}
@@ -12388,7 +13411,8 @@ export interface components {
           | 'candidate'
           | 'contact'
           | 'custom_object_type'
-          | 'email_layout';
+          | 'email_layout'
+          | 'campaign';
         id: string;
       } | null;
     };
@@ -12630,6 +13654,8 @@ export interface components {
       mcpEnabled: boolean;
       /** @description Tools the board's MCP server leaves out, by name. Every other tool is offered. Defaults to `[]`. */
       mcpDisabledTools: string[];
+      /** @description Whether personal agents (Personal Agent Protocol) can sign in to the board's MCP server on its Builder or self-hosted site, which then publishes `/.well-known/poppy.json` and accepts `private_key_jwt` client assertions addressed to the site's issuer. AI assistants such as Claude and ChatGPT connect either way. Defaults to `true`. */
+      mcpPersonalAgentsEnabled: boolean;
       signInMethods: components['schemas']['SignInMethods'];
       /** @description Absent means `true`. */
       employerCompanyDeletionEnabled?: boolean;
@@ -12673,9 +13699,22 @@ export interface components {
       /** @description ISO 4217 currency of salary pages and salary amounts. Absent means `USD`. */
       salaryCurrency?: string;
       themeConfig?: components['schemas']['BoardThemeConfigView'];
+      /**
+       * @deprecated
+       * @description Deprecated — the stored “Powered by” text, which emails no longer show: while `showCavunoBranding` is on, they say “Powered by Cavuno”.
+       */
       emailPoweredByText?: string;
+      /** @description Label of the manage-preferences link that the board's emails use in the board language: its `emailFooterLabels` entry, else the saved label, else that language's default. Never empty. */
       emailManagePreferencesLabel?: string;
+      /** @description Label of the unsubscribe link that the board's emails use in the board language: its `emailFooterLabels` entry, else the saved label, else that language's default. Never empty. */
       emailUnsubscribeLabel?: string;
+      /** @description Labels of the unsubscribe and manage-preferences links per board language, where the board set its own. A language or label left out uses the default for that language (for the board language, `emailUnsubscribeLabel` / `emailManagePreferencesLabel` already show the label in use). */
+      emailFooterLabels?: {
+        [key: string]: {
+          unsubscribe?: string;
+          managePreferences?: string;
+        };
+      };
       customLinks?: {
         id: string;
         label: string;
@@ -12875,6 +13914,8 @@ export interface components {
         | 'get_membership_link'
         | 'get_talent_access_link'
       )[];
+      /** @description Let personal agents (Personal Agent Protocol) sign in to the board's MCP server on its Builder or self-hosted site, or stop them. When on, the site publishes `/.well-known/poppy.json` and its token and revocation endpoints accept `private_key_jwt` client assertions addressed to the site's issuer; when off, both are gone. AI assistants such as Claude and ChatGPT connect either way. Absent board config means `true`. */
+      mcpPersonalAgentsEnabled?: boolean;
       /** @description Whether the public board shows a cookie consent banner before non-essential tracking runs. */
       requireCookieConsent?: boolean;
       /** @description Title shown on the cookie consent banner. 1–200 characters. */
@@ -13002,12 +14043,30 @@ export interface components {
       /** @description ISO 4217 code the board’s salary pages and salary amounts are shown in. A currency without a current exchange rate is refused with 400. */
       salaryCurrency?: string;
       themeConfig?: components['schemas']['BoardThemeConfig'];
-      /** @description “Powered by” text in the footer of the board’s emails, up to 80 characters. Must contain the word `Cavuno` (linked to cavuno.com) while `showCavunoBranding` is on. */
+      /**
+       * @deprecated
+       * @description Deprecated — no longer shown: while `showCavunoBranding` is on, emails say “Powered by Cavuno”. Still accepted and stored, up to 80 characters, and must contain the word `Cavuno` while `showCavunoBranding` is on.
+       */
       emailPoweredByText?: string;
-      /** @description Label of the manage-preferences link in marketing email footers, up to 60 characters. An empty string resets it to `Manage preferences`. */
+      /**
+       * @deprecated
+       * @description Deprecated — set `emailFooterLabels` for the board language instead, which wins over this. Still accepted: the label of the manage-preferences link in marketing email footers in the board language, up to 60 characters. An empty string goes back to the default for the board's language (`Manage preferences` in English); reads return the label in use.
+       */
       emailManagePreferencesLabel?: string;
-      /** @description Label of the unsubscribe link in marketing email footers, up to 60 characters. An empty string resets it to `Unsubscribe`. */
+      /**
+       * @deprecated
+       * @description Deprecated — set `emailFooterLabels` for the board language instead, which wins over this. Still accepted: the label of the unsubscribe link in marketing email footers in the board language, up to 60 characters. An empty string goes back to the default for the board's language (`Unsubscribe` in English); reads return the label in use.
+       */
       emailUnsubscribeLabel?: string;
+      /** @description Labels of the unsubscribe and manage-preferences links in email footers, per board language (`en`, `fr`, …). Each language sent is merged into the stored ones: a label sets it, `null` for a label goes back to the default, and `null` for a language removes both of its labels. These win over `emailUnsubscribeLabel` and `emailManagePreferencesLabel`, which apply to the board language only. The links themselves are always in the footer. */
+      emailFooterLabels?: {
+        [key: string]: {
+          /** @description Label of the unsubscribe link in this language, up to 60 characters of plain text. `null` goes back to the default; left out keeps the stored label. */
+          unsubscribe?: string | unknown;
+          /** @description Label of the manage-preferences link in this language, up to 60 characters of plain text. `null` goes back to the default; left out keeps the stored label. */
+          managePreferences?: string | unknown;
+        } | null;
+      };
       /** @description Custom links shown in email footers, in order (up to 50). Replaces the whole list. Rows with neither a label nor a URL are dropped; a row needs both, and an unsafe URL is refused. Refused with 409 while the site is moving to the AI website builder; sending the current list changes nothing. */
       customLinks?: components['schemas']['SettingsCustomLink'][];
     };
@@ -13045,6 +14104,10 @@ export interface components {
       takenDown: boolean;
       /** @description Listing was asked for (`isPublic: true`) before the product had a ready file or link: `isPublic` stays false and the product is listed automatically when its first file or link is ready. False once listed, unlisted, archived or taken down (read only). */
       listingPending?: boolean;
+      /** @description The product buyers of this one are offered after they buy (see GET /v1/settings/digital-product-offers). Null: Cavuno picks the most similar product the buyer doesn't own, else the best seller. */
+      offerPlanId?: string | null;
+      /** @description The largest discount (0 to 90) when this product is the one offered after another purchase. 0 keeps it at full price; null uses the board's maximum discount. */
+      offerMaxDiscountPercent?: number | null;
     } | null;
     /** @description A facts box row: `text` shows `value`; `check` (yes/no) shows a tick or a cross. */
     PlanDigitalProductDetail:
@@ -13749,6 +14812,12 @@ export interface components {
         displayOrder: number;
       }[];
     };
+    ReorderTodoBody: {
+      /** @description Id of the open own to-do this one should sit directly above. */
+      before?: string;
+      /** @description Id of the open own to-do this one should sit directly below. */
+      after?: string;
+    };
     ReplaceCheckoutFieldsBody: {
       /** @description Collect a phone number in Stripe Checkout. */
       phone: {
@@ -14178,6 +15247,13 @@ export interface components {
         | 'url'
         | 'email'
         | 'phone';
+    };
+    ScheduleCampaignBody: {
+      /**
+       * Format: date-time
+       * @description ISO 8601 datetime to start sending, at most a year ahead. Absent or in the past means now.
+       */
+      sendAt?: string;
     };
     SdkFrontend: {
       /** @enum {string} */
@@ -14880,6 +15956,35 @@ export interface components {
       customized: boolean;
       /** @description Time the wording was last published, or `null` when the default is in use. ISO 8601 datetime. */
       updatedAt: string | null;
+      /** @description The AI content review of the published wording, run on the email rendered with its template and sample data. It runs shortly after a publish, so it is `null` until then, when the default is in use, or when the review couldn’t run. */
+      review: {
+        /**
+         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @enum {string}
+         */
+        outcome: 'allow' | 'hold' | 'block';
+        /** @description Why, when the outcome isn’t `allow`. */
+        reasons: {
+          /**
+           * @description What the review found.
+           * @enum {string}
+           */
+          code:
+            | 'credential_harvesting'
+            | 'impersonation'
+            | 'link_text_mismatch'
+            | 'lookalike_domain'
+            | 'job_scam'
+            | 'promotional_in_system_email'
+            | 'unrelated_to_board';
+          /** @description What is wrong, in a sentence. */
+          message: string;
+          /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Time the content was reviewed. ISO 8601 datetime. */
+        reviewedAt: string;
+      } | null;
       /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
       subjectTokens: string[];
       /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
@@ -14931,6 +16036,35 @@ export interface components {
       customized: boolean;
       /** @description Time the wording was last published, or `null` when the default is in use. ISO 8601 datetime. */
       updatedAt: string | null;
+      /** @description The AI content review of the published wording, run on the email rendered with its template and sample data. It runs shortly after a publish, so it is `null` until then, when the default is in use, or when the review couldn’t run. */
+      review: {
+        /**
+         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @enum {string}
+         */
+        outcome: 'allow' | 'hold' | 'block';
+        /** @description Why, when the outcome isn’t `allow`. */
+        reasons: {
+          /**
+           * @description What the review found.
+           * @enum {string}
+           */
+          code:
+            | 'credential_harvesting'
+            | 'impersonation'
+            | 'link_text_mismatch'
+            | 'lookalike_domain'
+            | 'job_scam'
+            | 'promotional_in_system_email'
+            | 'unrelated_to_board';
+          /** @description What is wrong, in a sentence. */
+          message: string;
+          /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Time the content was reviewed. ISO 8601 datetime. */
+        reviewedAt: string;
+      } | null;
       /** @description Tokens available in `subject` and `previewText`, without braces. Write them as `{{token}}`. */
       subjectTokens: string[];
       /** @description Tokens available in `bodyHtml`, without braces. Includes block tokens that expand to a rendered section, such as a list of jobs. */
@@ -14951,6 +16085,19 @@ export interface components {
        * @enum {boolean}
        */
       sent: true;
+    };
+    Tag: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'tag';
+      /** @description The tag, such as `audience:employer`: lowercase letters, digits, `_` and `-`, with one optional `namespace:` part, each part up to 32 characters. */
+      slug: string;
+      /** @description How many people have the tag, or null for a tag whose count isn’t known yet. */
+      people: number | null;
+      /** @description Time at which the tag was created. ISO 8601 datetime. */
+      createdAt: string;
     };
     TaxonomyMerge: {
       id: string;
@@ -15251,7 +16398,7 @@ export interface components {
         | 'board-sso-link-proof';
     };
     Todo: {
-      /** @description Stable to-do id. Setup to-dos use the step name, for example `setup-payments`. */
+      /** @description Stable to-do id. Setup and starter to-dos use their step name, for example `setup-payments` or `homepage-copy`; own to-dos have a generated id. */
       id: string;
       /**
        * @description String representing the object's type. Objects of the same type share the same value.
@@ -15259,30 +16406,126 @@ export interface components {
        */
       object: 'todo';
       /**
-       * @description Where the to-do comes from. `setup`: a setup step Cavuno adds and ticks from the Board’s state. More kinds may be added; show a to-do of an unknown kind as it is.
+       * @description Where the to-do comes from. `setup`: a setup step Cavuno adds and ticks from the Board’s state. `starter`: one of the to-dos Cavuno adds once setup is complete (live jobs, homepage, About page, social links, Search Console, blog posts), which also tick from the Board’s state. `own`: a to-do in the Board’s own list, which the operator, Companion or an agent added; once the own list unlocks, an open blog starter moves into it as an own to-do with a `doneWhen`. More kinds may be added; show a to-do of an unknown kind as it is.
        * @enum {string}
        */
-      kind: 'setup';
+      kind: 'setup' | 'starter' | 'own';
       /** @description The to-do as it reads on Home. */
       title: string;
-      /** @description What the to-do involves, as it reads on Home. */
+      /** @description What the to-do involves, as Markdown (paragraphs, lists, links, bold and italic, as Home’s editor shows them). An empty string when there is none. */
       description: string;
       /**
-       * @description Whether the to-do is done. Setup to-dos are done once the Board’s state shows it, never by being marked. More statuses may be added; treat an unknown status as open.
+       * @description The to-do’s status, as in Linear: `open` (shown as "To do"), `in_progress`, `needs_review` (whoever it is assigned to looks at it next), `done` and `canceled` (closed: kept for the record, do not pick it up again). Setup and starter to-dos are only `open` or `done`, from the Board’s state, and a starter to-do reopens if that stops being true. More statuses may be added; treat an unknown status as open.
        * @enum {string}
        */
-      status: 'open' | 'done';
-      /** @description Something that was meant to happen did not, and only the operator can unblock it, for example a website build or Stripe verification that failed. */
+      status: 'open' | 'in_progress' | 'needs_review' | 'done' | 'canceled';
+      /** @description A person must move the to-do on: a website build or Stripe verification that failed, or an own to-do in `needs_review` assigned to a member. */
       needsAttention: boolean;
+      /** @description Whose turn it is. Null when it is not assigned. Setup and starter to-dos are never assigned. */
+      assignee: {
+        /**
+         * @description A member, Companion or an agent. More values may be added.
+         * @enum {string}
+         */
+        kind: 'member' | 'companion' | 'agent';
+        /** @description Who it is assigned to, as Home shows it, such as "Abi" or "Claude via Abi". */
+        name: string;
+        /** @description The member, or the member the agent acts for; see `GET /v1/members`. Null for Companion. */
+        userId: string | null;
+        /** @description For an agent: the OAuth client id or API key id it acts through, which names it exactly; pass it back with `userId` to assign the to-do to the same agent. Null otherwise. */
+        agentKey: string | null;
+      } | null;
+      /** @description Assigned to whoever is calling: you, or this agent. Work on your own to-dos and leave the others to their assignee. */
+      assignedToYou: boolean;
+      /** @description Comments on an own to-do, replies included; 0 for setup and starter to-dos. */
+      commentCount: number;
+      /** @description When the last comment was posted, as an ISO 8601 datetime, or null. When it is newer than your last read, read `GET /v1/todos/{id}/comments`: the operator may have replied. */
+      lastCommentAt: string | null;
+      /** @description Set when the to-do ticks itself: Cavuno completes it once `metric` reaches `atLeast`, and it cannot be completed by hand. Null otherwise. */
+      doneWhen: {
+        /**
+         * @description The number it watches; see `createTodo`’s `doneWhen.metric`. More metrics may be added; show an unknown one by its `atLeast` alone.
+         * @enum {string}
+         */
+        metric:
+          | 'liveJobs'
+          | 'publishedPosts'
+          | 'postsByReadyAuthor'
+          | 'companies'
+          | 'candidates'
+          | 'socialLinks'
+          | 'searchConsoleConnected';
+        /** @description The target. */
+        atLeast: number;
+        /** @description The number now; null while done, or while Cavuno cannot read it yet. */
+        current: number | null;
+      } | null;
       /**
-       * @description Who added the to-do. Setup to-dos are added by Cavuno. More values may be added.
+       * @description Who added the to-do. `cavuno`: Cavuno (setup and starter to-dos). `member`: someone on the team, in the dashboard. `companion`: Companion, approved by a member. `agent`: an outside agent or API key acting for a member. More values may be added.
        * @enum {string}
        */
-      addedBy: 'cavuno';
+      addedBy: 'cavuno' | 'member' | 'companion' | 'agent';
+      /** @description Who added the to-do, as Home shows it: "Cavuno", a member's name, "Companion (approved by Abi)" or "Claude via Abi". */
+      addedByName: string;
+      /**
+       * @description Who completed an own to-do, with the same values as `addedBy` (`cavuno` when its `doneWhen` was reached); null while open and for setup and starter to-dos.
+       * @enum {string|null}
+       */
+      completedBy: 'cavuno' | 'member' | 'companion' | 'agent' | null;
+      /** @description Who completed the to-do, as Home shows it, or null. */
+      completedByName: string | null;
+      /** @description When an own to-do was completed, as an ISO 8601 datetime, or null. */
+      completedAt: string | null;
       /** @description Label of the dashboard button that opens where the to-do is done, or null when there is nothing to open. */
       actionLabel: string | null;
       /** @description Absolute dashboard URL where the to-do is done, or null when there is nothing to open, for example while the website is being built. */
       url: string | null;
+    };
+    TodoComment: {
+      /** @description Comment id. */
+      id: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'todo_comment';
+      /** @description The own to-do the comment is on. */
+      todoId: string;
+      /** @description The first comment of the thread this one replies in, or null for a comment that starts a thread. */
+      parentId: string | null;
+      /** @description The comment, in plain text. */
+      body: string;
+      /**
+       * @description Who wrote it, with the same values as the to-do’s `addedBy`. More values may be added.
+       * @enum {string}
+       */
+      by: 'cavuno' | 'member' | 'companion' | 'agent';
+      /** @description Who wrote it, as Home shows it, such as "Claude via Abi". */
+      byName: string;
+      /**
+       * @description A `comment`, or a `status_change` or `assignment` the to-do’s activity logs (with an empty `body`). More kinds may be added.
+       * @enum {string}
+       */
+      kind: 'comment' | 'status_change' | 'assignment';
+      /**
+       * @description The status set, for a `status_change`; null otherwise. More statuses may be added.
+       * @enum {string|null}
+       */
+      status:
+        | 'open'
+        | 'in_progress'
+        | 'needs_review'
+        | 'done'
+        | 'canceled'
+        | null;
+      /** @description Who it was assigned to, for an `assignment`, such as "Abi"; null when it was unassigned, and for other kinds. */
+      assigneeName: string | null;
+      /** @description When it was posted, as an ISO 8601 datetime. */
+      createdAt: string;
+      /** @description When its author last edited it, as an ISO 8601 datetime; null when never edited. */
+      editedAt: string | null;
+      /** @description When it was deleted, as an ISO 8601 datetime, with an empty `body`; null otherwise. A deleted comment stays so its replies keep their thread. */
+      deletedAt: string | null;
     };
     Transaction: {
       id: string;
@@ -15331,6 +16574,32 @@ export interface components {
     TransferOwnershipBody: {
       /** @description The user ID of the member who will become the primary owner. */
       newOwnerUserId: string;
+    };
+    TranslationCoverage: {
+      /** @enum {string} */
+      object: 'translation_coverage';
+      /** @description One entry per Interface locale and content type. Empty when the board serves one language. */
+      locales: components['schemas']['TranslationCoverageLocale'][];
+    };
+    TranslationCoverageLocale: {
+      /** @description An Interface locale the board serves other than the board's language, e.g. `de`. */
+      locale: string;
+      /**
+       * @description The translated content: landing page intros and meta overrides (`/v1/page-content`).
+       * @enum {string}
+       */
+      contentType: 'page_content';
+      /** @description Pages with copy to translate into this locale. */
+      required: number;
+      /** @description Pages whose copy shows in this locale. */
+      translated: number;
+      /**
+       * @description `up_to_date`: every page is translated. `translating`: pages are queued and run within minutes. `paused`: pages are queued but on hold. `incomplete`: some pages are not translated and none are queued; edit a page, or write its translation with `PUT /v1/page-content?locale=`.
+       * @enum {string}
+       */
+      status: 'up_to_date' | 'translating' | 'paused' | 'incomplete';
+      /** @description True when a count passed 1,000 and `translated` is approximate. */
+      capped: boolean;
     };
     UnblockCompanyResult: {
       /** @description The unblocked company id. */
@@ -15486,6 +16755,28 @@ export interface components {
       /** @enum {string} */
       status?: 'draft' | 'scheduled' | 'published';
     };
+    UpdateCampaignBody: {
+      /** @description Name in the dashboard, never shown to recipients. Up to 200 characters. */
+      name?: string;
+      /** @description Subject line, up to 200 characters. Tokens are written `{{first_name}}`, `{{email}}`, `{{board_name}}` and `{{board_url}}`; anything else between double braces is refused. */
+      subject?: string;
+      /** @description Inbox preview text, up to 150 characters. */
+      previewText?: string;
+      /** @description The email’s content as HTML, placed inside its template. It is sanitised as system email wording is; links must be `https:` or `mailto:` (or start with `{{board_url}}`). The footer, with the unsubscribe link and the board’s mailing address, is added when it sends. Tokens are written `{{first_name}}`, `{{email}}`, `{{board_name}}` and `{{board_url}}`; anything else between double braces is refused. Up to 80000 characters. */
+      bodyHtml?: string;
+      /** @description The email template it renders on: `newsletter` (the board’s Newsletter template), `system`, or the id of a published template (`GET /v1/email-layouts`). It renders with the template’s published version until it sends. */
+      layoutId?: string;
+      audience?: components['schemas']['CampaignAudience'] & unknown;
+      /** @description What a token shows for a recipient with no value, such as `{ "first_name": "there" }`. Up to 100 characters each; an empty one is removed. Replaces the stored fallbacks. */
+      tokenFallbacks?: {
+        first_name?: string;
+        email?: string;
+        board_name?: string;
+        board_url?: string;
+      };
+      /** @description The `revision` you last read. When given and someone has saved since, the update is refused with `campaign_revision_conflict`. */
+      baseRevision?: number;
+    };
     UpdateCandidateBody: {
       /**
        * Format: email
@@ -15567,6 +16858,12 @@ export interface components {
       logoFieldKey?: string | null;
       /** @description Let the board's site read this type's active records and their public fields without a key, at `GET /v1/boards/{identifier}/collections/{key}/entries`. Omit to keep the current setting. */
       isPublic?: boolean;
+    };
+    UpdateDigitalProductOfferSettingsBody: {
+      /** @description The largest discount, 0 to 90, on the product offered after a purchase. 0 offers products at full price. A product can override it with `digitalProduct.offerMaxDiscountPercent`. */
+      discountPercent?: number;
+      /** @description How long the discount lasts after the purchase, in whole hours (at least 1). `null`: no time limit. After it ends the product is still offered at full price. */
+      offerHours?: number | null;
     };
     UpdateDistributionFeedBody: {
       /** @description The feed's name. A prebuilt feed keeps its aggregator's name. Renaming never changes the URL. */
@@ -15691,6 +16988,30 @@ export interface components {
        * @enum {string}
        */
       role: 'admin' | 'member';
+    };
+    UpdateHelpArticleBody: {
+      /** @description Article title, up to 200 characters. */
+      title?: string;
+      /** @description Short text about the article, up to 300 characters. `null` clears it. */
+      summary?: string | null;
+      /** @description Article body as HTML, up to 200,000 characters. It is sanitized before it is stored, so the returned `html` can differ from what was sent. */
+      html?: string;
+      /** @description URL slug: lowercase letters, numbers and hyphens. Applies at once, also on a published article. One another article uses is refused with `help_article_slug_taken`. */
+      slug?: string;
+      /** @description ID of the help category to move the article to. Applies at once. Without `position`, the article goes last in that category. */
+      categoryId?: string;
+      /** @description 0-based index inside its category. Applies at once. The other articles are renumbered; an index past the end means last. */
+      position?: number;
+    };
+    UpdateHelpCategoryBody: {
+      /** @description Category name, up to 200 characters. */
+      title?: string;
+      /** @description URL slug: lowercase letters, numbers and hyphens. One another category uses is refused with `help_category_slug_taken`. */
+      slug?: string;
+      /** @description Short text about the category, up to 300 characters. `null` clears it. */
+      description?: string | null;
+      /** @description 0-based index among the board's categories. The others are renumbered; an index past the end means last. */
+      position?: number;
     };
     UpdateInboxSavedReplyBody: {
       /** @description Searched in the composer. */
@@ -15963,6 +17284,10 @@ export interface components {
       /** @description E-book or e-publication: books, newspapers, magazines, sheet music or maps delivered as files. Sets the product's Stripe tax code to `txcd_10302000` (digital books) instead of the one picked from its files. Some countries charge a lower VAT rate on these; it applies when the board collects tax with Stripe Tax. */
       isEbook?: boolean;
       questions?: components['schemas']['PlanDigitalProductQuestion'][] | null;
+      /** @description Plan id of another digital product of this board to offer after this one is bought; it may be unlisted. `null` lets Cavuno choose (the most similar product, else the best seller). */
+      offerPlanId?: string | null;
+      /** @description The largest discount, 0 to 90, when this product is offered after another purchase. 0 keeps it at full price; `null` uses the board's maximum discount. */
+      offerMaxDiscountPercent?: number | null;
     };
     UpdatePlanFileBody: {
       displayName?: string;
@@ -16159,6 +17484,54 @@ export interface components {
         /** @description `false` keeps skills AI added even when no live job uses them. */
         skill?: boolean;
       };
+    };
+    UpdateTodoBody: {
+      /** @description New title. Own to-dos only. */
+      title?: string;
+      /** @description New description, in Markdown like `createTodo`’s; null or an empty string clears it. Own to-dos only. */
+      description?: string | null;
+      /**
+       * @description New status, as a person would set it. `in_progress` when you start on it. `needs_review` when someone else must answer, decide or check something: leave a comment saying what, and assign it to them. `done` and `canceled` close it; say what was done, or why it was dropped, in a comment. `open` or `in_progress` reopens a closed to-do in its old place. A to-do with a `doneWhen` cannot be set to `done`: it ticks itself. More statuses may be added.
+       * @enum {string}
+       */
+      status?: 'open' | 'in_progress' | 'needs_review' | 'done' | 'canceled';
+      /** @description Who it is assigned to: `"me"`, a member, Companion, an agent, or null to unassign. Own to-dos only. */
+      assignee?:
+        | 'me'
+        | {
+            /**
+             * @description A member of the Board.
+             * @enum {string}
+             */
+            kind: 'member';
+            /** @description The member’s `userId` from `GET /v1/members`. */
+            userId: string;
+          }
+        | {
+            /**
+             * @description Companion.
+             * @enum {string}
+             */
+            kind: 'companion';
+          }
+        | {
+            /**
+             * @description An agent acting for a member of the Board.
+             * @enum {string}
+             */
+            kind: 'agent';
+            /** @description The `userId` of the member the agent acts for. */
+            userId: string;
+            /** @description The agent’s name as Home shows it, such as "Claude". */
+            agentName: string;
+            /** @description The agent’s `assignee.agentKey` from a to-do or comment, which names it exactly. */
+            agentKey: string;
+          }
+        | unknown;
+    };
+    UpdateTodoCommentBody: {
+      /** @description The comment’s new words, in plain text. Only the comment’s author can edit it; Home then shows it as edited. */
+      body: string;
     };
     UpdateWebhookEndpointBody: {
       /** Format: uri */
@@ -18799,7 +20172,10 @@ export interface operations {
           | 'invoice'
           | 'backfill'
           | 'inbox_ticket'
-          | 'inbox_saved_reply';
+          | 'inbox_saved_reply'
+          | 'help_category'
+          | 'help_article'
+          | 'campaign';
         /** @description Only return entries at or after this time. ISO 8601 datetime. On the Grow plan entries older than 90 days are never returned. */
         from?: string;
         /** @description Only return entries at or before this time. ISO 8601 datetime. */
@@ -20850,6 +22226,526 @@ export interface operations {
       };
     };
   };
+  listCampaigns: {
+    parameters: {
+      query?: {
+        /** @description Only campaigns with this status, newest first. */
+        status?: components['schemas']['CampaignStatus'] & unknown;
+        /** @description `nextCursor` from the previous page. */
+        cursor?: string;
+        /** @description Campaigns per page, 1 to 100. Default 25. */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/campaigns */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CampaignSummary'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCampaignBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The request is invalid (`campaign_invalid_request`): a link that isn’t https: or mailto:, an unknown token, an unknown topic or tag, or a template that isn’t published. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Only a draft can be deleted (`campaign_not_draft`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCampaignBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The request is invalid (`campaign_invalid_request`): a link that isn’t https: or mailto:, an unknown token, an unknown topic or tag, or a template that isn’t published. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. Or it isn’t a draft (`campaign_not_draft`), or it changed since `baseRevision` (`campaign_revision_conflict`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  duplicateCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getCampaignReport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CampaignReport'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  scheduleCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['ScheduleCampaignBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The request is invalid (`campaign_invalid_request`): a link that isn’t https: or mailto:, an unknown token, an unknown topic or tag, or a template that isn’t published. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. Campaign sending isn’t on for this board yet (`campaign_sending_off`). Or it isn’t a draft (`campaign_not_draft`), its checks aren’t current (`campaign_checks_required`), or they found problems (`campaign_checks_blocking`, listed in `details.blocking`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  stopCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Only a sending campaign can be stopped (`campaign_not_sending`); unschedule a scheduled one. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  testCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CampaignTest'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. Or the member has no email address (`campaign_no_test_recipient`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has sent 20 test emails in the last hour (`campaign_test_rate_limited`). The `Retry-After` header gives the seconds to wait. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  unscheduleCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Campaign'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Only a scheduled campaign can be unscheduled (`campaign_not_scheduled`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  verifyCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Campaign ID. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Check operation started. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OperationResource'];
+        };
+      };
+      /** @description The board has no campaign with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has run 20 campaign checks in the last hour (`campaign_verify_rate_limited`). The `Retry-After` header gives the seconds to wait. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listCandidates: {
     parameters: {
       query?: {
@@ -21264,6 +23160,15 @@ export interface operations {
           'application/json': components['schemas']['ProfileFieldValuesResponse'];
         };
       };
+      /** @description A value was refused (`validation_bad_request`). When the refusal is about specific fields, `details.violations` lists each as `{ fieldKey, code, message }`, such as a required field left empty (`custom_field_required`), so a form can show each message on its field. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
       /** @description Profile not found. */
       404: {
         headers: {
@@ -21371,8 +23276,8 @@ export interface operations {
           'application/json': components['schemas']['ProfileObjectReferencesResult'];
         };
       };
-      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
-      default: {
+      /** @description Invalid selection or field value (`validation_bad_request`). When the refusal is about specific fields, `details.violations` lists each as `{ fieldKey, code, message }`: `fieldKey` is a required collection field left empty, or the key of an entry detail or row detail that was refused. */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -22292,6 +24197,15 @@ export interface operations {
           'application/json': components['schemas']['ProfileFieldValuesResponse'];
         };
       };
+      /** @description A value was refused (`validation_bad_request`). When the refusal is about specific fields, `details.violations` lists each as `{ fieldKey, code, message }`, such as a required field left empty (`custom_field_required`), so a form can show each message on its field. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
       /** @description Profile not found. */
       404: {
         headers: {
@@ -22521,8 +24435,8 @@ export interface operations {
           'application/json': components['schemas']['ProfileObjectReferencesResult'];
         };
       };
-      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
-      default: {
+      /** @description Invalid selection or field value (`validation_bad_request`). When the refusal is about specific fields, `details.violations` lists each as `{ fieldKey, code, message }`: `fieldKey` is a required collection field left empty, or the key of an entry detail or row detail that was refused. */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -23465,6 +25379,81 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  batchUpdateContactTags: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BatchContactTagsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ContactBatchResult'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  batchAddContactsToTopic: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BatchContactTopicsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ContactBatchResult'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No live topic has this key. */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -24878,7 +26867,7 @@ export interface operations {
       query?: {
         /** @description The last 7 or 30 UTC days, today included. Defaults to 30. */
         days?: '7' | '30';
-        /** @description Which email to count: `all` (default), or one email by its key, such as `job-alert-digest`, `job-recommendation-digest`, `import-confirmation` or `board-magic-link`. */
+        /** @description Which email to count: `all` (default), or one email by its key, such as `job-alert-digest` (the job alert digest, and the weekly jobs email), `job-recommendation-digest` (the separate Job matches digest), `import-confirmation`, `campaign` (every email campaign) or `board-magic-link`. */
         email?: string;
       };
       header?: never;
@@ -26691,7 +28680,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -26723,7 +28712,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -26768,7 +28757,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -26798,7 +28787,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The email template type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -27841,6 +29830,647 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['AgentFeedbackError'];
+        };
+      };
+    };
+  };
+  listHelpArticles: {
+    parameters: {
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. Pass it back, with the same filters, to fetch the next page. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 100, and defaults to 50.
+         * @example 50
+         */
+        limit?: number;
+        /** @description Only the articles of this help category. */
+        categoryId?: string;
+        /** @description Only the articles with this status. */
+        status?: 'draft' | 'published';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/help/articles */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['HelpArticleSummary'][];
+          };
+        };
+      };
+      /** @description A `cursor` this list did not return (`pagination_invalid_cursor`), or a malformed request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The `categoryId` help category was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHelpArticleBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description The request was malformed, or the board already has 500 articles. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The `categoryId` help category was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateHelpArticleBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found, or the `categoryId` help category was not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Another article already uses the slug. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  discardHelpArticleChanges: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  publishHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description The article, or its unpublished changes, has no content. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  unpublishHelpArticle: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help article ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpArticle'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help article not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listHelpCategories: {
+    parameters: {
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. Pass it back, with the same filters, to fetch the next page. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 100, and defaults to 50.
+         * @example 50
+         */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/help/categories */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['HelpCategory'][];
+          };
+        };
+      };
+      /** @description A `cursor` this list did not return (`pagination_invalid_cursor`), or a malformed request. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createHelpCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateHelpCategoryBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpCategory'];
+        };
+      };
+      /** @description The request was malformed, or the board already has 50 categories. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getHelpCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help category ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpCategory'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help category not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteHelpCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help category ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help category not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The category still has articles. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateHelpCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Help category ID (the `id` field, not the `slug`). */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateHelpCategoryBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HelpCategory'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Missing the required permission, or the acting user is not an active member. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Help category not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Another category already uses the slug. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
         };
       };
     };
@@ -33922,6 +36552,68 @@ export interface operations {
       };
     };
   };
+  getDigitalProductOfferSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DigitalProductOfferSettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateDigitalProductOfferSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateDigitalProductOfferSettingsBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DigitalProductOfferSettings'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   getFormLayouts: {
     parameters: {
       query?: never;
@@ -35161,7 +37853,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -35193,7 +37885,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -35238,7 +37930,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -35268,7 +37960,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -35313,7 +38005,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. */
+        /** @description The system email type, as returned in `type` by the list endpoint. One of `board-magic-link`, `board-email-verification`, `board-password-reset`, `board-work-email-verification`, `job-alert-subscription-confirmation`, `job-alert-digest`, `job-recommendation-digest`, `company-access-approved`, `company-access-rejected`, `public-job-submission-customer`, `public-job-submission-pending`, `public-job-submission-approved`, `billing-verification`, `board-new-message`, `board-job-invoice-on-issue`, `board-job-invoice-on-payment`, `board-email-change`, `board-email-changed-notice`, `board-account-deleted`, `board-company-invite`, `board-new-application`, `board-digital-product-purchase`, `board-digital-product-copy-ready`, `board-digital-product-updated`, `board-digital-product-download-link`, `board-tip-receipt`, `board-item-verification-code`, `board-item-verification-expiring`, `board-item-verification-lapsed`, `board-item-verification-decided`, `newsletter-subscription-confirmation`, `public-job-submission-rejected`, `board-sso-link-proof`. `job-recommendation-digest` is deprecated: it reads and writes `job-alert-digest`, the weekly jobs email. */
         type: string;
       };
       cookie?: never;
@@ -35358,6 +38050,159 @@ export interface operations {
       };
       /** @description The board has sent 20 test emails in the last hour (`system_emails_test_rate_limited`). The `Retry-After` header gives the seconds to wait. */
       429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listTags: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/tags */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['Tag'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTag: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The tag, such as `audience:employer`: lowercase letters, digits, `_` and `-`, with one optional `namespace:` part, each part up to 32 characters. */
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Tag'];
+        };
+      };
+      /** @description The board has no tag with this slug. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteTag: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The tag, such as `audience:employer`: lowercase letters, digits, `_` and `-`, with one optional `namespace:` part, each part up to 32 characters. */
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The board has no tag with this slug. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateTag: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The tag, such as `audience:employer`: lowercase letters, digits, `_` and `-`, with one optional `namespace:` part, each part up to 32 characters. */
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateTagBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Tag'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no tag with this slug. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has a tag with the new slug (`tags_slug_taken`). */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -37467,7 +40312,15 @@ export interface operations {
   };
   listTodos: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description How many closed own to-dos a page holds, from 1 to 100; defaults to 25. Setup, starter and open own to-dos all come on the first page.
+         * @example 25
+         */
+        limit?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -37493,6 +40346,498 @@ export interface operations {
       };
       /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
       default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createTodo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateTodoBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Todo'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The Board already has 200 open to-dos. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTodo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Todo'];
+        };
+      };
+      /** @description To-do not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteTodo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The to-do was removed. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description To-do not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Setup and starter to-dos cannot be removed. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateTodo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['UpdateTodoBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Todo'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To-do not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The to-do is a setup or starter one. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listTodoComments: {
+    parameters: {
+      query?: {
+        /** @description An opaque pagination cursor returned in the `nextCursor` field of a previous response. */
+        cursor?: string;
+        /**
+         * @description A limit on the number of objects to be returned. Limit can range between 1 and 100, and defaults to 25.
+         * @example 25
+         */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/todos/{id}/comments */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['TodoComment'][];
+          };
+        };
+      };
+      /** @description To-do not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Setup and starter to-dos have no comments. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createTodoComment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateTodoCommentBody'];
+      };
+    };
+    responses: {
+      /** @description The comment was posted. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodoComment'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To-do or comment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description A setup or starter to-do, or the to-do already has 100 comments. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTodoComment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+        /** @description The comment id from `GET /v1/todos/{id}/comments`. */
+        commentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodoComment'];
+        };
+      };
+      /** @description To-do or comment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Setup and starter to-dos have no comments. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteTodoComment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+        /** @description The comment id from `GET /v1/todos/{id}/comments`. */
+        commentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The deleted comment. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodoComment'];
+        };
+      };
+      /** @description Only its author or the Board’s owner can delete a comment. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To-do or comment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Setup and starter to-dos have no comments. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateTodoComment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+        /** @description The comment id from `GET /v1/todos/{id}/comments`. */
+        commentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateTodoCommentBody'];
+      };
+    };
+    responses: {
+      /** @description The edited comment. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TodoComment'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Only its author can edit a comment. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To-do or comment not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Setup and starter to-dos have no comments. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  reorderTodo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The to-do id from `GET /v1/todos`: a step name such as `search-console` or an own to-do's id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderTodoBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Todo'];
+        };
+      };
+      /** @description The request was malformed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description To-do not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Only open own to-dos can be reordered. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -37881,6 +41226,35 @@ export interface operations {
       };
       /** @description The payment provider could not void the invoice right now (`transactions_invoice_provider_error`). Nothing was changed; retry later. */
       502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getTranslationCoverage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TranslationCoverage'];
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
         headers: {
           [name: string]: unknown;
         };
