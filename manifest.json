@@ -1,6 +1,6 @@
 {
-  "version": "1.30.0",
-  "generatedAt": "2026-11-19T02:00:17.555Z",
+  "version": "1.31.0",
+  "generatedAt": "2026-11-24T07:48:19.793Z",
   "groups": [
     {
       "name": "auth",
@@ -717,18 +717,293 @@
     },
     {
       "name": "todos",
-      "description": "Read the to-dos on the Board's Home, the same list the dashboard shows.",
+      "description": "Read and work through the to-dos on the Board's Home, the same list the dashboard shows.",
       "commands": [
         {
           "name": "list",
-          "description": "List the Board’s to-dos in Home’s order, with status and the dashboard link for each. While the Board is being set up these are its setup steps.",
-          "synopsis": "cavuno todos list",
+          "description": "List the Board’s to-dos in Home’s order: setup and starter to-dos, then the Board’s own (open in the operator’s order, then closed, newest first). Work from the top. Pass --cursor for more closed to-dos.",
+          "synopsis": "cavuno todos list [options]",
           "arguments": [],
-          "options": [],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Closed to-dos per page, 1-100 (default 25)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
           "examples": [
             "cavuno todos list"
           ],
           "mapsTo": "GET /v1/todos"
+        },
+        {
+          "name": "get",
+          "description": "Fetch one to-do: an own one, or a setup or starter one.",
+          "synopsis": "cavuno todos get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID, for example search-console or an own ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno todos get search-console"
+          ],
+          "mapsTo": "GET /v1/todos/:id"
+        },
+        {
+          "name": "add",
+          "description": "Add a to-do to the bottom of the Board’s own list.",
+          "synopsis": "cavuno todos add <title> [options]",
+          "arguments": [
+            {
+              "name": "title",
+              "description": "The to-do as it reads on Home, in a few words",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--description <text>",
+              "description": "Notes, links or reason, in Markdown",
+              "required": false
+            },
+            {
+              "flags": "--done-when-metric <metric>",
+              "description": "Tick itself once this number reaches --at-least: liveJobs, publishedPosts, postsByReadyAuthor, companies, candidates, socialLinks or searchConsoleConnected",
+              "required": false
+            },
+            {
+              "flags": "--at-least <n>",
+              "description": "Target for --done-when-metric",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos add \"Email 10 employers in your niche\"",
+            "cavuno todos add \"Write a salary guide\" --description \"214 live jobs to draw from\"",
+            "cavuno todos add \"Reach 250 live jobs\" --done-when-metric liveJobs --at-least 250"
+          ],
+          "mapsTo": "POST /v1/todos"
+        },
+        {
+          "name": "update",
+          "description": "Change an own to-do’s title, description, status or assignee, as a person would. To hand it to the operator, comment what you need, then set `--status needs_review --assignee <their userId>`. Setup and starter to-dos cannot be changed.",
+          "synopsis": "cavuno todos update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--title <title>",
+              "description": "New title",
+              "required": false
+            },
+            {
+              "flags": "--description <text>",
+              "description": "New description; \"\" clears it",
+              "required": false
+            },
+            {
+              "flags": "--status <status>",
+              "description": "open, in_progress, needs_review, done or canceled",
+              "required": false
+            },
+            {
+              "flags": "--assignee <who>",
+              "description": "me, companion, none, or a member’s userId (see `cavuno members list`)",
+              "required": false
+            },
+            {
+              "flags": "--reopen",
+              "description": "Reopen a closed to-do (same as --status open)",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos update k57abc --title \"Email 20 employers\"",
+            "cavuno todos update k57abc --status in_progress",
+            "cavuno todos update k57abc --assignee me",
+            "cavuno todos update k57abc --status needs_review --assignee u_9f2k",
+            "cavuno todos update k57abc --reopen"
+          ],
+          "mapsTo": "PATCH /v1/todos/:id"
+        },
+        {
+          "name": "complete",
+          "description": "Mark an own to-do done (same as --status done). Say what was done in a comment. Setup and starter to-dos tick themselves.",
+          "synopsis": "cavuno todos complete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos complete k57abc"
+          ],
+          "mapsTo": "PATCH /v1/todos/:id"
+        },
+        {
+          "name": "reorder",
+          "description": "Move an own to-do next to another. Only when the operator asks: their order is the priority.",
+          "synopsis": "cavuno todos reorder <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID to move",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--before <id>",
+              "description": "Sit directly above this own to-do",
+              "required": false
+            },
+            {
+              "flags": "--after <id>",
+              "description": "Sit directly below this own to-do",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos reorder k57abc --before k57def"
+          ],
+          "mapsTo": "POST /v1/todos/:id/reorder"
+        },
+        {
+          "name": "remove",
+          "description": "Remove an own to-do without completing it.",
+          "synopsis": "cavuno todos remove <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos remove k57abc --yes"
+          ],
+          "mapsTo": "DELETE /v1/todos/:id"
+        },
+        {
+          "name": "comments",
+          "description": "List an own to-do’s activity, newest first: comments (a reply names its thread in `parentId`), and status and assignment changes. Pass --cursor for older ones.",
+          "synopsis": "cavuno todos comments <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--limit <n>",
+              "description": "Page size 1-100 (default 25)",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "Pagination cursor",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos comments k57abc"
+          ],
+          "mapsTo": "GET /v1/todos/:id/comments"
+        },
+        {
+          "name": "comment",
+          "description": "Comment on an own to-do or reply in a thread. A comment changes nothing else; to hand the to-do to someone, also run `cavuno todos update --status needs_review --assignee`.",
+          "synopsis": "cavuno todos comment <id> <body> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "To-do ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "body",
+              "description": "The comment, in plain text",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--reply-to <commentId>",
+              "description": "Reply in this comment’s thread",
+              "required": false
+            },
+            {
+              "flags": "--idempotency-key <key>",
+              "description": "Reuse this key when retrying the same logical mutation",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno todos comment k57abc \"Drafted the email; it is in the description.\"",
+            "cavuno todos comment k57abc \"Sent to Jane; she replies within a week.\" --reply-to k99xyz"
+          ],
+          "mapsTo": "POST /v1/todos/:id/comments"
         }
       ]
     },
@@ -3081,6 +3356,330 @@
             "cavuno system-emails reset board-magic-link --yes"
           ],
           "mapsTo": "DELETE /v1/system-emails/:type"
+        }
+      ]
+    },
+    {
+      "name": "campaigns",
+      "description": "Draft one-off emails to your contacts, send yourself a test, and run the pre-send checks.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List campaigns, the most recently edited first.",
+          "synopsis": "cavuno campaigns list [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "Only this status, such as draft",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Campaigns per page",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "nextCursor from the previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns list --status draft"
+          ],
+          "mapsTo": "GET /v1/campaigns"
+        },
+        {
+          "name": "get",
+          "description": "Fetch a campaign with its body and latest checks.",
+          "synopsis": "cavuno campaigns get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns get cmp_123"
+          ],
+          "mapsTo": "GET /v1/campaigns/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a draft campaign. Nothing is sent.",
+          "synopsis": "cavuno campaigns create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <text>",
+              "description": "Name in the dashboard",
+              "required": false
+            },
+            {
+              "flags": "--subject <text>",
+              "description": "Subject line",
+              "required": false
+            },
+            {
+              "flags": "--preview <text>",
+              "description": "Inbox preview text",
+              "required": false
+            },
+            {
+              "flags": "--body-file <path>",
+              "description": "File with the body HTML",
+              "required": false
+            },
+            {
+              "flags": "--layout <id>",
+              "description": "Template: newsletter, system, or a template ID",
+              "required": false
+            },
+            {
+              "flags": "--audience-file <path>",
+              "description": "JSON file with the audience ({ topicKey, include, exclude })",
+              "required": false
+            },
+            {
+              "flags": "--fallbacks-file <path>",
+              "description": "JSON file with token fallbacks, such as { \"first_name\": \"there\" }",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns create --name \"November roundup\" --subject \"New jobs this month\" --body-file body.html"
+          ],
+          "mapsTo": "POST /v1/campaigns"
+        },
+        {
+          "name": "update",
+          "description": "Change a draft campaign. Only the options given change.",
+          "synopsis": "cavuno campaigns update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--base-revision <n>",
+              "description": "Refuse the update if the campaign changed since this revision",
+              "required": false
+            },
+            {
+              "flags": "--name <text>",
+              "description": "Name in the dashboard",
+              "required": false
+            },
+            {
+              "flags": "--subject <text>",
+              "description": "Subject line",
+              "required": false
+            },
+            {
+              "flags": "--preview <text>",
+              "description": "Inbox preview text",
+              "required": false
+            },
+            {
+              "flags": "--body-file <path>",
+              "description": "File with the body HTML",
+              "required": false
+            },
+            {
+              "flags": "--layout <id>",
+              "description": "Template: newsletter, system, or a template ID",
+              "required": false
+            },
+            {
+              "flags": "--audience-file <path>",
+              "description": "JSON file with the audience ({ topicKey, include, exclude })",
+              "required": false
+            },
+            {
+              "flags": "--fallbacks-file <path>",
+              "description": "JSON file with token fallbacks, such as { \"first_name\": \"there\" }",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns update cmp_123 --subject \"Fresh jobs\""
+          ],
+          "mapsTo": "PATCH /v1/campaigns/:id"
+        },
+        {
+          "name": "duplicate",
+          "description": "Copy a campaign into a new draft.",
+          "synopsis": "cavuno campaigns duplicate <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns duplicate cmp_123"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/duplicate"
+        },
+        {
+          "name": "test",
+          "description": "Send the campaign to your own inbox.",
+          "synopsis": "cavuno campaigns test <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns test cmp_123"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/test"
+        },
+        {
+          "name": "verify",
+          "description": "Run the pre-send checks (links, tokens, audience, deliverability). Returns an operation.",
+          "synopsis": "cavuno campaigns verify <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns verify cmp_123"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/verify"
+        },
+        {
+          "name": "schedule",
+          "description": "Send the campaign now, or at --at. Its checks must be current with nothing blocking.",
+          "synopsis": "cavuno campaigns schedule <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--at <datetime>",
+              "description": "ISO 8601 datetime to start sending",
+              "required": false
+            },
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns schedule cmp_123 --at 2026-12-01T09:00:00Z --yes"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/schedule"
+        },
+        {
+          "name": "unschedule",
+          "description": "Take a scheduled campaign back to draft.",
+          "synopsis": "cavuno campaigns unschedule <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns unschedule cmp_123"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/unschedule"
+        },
+        {
+          "name": "stop",
+          "description": "Stop sending a campaign. It cannot be resumed.",
+          "synopsis": "cavuno campaigns stop <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns stop cmp_123 --yes"
+          ],
+          "mapsTo": "POST /v1/campaigns/:id/stop"
+        },
+        {
+          "name": "report",
+          "description": "Sent, delivered, bounced, spam and unsubscribes.",
+          "synopsis": "cavuno campaigns report <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno campaigns report cmp_123"
+          ],
+          "mapsTo": "GET /v1/campaigns/:id/report"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a draft campaign.",
+          "synopsis": "cavuno campaigns delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Campaign ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno campaigns delete cmp_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/campaigns/:id"
         }
       ]
     },
