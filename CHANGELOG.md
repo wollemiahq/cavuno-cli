@@ -3,6 +3,32 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.32.0 — 2026-11-24
+
+- **`cavuno campaigns`** drafts one-off emails to a board's contacts:
+  `list`, `get`, `create` and `update` (name, subject, inbox preview, body
+  from a file, template, audience and token fallbacks), `duplicate`,
+  `delete` for a draft, `test` to send it to your own inbox, and `verify`
+  to run the pre-send checks (links, tokens, audience and deliverability).
+  `schedule` sends now or at `--at`, `unschedule` takes a scheduled
+  campaign back to draft, `stop` ends a send, and `report` shows sent,
+  delivered, bounced, spam and unsubscribe counts. Sending opens board by
+  board; until it is open for yours, `schedule` answers
+  `campaign_sending_off`.
+- **`cavuno todos`** adds `edit-comment` to change the words of a comment you
+  wrote on a to-do, and `delete-comment` to delete one. A deleted comment's
+  words can't be restored; its replies keep their thread.
+
+## 1.31.0 — 2026-11-24
+
+- **`cavuno todos`** manages a board's own to-dos:
+  `get`, `add` (with a Markdown description), `update` to change the title,
+  description, status (`open`, `in_progress`, `needs_review`, `done` or
+  `canceled`) or assignee (`me`, `companion`, `none` or a member's user ID),
+  `complete`, `reorder`, `remove`, `comments` to read a to-do's activity and
+  `comment` to comment or reply in a thread. Setup and starter to-dos stay
+  read-only and tick themselves.
+
 ## 1.30.0 — 2026-11-23
 
 - **`cavuno system-emails`** manages the wording of a board's system emails

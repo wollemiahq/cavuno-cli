@@ -92,6 +92,13 @@ export {
   type PublishSystemEmailBody,
 } from './system-emails.js';
 export {
+  createCampaignsClient,
+  type CampaignsClient,
+  type CreateCampaignBody,
+  type ListCampaignsQuery,
+  type UpdateCampaignBody,
+} from './campaigns.js';
+export {
   createRedirectsClient,
   type RedirectsClient,
   type RedirectListQuery,
