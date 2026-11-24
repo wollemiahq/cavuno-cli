@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.32.1 — 2026-11-24
+
+- The command manifest (`manifest.json`) now lists `cavuno todos
+  edit-comment` and `cavuno todos delete-comment`, which 1.32.0 added, so
+  agents that read it can find them.
+
 ## 1.32.0 — 2026-11-24
 
 - **`cavuno campaigns`** drafts one-off emails to a board's contacts:
