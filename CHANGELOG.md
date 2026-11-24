@@ -3,6 +3,16 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.31.0 — 2026-11-24
+
+- **`cavuno todos`** manages a board's own to-dos:
+  `get`, `add` (with a Markdown description), `update` to change the title,
+  description, status (`open`, `in_progress`, `needs_review`, `done` or
+  `canceled`) or assignee (`me`, `companion`, `none` or a member's user ID),
+  `complete`, `reorder`, `remove`, `comments` to read a to-do's activity and
+  `comment` to comment or reply in a thread. Setup and starter to-dos stay
+  read-only and tick themselves.
+
 ## 1.30.0 — 2026-11-23
 
 - **`cavuno system-emails`** manages the wording of a board's system emails
