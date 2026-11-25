@@ -19,6 +19,8 @@ const PURPOSES: MediaPurpose[] = [
   'account_avatar',
   'company_logo',
   'blog_image',
+  'help_image',
+  'help_icon',
 ];
 
 const MIME_BY_EXTENSION: Record<string, string> = {
