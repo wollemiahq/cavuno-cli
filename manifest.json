@@ -1,5 +1,5 @@
 {
-  "version": "1.32.1",
+  "version": "1.33.0",
   "generatedAt": "2026-11-24T21:52:29.563Z",
   "groups": [
     {
@@ -2700,7 +2700,7 @@
       "commands": [
         {
           "name": "upload",
-          "description": "Upload a file. Purpose must be one of: board_logo, board_hero, account_avatar, company_logo, blog_image.",
+          "description": "Upload a file. Purpose must be one of: board_logo, board_hero, account_avatar, company_logo, blog_image, help_image, help_icon.",
           "synopsis": "cavuno media upload <file> [options]",
           "arguments": [
             {

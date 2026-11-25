@@ -3,6 +3,12 @@
 This changelog records changes that affect installation, commands, API
 compatibility, or automation behavior.
 
+## 1.33.0 — 2026-11-25
+
+- `cavuno media upload` takes two more purposes: `help_image`, an image for
+  the body of a help article (up to 10 MB), and `help_icon`, an image for a
+  help category's icon (up to 2 MB). Both need the `help.manage` permission.
+
 ## 1.32.1 — 2026-11-24
 
 - The command manifest (`manifest.json`) now lists `cavuno todos
