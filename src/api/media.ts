@@ -17,7 +17,9 @@ export type MediaPurpose =
   | 'board_hero'
   | 'account_avatar'
   | 'company_logo'
-  | 'blog_image';
+  | 'blog_image'
+  | 'help_image'
+  | 'help_icon';
 
 export interface MediaUploadOptions {
   file: Blob;

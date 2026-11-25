@@ -2700,7 +2700,7 @@
       "commands": [
         {
           "name": "upload",
-          "description": "Upload a file. Purpose must be one of: board_logo, board_hero, account_avatar, company_logo, blog_image.",
+          "description": "Upload a file. Purpose must be one of: board_logo, board_hero, account_avatar, company_logo, blog_image, help_image, help_icon.",
           "synopsis": "cavuno media upload <file> [options]",
           "arguments": [
             {
