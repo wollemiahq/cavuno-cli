@@ -1,6 +1,6 @@
 {
   "version": "1.33.0",
-  "generatedAt": "2026-11-24T21:52:29.563Z",
+  "generatedAt": "2026-11-25T22:34:59.258Z",
   "groups": [
     {
       "name": "auth",
@@ -3751,6 +3751,298 @@
             "cavuno campaigns delete cmp_123 --yes"
           ],
           "mapsTo": "DELETE /v1/campaigns/:id"
+        }
+      ]
+    },
+    {
+      "name": "automations",
+      "description": "Emails that go out when something happens: the defaults and your own. Edits go into a draft until you publish.",
+      "commands": [
+        {
+          "name": "list",
+          "description": "List the defaults, then your own automations.",
+          "synopsis": "cavuno automations list",
+          "arguments": [],
+          "options": [],
+          "examples": [
+            "cavuno automations list"
+          ],
+          "mapsTo": "GET /v1/automations"
+        },
+        {
+          "name": "get",
+          "description": "Fetch an automation with its steps, emails and checks.",
+          "synopsis": "cavuno automations get <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID, or a default key such as new_application",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno automations get new_application"
+          ],
+          "mapsTo": "GET /v1/automations/:id"
+        },
+        {
+          "name": "create",
+          "description": "Create a draft automation. Nothing runs until you publish.",
+          "synopsis": "cavuno automations create [options]",
+          "arguments": [],
+          "options": [
+            {
+              "flags": "--name <text>",
+              "description": "Name in the dashboard",
+              "required": true
+            },
+            {
+              "flags": "--trigger <kind>",
+              "description": "Trigger, such as application_received",
+              "required": true
+            },
+            {
+              "flags": "--days-before <n>",
+              "description": "Date-relative triggers: days before",
+              "required": false
+            },
+            {
+              "flags": "--re-entry <mode>",
+              "description": "once, after_finish or per_job",
+              "required": false
+            },
+            {
+              "flags": "--definition-file <path>",
+              "description": "JSON file with the step graph",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations create --name \"Nudge the team\" --trigger application_received --definition-file flow.json"
+          ],
+          "mapsTo": "POST /v1/automations"
+        },
+        {
+          "name": "update",
+          "description": "Edit an automation. While live, the edit waits for publish.",
+          "synopsis": "cavuno automations update <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON body, with baseRevision",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno automations update aut_123 --file edit.json"
+          ],
+          "mapsTo": "PATCH /v1/automations/:id"
+        },
+        {
+          "name": "email",
+          "description": "Write a Send email step's email from a JSON body.",
+          "synopsis": "cavuno automations email <id> <stepId> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            },
+            {
+              "name": "stepId",
+              "description": "Send email step ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--file <path>",
+              "description": "JSON body: subject, previewText, bodyHtml",
+              "required": true
+            }
+          ],
+          "examples": [
+            "cavuno automations email aut_123 reminder --file email.json"
+          ],
+          "mapsTo": "PUT /v1/automations/:id/emails/:stepId"
+        },
+        {
+          "name": "duplicate",
+          "description": "Copy an automation and its emails as a draft.",
+          "synopsis": "cavuno automations duplicate <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno automations duplicate aut_123"
+          ],
+          "mapsTo": "POST /v1/automations/:id/duplicate"
+        },
+        {
+          "name": "test",
+          "description": "Run the latest edits once for the most recent record, or a sample. Nothing is sent.",
+          "synopsis": "cavuno automations test <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--sample",
+              "description": "Run as a sample person",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations test aut_123"
+          ],
+          "mapsTo": "POST /v1/automations/:id/test"
+        },
+        {
+          "name": "pause",
+          "description": "Hold everyone at their step; publish resumes it.",
+          "synopsis": "cavuno automations pause <id>",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [],
+          "examples": [
+            "cavuno automations pause aut_123"
+          ],
+          "mapsTo": "POST /v1/automations/:id/pause"
+        },
+        {
+          "name": "publish",
+          "description": "Turn on, or resume, with the latest edits. People who trigger it from now on get its emails.",
+          "synopsis": "cavuno automations publish <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations publish aut_123 --yes"
+          ],
+          "mapsTo": "POST /v1/automations/:id/publish"
+        },
+        {
+          "name": "stop",
+          "description": "Turn off: everyone in it leaves now.",
+          "synopsis": "cavuno automations stop <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations stop aut_123 --yes"
+          ],
+          "mapsTo": "POST /v1/automations/:id/stop"
+        },
+        {
+          "name": "delete",
+          "description": "Delete a draft or turned-off automation and its emails.",
+          "synopsis": "cavuno automations delete <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "-y, --yes",
+              "description": "Skip the confirmation prompt",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations delete aut_123 --yes"
+          ],
+          "mapsTo": "DELETE /v1/automations/:id"
+        },
+        {
+          "name": "enrolments",
+          "description": "List the people going, or who went, through it.",
+          "synopsis": "cavuno automations enrolments <id> [options]",
+          "arguments": [
+            {
+              "name": "id",
+              "description": "Automation ID",
+              "required": true,
+              "variadic": false
+            }
+          ],
+          "options": [
+            {
+              "flags": "--status <status>",
+              "description": "waiting, completed or exited",
+              "required": false
+            },
+            {
+              "flags": "--limit <n>",
+              "description": "Runs per page",
+              "required": false
+            },
+            {
+              "flags": "--cursor <cursor>",
+              "description": "nextCursor from the previous page",
+              "required": false
+            }
+          ],
+          "examples": [
+            "cavuno automations enrolments aut_123 --status waiting"
+          ],
+          "mapsTo": "GET /v1/automations/:id/enrolments"
         }
       ]
     },
