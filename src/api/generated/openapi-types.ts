@@ -207,6 +207,202 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/automations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List automations
+     * @description The board’s automations: the defaults its features use, then up to 100 it built, the most recently edited first. Requires `emails.read`.
+     */
+    get: operations['listAutomations'];
+    put?: never;
+    /**
+     * Create an automation
+     * @description Creates a draft. Nothing runs until it is published. Requires `emails.manage`.
+     */
+    post: operations['createAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get an automation
+     * @description One automation with its steps, emails, waiting counts and publish checks. Requires `emails.read`.
+     */
+    get: operations['getAutomation'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete an automation
+     * @description Deletes a draft or turned-off automation with its emails. A deleted default can be restored by publishing it. Weekly jobs follows the Job alerts and Job matches settings: this returns 409 `automation_weekly_jobs_follows_settings`, naming `jobAlertsEnabled` and `jobRecommendationsEnabled` (`PATCH /v1/settings`). Requires `emails.manage`.
+     */
+    delete: operations['deleteAutomation'];
+    options?: never;
+    head?: never;
+    /**
+     * Update an automation
+     * @description Edits a board-built automation. While it is live or paused the edit goes into a draft and the published version keeps running until Publish. Defaults can’t be edited (`automation_default_not_editable`). Requires `emails.manage`.
+     */
+    patch: operations['updateAutomation'];
+    trace?: never;
+  };
+  '/automations/{id}/duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Duplicate an automation
+     * @description Copies a board-built automation and its emails as a draft. Requires `emails.manage`.
+     */
+    post: operations['duplicateAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/emails/{stepId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get an automation email
+     * @description A Send email step's email, unpublished wording included. Requires `emails.read`.
+     */
+    get: operations['getAutomationEmail'];
+    /**
+     * Update an automation email
+     * @description Writes a Send email step’s email. While the automation is live or paused it goes into a draft until Publish. Requires `emails.manage`.
+     */
+    put: operations['updateAutomationEmail'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/enrolments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List automation enrolments
+     * @description The people going, or who went, through it, newest first. Requires `emails.read`.
+     */
+    get: operations['listAutomationEnrolments'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/pause': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Pause an automation
+     * @description Holds everyone at their step; publishing resumes it. Requires `emails.manage`.
+     */
+    post: operations['pauseAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/publish': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish an automation
+     * @description Turns it on, or resumes it, with its latest edits. People who trigger it from now on go through it; people already in it keep the version they started on. Refused with `automation_publish_checks_failed` (`details.checks`) while an email is empty, the graph is invalid or the board can’t send marketing email. Publishing a default turns it back on. Weekly jobs follows the Job alerts and Job matches settings: this returns 409 `automation_weekly_jobs_follows_settings`, naming `jobAlertsEnabled` and `jobRecommendationsEnabled` (`PATCH /v1/settings`). Requires `emails.manage`.
+     */
+    post: operations['publishAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/stop': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Turn off an automation
+     * @description Turns it off: everyone in it leaves now and nothing more is sent. Weekly jobs follows the Job alerts and Job matches settings: this returns 409 `automation_weekly_jobs_follows_settings`, naming `jobAlertsEnabled` and `jobRecommendationsEnabled` (`PATCH /v1/settings`). Requires `emails.manage`.
+     */
+    post: operations['stopAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/automations/{id}/test': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Test an automation
+     * @description Runs its latest edits once for the board’s most recent record of its trigger, or a sample, and returns what each step would do. Waits are skipped; nothing is sent or saved. Requires `emails.read`.
+     */
+    post: operations['testAutomation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/backfill/blocked-jobs/unblock-all': {
     parameters: {
       query?: never;
@@ -2603,6 +2799,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/deliverability/emails': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List deliverability emails
+     * @description Lists the emails your Board sent its contacts over the last 7 or 30 days, newest first, with each one's latest status, why it was delayed or bounced, how many times it was retried, and when it was delivered or bounced. Filter by email, status or exact address. Lists the emails the Board records per person: mail to an address that isn't a contact is not listed. Requires `settings.read`.
+     */
+    get: operations['listDeliverabilityEmails'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/development-origins': {
     parameters: {
       query?: never;
@@ -3089,7 +3305,7 @@ export interface paths {
     put?: never;
     /**
      * Publish an email template design
-     * @description Starts an asynchronous `email_layouts.publish` operation. It renders every email that can use the template with sample data and the board’s brand, and makes the draft live as a new version only when each one renders, keeps its footer and required links, and stays under 100 KB. Otherwise the operation fails with `email_layouts_publish_refused`, its `error.message` lists every problem, one per line, and the published version keeps sending. Once it succeeds, the template’s `currentVersionId` is the new version, and the version’s `review` holds the AI content review of the published template. The newest 50 versions are kept.
+     * @description Starts an asynchronous `email_layouts.publish` operation. It renders every email that can use the template with sample data and the board’s brand, and makes the draft live as a new version only when each one renders, keeps its footer and required links, and stays under 100 KB. Otherwise the operation fails with `email_layouts_publish_refused`, its `error.message` lists every problem, one per line, and the published version keeps sending. Once it succeeds, the template’s `currentVersionId` is the new version, and the version’s `review` holds the AI content review of the published template. Where the review is enforced, it decides at once: a version it blocks, or a review that couldn’t run, fails the operation with `email_layouts_publish_refused`. A published operation’s result also lists the review’s `warnings`: borderline wording, published anyway. The newest 50 versions are kept.
      */
     post: operations['publishEmailLayout'];
     delete?: never;
@@ -3521,6 +3737,86 @@ export interface paths {
      * @description Reinstates a removed or rejected membership as `member` (`admin` if the company has none) and emails the employer. A pending claim is refused. Requires `companies.manage`.
      */
     post: operations['restoreEmployerMembership'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/website-changes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List company website changes
+     * @description Returns open requests from employers to move their company to a new website domain. Employers cannot change the domain directly, because it decides who joins the company by email. Defaults to `status=pending_review`. Requires `employers.read`.
+     */
+    get: operations['listEmployersWebsiteChanges'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/website-changes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a company website change
+     * @description Returns one open website change. Approved and rejected changes are closed and return 404; the audit log keeps them. Requires `employers.read`.
+     */
+    get: operations['getEmployersWebsiteChange'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/website-changes/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a company website change
+     * @description Approve a website change waiting for review: the company's website becomes the requested one, existing members keep access, and every company admin is emailed. Returns the change as it was approved. Requires `employers.manage`.
+     */
+    post: operations['approveEmployersWebsiteChange'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/employers/website-changes/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a company website change
+     * @description Reject a website change waiting for review: the website stays as it is and the employer is emailed. Returns the change as it was rejected. Requires `employers.manage`.
+     */
+    post: operations['rejectEmployersWebsiteChange'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4795,7 +5091,7 @@ export interface paths {
     put?: never;
     /**
      * Upload a media file
-     * @description Uploads a file via the unified media dispatcher. Send a multipart form with `file` (binary) and `purpose` (one of `board_logo`, `board_hero`, `account_avatar`, `company_logo`, or `blog_image`). Optionally include `resourceType` and `resourceId` to bind the upload to an owning resource. The request is idempotent when an `Idempotency-Key` header is supplied.
+     * @description Uploads a file via the unified media dispatcher. Send a multipart form with `file` (binary) and `purpose` (one of `board_logo`, `board_hero`, `account_avatar`, `company_logo`, `blog_image`, `help_image`, or `help_icon`). Each purpose also needs its own permission: `help_image`, for images in help article bodies, and `help_icon`, for the icon of a help category (up to 2 MB, resized to fit 256 pixels), need `help.manage`. Optionally include `resourceType` and `resourceId` to bind the upload to an owning resource. The request is idempotent when an `Idempotency-Key` header is supplied.
      */
     post: operations['uploadMedia'];
     delete?: never;
@@ -6414,7 +6710,7 @@ export interface paths {
     get: operations['getSystemEmail'];
     /**
      * Publish a system email
-     * @description Publishes your wording of an email, replacing any wording published before. It is used for every email of this type sent from then on. Send all three fields. The wording is checked the same way as in the dashboard: length limits, only the tokens listed for this type, every required body token present, the button kept on the email’s main link, and links only to the email’s own links or the board’s contact address. Shortly after, an AI content review reads the email as sent and records its verdict in `review`. The verdict is recorded only: it doesn’t stop or undo a publish.
+     * @description Publishes your wording of an email, replacing any wording published before. It is used for every email of this type sent from then on. Send all three fields. The wording is checked the same way as in the dashboard: length limits, only the tokens listed for this type, every required body token present, the button kept on the email’s main link, and links only to the email’s own links or the board’s contact address. An AI content review then reads the email as sent and records its verdict in `review`. Where the review is enforced, it runs before the publish and decides at once: content it blocks, or a review that couldn’t run, is refused with `reason: review_blocked` or `review_unavailable`, and the previous wording keeps sending.
      */
     put: operations['publishSystemEmail'];
     post?: never;
@@ -8079,6 +8375,306 @@ export interface components {
       /** @description The changed fields after the change, as a JSON string, or `null` (for example on delete). Same redaction and size rules as `before`. */
       after: string | null;
     };
+    Automation: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'automation';
+      /** @description Automation ID. */
+      id: string;
+      /** @description Set on a default Cavuno adds; null on one the board built. */
+      defaultKey: string | null;
+      name: string;
+      /**
+       * @description `draft` until published; `live`, `paused` or `off` after.
+       * @enum {string}
+       */
+      status: 'draft' | 'live' | 'paused' | 'off';
+      trigger: components['schemas']['AutomationTrigger'];
+      /** @description Its steps and emails can be edited. False for defaults, which run on Cavuno’s built-in emails for now. */
+      editable: boolean;
+      /** @description Goes up on every edit; pass it as `baseRevision`. Null for a default. */
+      revision: number | null;
+      /** @description Emails sent in the last 30 days. */
+      sentLast30Days: number;
+      /** @description ISO 8601 datetime, or null for an unchanged default. */
+      updatedAt: string | null;
+      /** @description Live or paused with edits not yet published; the published version keeps running until `POST /v1/automations/{id}/publish`. */
+      unpublishedChanges: boolean;
+      /**
+       * @description Who can go through it again: `once` ever, `after_finish` once their run ends, or `per_job` once per job (job triggers).
+       * @enum {string}
+       */
+      reEntry: 'once' | 'after_finish' | 'per_job';
+      /**
+       * @description `job_is_live`: the run’s job is still published. `has_job_alert`: the person has a job alert. `has_new_jobs` belongs to Weekly jobs.
+       * @enum {string|null}
+       */
+      stopIf: 'has_new_jobs' | 'job_is_live' | 'has_job_alert' | null;
+      /** @description Marketing emails: one topic, or all marketing when null. */
+      audience: {
+        topicKey: string | null;
+      } | null;
+      /**
+       * @description Job triggers: the job’s owner, or its company’s whole team.
+       * @enum {string|null}
+       */
+      sendTo: 'job_owner' | 'company_team' | null;
+      dailyLimit: number | null;
+      definition: components['schemas']['AutomationDefinition'];
+      /** @description Each Send email step’s email, unpublished wording included. */
+      emails: components['schemas']['AutomationStepEmail'][];
+      /** @description People waiting at each step, for steps with anyone. */
+      waiting: {
+        stepId: string;
+        count: number;
+      }[];
+      /** @description What Publish needs; every `ok` must be true. */
+      checks: components['schemas']['AutomationPublishCheck'][];
+    };
+    /** @description The step graph as the builder shows it, unpublished edits included. */
+    AutomationDefinition: {
+      entryStepId: string;
+      steps: {
+        id: string;
+        /** @enum {string} */
+        type: 'send_email' | 'condition' | 'wait' | 'exit';
+        /** @description A default’s Send email step: the system email it sends (`GET /v1/system-emails`). */
+        emailType?: string;
+        name?: string;
+        /**
+         * @description `job_is_live`: the run’s job is still published. `has_job_alert`: the person has a job alert. `has_new_jobs` belongs to Weekly jobs.
+         * @enum {string}
+         */
+        condition?: 'has_new_jobs' | 'job_is_live' | 'has_job_alert';
+        yes?: string;
+        no?: string;
+        amount?: number;
+        /** @enum {string} */
+        unit?: 'hours' | 'days';
+        atHour?: number;
+        next?: string;
+      }[];
+    };
+    /** @description The step graph. Default: one empty Send email step. */
+    AutomationDefinitionInput: {
+      /** @description The step a run starts at. */
+      entryStepId: string;
+      /** @description The steps, at most 30. Every path must end, nothing may loop back, every step must be reachable, and If/else nests at most 3 deep. */
+      steps: components['schemas']['AutomationStepInput'][];
+    };
+    AutomationEmail: {
+      /** @enum {string} */
+      object: 'automation_email';
+      /** @description The Send email step it belongs to. */
+      stepId: string;
+      subject: string;
+      previewText: string;
+      bodyHtml: string;
+      /** @description The email template it renders on. */
+      layoutId: string | null;
+      tokenFallbacks: {
+        [key: string]: string;
+      };
+      /** @description The unsubscribe category it sends in, checked at send time. */
+      category: string;
+      /** @description Edited since the automation was last published. */
+      unpublishedChanges: boolean;
+    };
+    AutomationEnrolment: {
+      /** @enum {string} */
+      object: 'automation_enrolment';
+      id: string;
+      /** @description The person going through it. */
+      boardUserId: string;
+      /** @enum {string} */
+      status: 'waiting' | 'completed' | 'exited';
+      /** @description The step it runs next, or ended on. */
+      stepId: string;
+      /** @description ISO 8601 datetime of its next step. */
+      runAt: string | null;
+      enteredAt: string;
+      finishedAt: string | null;
+      /** @description Why it left early, when it did. */
+      exitReason: string | null;
+    };
+    AutomationPublishCheck: {
+      /** @enum {string} */
+      key: 'graph' | 'emails' | 'readiness';
+      ok: boolean;
+      /** @description One line, as the builder shows it. */
+      summary: string;
+    };
+    AutomationStepEmail: {
+      /** @description The Send email step it belongs to. */
+      stepId: string;
+      subject: string;
+      previewText: string;
+      bodyHtml: string;
+      /** @description The email template it renders on. */
+      layoutId: string | null;
+      tokenFallbacks: {
+        [key: string]: string;
+      };
+      /** @description The unsubscribe category it sends in, checked at send time. */
+      category: string;
+      /** @description Edited since the automation was last published. */
+      unpublishedChanges: boolean;
+    };
+    AutomationStepInput:
+      | {
+          /** @description Step id, unique in the graph. */
+          id: string;
+          /** @enum {string} */
+          type: 'send_email';
+          /** @description The email’s name on the canvas. */
+          name?: string;
+          /** @description The step that runs next; absent ends the run. */
+          next?: string;
+        }
+      | {
+          /** @description Step id, unique in the graph. */
+          id: string;
+          /** @enum {string} */
+          type: 'condition';
+          /**
+           * @description `job_is_live`: the run’s job is still published. `has_job_alert`: the person has a job alert.
+           * @enum {string}
+           */
+          condition: 'job_is_live' | 'has_job_alert';
+          /** @description The step when the condition holds. */
+          yes: string;
+          /** @description The step when it doesn’t. */
+          no: string;
+        }
+      | {
+          /** @description Step id, unique in the graph. */
+          id: string;
+          /** @enum {string} */
+          type: 'wait';
+          /** @description How long, in `unit`s: at most 365 days or 8760 hours. */
+          amount: number;
+          /**
+           * @description The unit of `amount`.
+           * @enum {string}
+           */
+          unit: 'hours' | 'days';
+          /** @description Then wait until this hour in the person’s time zone, else the board’s. */
+          atHour?: number;
+          /** @description The step that runs next; absent ends the run. */
+          next?: string;
+        }
+      | {
+          /** @description Step id, unique in the graph. */
+          id: string;
+          /**
+           * @description Ends the run.
+           * @enum {string}
+           */
+          type: 'exit';
+        };
+    AutomationSummary: {
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: 'automation';
+      /** @description Automation ID. */
+      id: string;
+      /** @description Set on a default Cavuno adds; null on one the board built. */
+      defaultKey: string | null;
+      name: string;
+      /**
+       * @description `draft` until published; `live`, `paused` or `off` after.
+       * @enum {string}
+       */
+      status: 'draft' | 'live' | 'paused' | 'off';
+      trigger: components['schemas']['AutomationTrigger'];
+      /** @description Its steps and emails can be edited. False for defaults, which run on Cavuno’s built-in emails for now. */
+      editable: boolean;
+      /** @description Goes up on every edit; pass it as `baseRevision`. Null for a default. */
+      revision: number | null;
+      /** @description Emails sent in the last 30 days. */
+      sentLast30Days: number;
+      /** @description ISO 8601 datetime, or null for an unchanged default. */
+      updatedAt: string | null;
+    };
+    AutomationTest: {
+      /** @enum {string} */
+      object: 'automation_test';
+      /** @description The board’s latest record for the trigger, or a sample when it has none. */
+      subject: {
+        /** @enum {string} */
+        kind: 'record' | 'sample';
+        id?: string;
+        /** @description The applicant, job or file it ran for. */
+        label?: string;
+      };
+      /** @description Who it would email; null for a sample. */
+      recipient: {
+        boardUserId: string;
+        name: string | null;
+        email: string;
+      } | null;
+      /** @description The steps it reached, in order. */
+      steps: {
+        stepId: string;
+        /**
+         * @description What the step would do. Waits are skipped in a test.
+         * @enum {string}
+         */
+        result:
+          | 'would_send'
+          | 'would_skip'
+          | 'would_hold'
+          | 'waits'
+          | 'yes'
+          | 'no'
+          | 'exit';
+        /** @description Why a send would skip or hold, such as `empty_email` or `no_marketing_consent`. */
+        reason: string | null;
+        /** @description ISO 8601 datetime a Wait would end. */
+        until: string | null;
+      }[];
+      end: {
+        /** @enum {string} */
+        status: 'completed' | 'exited';
+        exitReason: string | null;
+      };
+    };
+    AutomationTrigger: {
+      /**
+       * @description What starts a run. `weekly_jobs` belongs to the Weekly jobs default and can’t be used by another automation.
+       * @enum {string}
+       */
+      kind:
+        | 'weekly_jobs'
+        | 'job_expires_in'
+        | 'application_received'
+        | 'message_received'
+        | 'verification_expires_in'
+        | 'verification_lapsed'
+        | 'product_updated';
+      /** @description Date-relative triggers (`job_expires_in`, `verification_expires_in`): how many days before the date. */
+      daysBefore?: number | null;
+    };
+    /** @description What starts a run. */
+    AutomationTriggerInput: components['schemas']['AutomationTrigger'] & {
+      /**
+       * @description What starts a run.
+       * @enum {string}
+       */
+      kind?:
+        | 'job_expires_in'
+        | 'application_received'
+        | 'message_received'
+        | 'verification_expires_in'
+        | 'verification_lapsed'
+        | 'product_updated';
+      /** @description Date-relative triggers (`job_expires_in`, `verification_expires_in`): how many days before the date. */
+      daysBefore?: number;
+    };
     BackfillBulkItemResult: {
       companyId: string;
       /** @enum {string} */
@@ -8977,6 +9573,18 @@ export interface components {
       tokenFallbacks: {
         [key: string]: string;
       };
+      /** @description The campaign’s own design, made in its editor chat, which it sends in place of its template’s published version. Null when the campaign follows its template. Once the template publishes this same design, the campaign follows its template again and this is null. */
+      design: {
+        /** @description The design’s React Email source files. */
+        files: {
+          /** @description File name. */
+          path: string;
+          /** @description The file’s source. */
+          contents: string;
+        }[];
+        /** @description The design compiled to HTML, as the campaign sends. */
+        compiledHtml: string;
+      } | null;
       checks: components['schemas']['CampaignChecks'];
       delivery: components['schemas']['CampaignDelivery'];
     };
@@ -8993,13 +9601,15 @@ export interface components {
       current: boolean;
       /** @description When the checks ran. ISO 8601 datetime. */
       checkedAt: string;
-      /** @description What would stop the campaign sending. `deliverability_pending` clears once the deliverability check’s verdict arrives, within about two minutes. */
+      /** @description What would stop the campaign sending. `deliverability_pending` clears once the deliverability check’s verdict arrives, within about two minutes. `review_blocked`: the AI content review found phishing, a scam or impersonation (`review.verdict.reasons` says what, with the line). `review_unavailable`: the review couldn’t run; verify again. `broken_links` is no longer reported: broken links are warnings, listed in `links.broken`. */
       blocking: (
         | 'unknown_tokens'
         | 'missing_token_values'
         | 'broken_links'
         | 'deliverability'
         | 'deliverability_pending'
+        | 'review_blocked'
+        | 'review_unavailable'
       )[];
       /** @description The bulk sending domain the deliverability check sent from, or null when the board has none verified. */
       domain: string | null;
@@ -9012,7 +9622,7 @@ export interface components {
         /** @description Recipients with no value for the token, who see the fallback. */
         missingValues: number;
       }[];
-      /** @description Every link was fetched, from Cavuno’s servers. */
+      /** @description Every link was fetched, from Cavuno’s servers, as a browser would ask for it. */
       links: {
         checked: number;
         /** @description Links past the first 50, not checked. */
@@ -9033,6 +9643,13 @@ export interface components {
             | 'unsupported_link';
           /** @description The HTTP status, if any. */
           status?: number;
+          /** @description The link's visible text, or an image link's alt text. Absent when it shows none, and on checks run before it was recorded. */
+          text?: string;
+          /**
+           * @description dead: it doesn't load (no such host or no answer, 404, 410, a private address, not an http(s) or mailto: link). unverified: it couldn't be checked (403, 429, 999, other 4xx, 5xx, a timeout, too many redirects). Both are warnings; broken links never stop a send.
+           * @enum {string}
+           */
+          kind: 'dead' | 'unverified';
         }[];
       };
       /** @description Who it reaches, counted now; sending checks each person again. */
@@ -9051,7 +9668,7 @@ export interface components {
       /** @description The email, rendered with sample data, sent from the bulk domain to a deliverability checker. */
       deliverability: {
         /**
-         * @description pending; passed; blocked (a check failed); held (it reads as spam, for review); skipped (outside production).
+         * @description pending; passed; blocked (a check failed); held (a spam filter scored it as spam); skipped (this board’s emails aren’t delivered, so no test copy was sent).
          * @enum {string}
          */
         status: 'pending' | 'passed' | 'blocked' | 'held' | 'skipped';
@@ -9060,6 +9677,53 @@ export interface components {
         reportUrl: string | null;
         checkedAt: string | null;
       };
+      /** @description The AI content review of the campaign as checked, rendered with sample data, the same review templates get. Null on checks run before the review; verify again. */
+      review: {
+        /**
+         * @description `passed`: it may send. `blocked` or `unavailable` stop it, as `review_blocked` and `review_unavailable` in `blocking`. Where the review is only recorded, always `passed`.
+         * @enum {string}
+         */
+        status: 'passed' | 'blocked' | 'unavailable';
+        /** @description The verdict, with its reason codes and the lines they quote. Null when the review couldn’t run. Campaigns are marketing email with an unsubscribe link, so they aren’t judged for promotion. */
+        verdict: {
+          /**
+           * @description `allow` or `block` (phishing, a scam or impersonation, or a system email selling something). When the first review can’t decide, a stronger model makes the final call, so new reviews are never `hold`; `hold` appears only on reviews recorded before that. Where the review is enforced, `block` refuses the publish; otherwise the verdict is only recorded.
+           * @enum {string}
+           */
+          outcome: 'allow' | 'hold' | 'block';
+          /** @description Why, when the outcome isn’t `allow`. */
+          reasons: {
+            /**
+             * @description What the review found.
+             * @enum {string}
+             */
+            code:
+              | 'credential_harvesting'
+              | 'impersonation'
+              | 'link_text_mismatch'
+              | 'lookalike_domain'
+              | 'job_scam'
+              | 'promotional_in_system_email'
+              | 'unrelated_to_board';
+            /** @description What is wrong, in a sentence. */
+            message: string;
+            /** @description The text of the email the reason is about. */
+            excerpt: string;
+          }[];
+          /** @description Borderline wording worth a look. The email still publishes: warnings never change the outcome. Empty or absent when there is nothing to flag. */
+          warnings?: {
+            /**
+             * @description `promotional_wording`: a line in a system email reads a little promotional. System emails go to everyone, including people who didn’t agree to marketing.
+             * @enum {string}
+             */
+            code: 'promotional_wording';
+            /** @description The text of the email the warning is about. */
+            excerpt: string;
+          }[];
+          /** @description Time the content was reviewed. ISO 8601 datetime. */
+          reviewedAt: string;
+        } | null;
+      } | null;
     } | null;
     /** @description Only people who match this filter. */
     CampaignContactFilter: {
@@ -9107,7 +9771,7 @@ export interface components {
       /** @description Why a scheduled campaign went back to draft when its send time came, or null. The board’s owners are emailed when it does. */
       draftReason: {
         /**
-         * @description Campaign sending isn’t on for the board (`sending_off`); the board can’t send campaigns (`not_ready`); its template changed since the checks (`checks_stale`); it needs a review before it sends (`review_required`); or it failed to render (`render_failed`).
+         * @description Campaign sending isn’t on for the board (`sending_off`); the board can’t send campaigns (`not_ready`); its template changed since the checks (`checks_stale`); it failed to render (`render_failed`); the AI content review blocked it at its send time (`review_blocked`, see `message`) or couldn’t run then (`review_unavailable`). `review_required` is no longer set.
          * @enum {string}
          */
         reason:
@@ -9115,9 +9779,13 @@ export interface components {
           | 'not_ready'
           | 'checks_stale'
           | 'review_required'
-          | 'render_failed';
+          | 'render_failed'
+          | 'review_blocked'
+          | 'review_unavailable';
         /** @description For `not_ready`, the first readiness item missing. */
         blockingItem: string | null;
+        /** @description For `review_blocked`, what the review found, with the line quoted; otherwise null. */
+        message: string | null;
         /** @description ISO 8601 datetime. */
         at: string;
       } | null;
@@ -9875,6 +10543,31 @@ export interface components {
         public?: string | null;
       };
     };
+    CompanyWebsiteChange: {
+      id: string;
+      /** @enum {string} */
+      object: 'company_website_change';
+      companyId: string;
+      companyName: string;
+      /** @description The company website domain today. */
+      currentWebsiteDomain: string | null;
+      /** @description The requested website, as typed. */
+      website: string;
+      /** @description The requested website domain. */
+      websiteDomain: string;
+      /**
+       * @description `pending_review`: the board decides. `awaiting_verification`: a link went to an email on the new domain and the employer has not clicked it.
+       * @enum {string}
+       */
+      status: 'pending_review' | 'awaiting_verification';
+      /** @description The employer who asked for the change. */
+      employerId: string;
+      employerEmail: string | null;
+      /** @description An address on the new domain the employer verified, or `null` when they could not. A verified address proves control of the domain. */
+      verifiedEmail: string | null;
+      /** @description ISO-8601 timestamp of the request. */
+      requestedAt: string;
+    };
     ConfirmImportBody: {
       /** @description A first-time or revised mapping review to persist. Omit it to accept the mapping already attached to this Import. */
       inlineMapping?: {
@@ -10019,7 +10712,7 @@ export interface components {
        */
       object: 'contact_email';
       /**
-       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, a newsletter sign-up confirmation (`board.subscribe`), a sign-in link, an email verification, a password reset, a tip receipt, or a digital product purchase receipt. Sign-in links, verifications, resets and receipts are listed only when the address already belongs to a person on the board.
+       * @description What the email was: a job alert digest, a job matches digest, the confirmation request sent after an import, a job alert sign-up confirmation, a newsletter sign-up confirmation (`board.subscribe`), a sign-in link, an email verification, a password reset, a tip receipt, a digital product purchase receipt, a campaign, or a new application sent to the job’s employer (`new_application`). Sign-in links, verifications, resets, receipts and new applications are listed only when the address already belongs to a person on the board.
        * @enum {string}
        */
       kind:
@@ -10033,7 +10726,8 @@ export interface components {
         | 'password_reset'
         | 'tip_receipt'
         | 'purchase_receipt'
-        | 'campaign';
+        | 'campaign'
+        | 'new_application';
       /** @description The email's subject line. */
       subject: string;
       /**
@@ -10047,7 +10741,7 @@ export interface components {
         | 'bounced'
         | 'complained'
         | 'failed';
-      /** @description Why it is deferred, bounced or failed, from the latest such event: a plain sentence or the receiving server’s reply, with email addresses redacted. `null` once delivered, and when no reason was given. */
+      /** @description Why it is deferred, bounced or failed, from the latest such event: a plain sentence or the receiving server’s reply, with email addresses redacted. A delivered email keeps the reason it was delayed. `null` when no reason was given. */
       reason: string | null;
       /**
        * @description The mailbox provider behind the address’s domain, from its MX records, when it is one of these; otherwise `null`. The same on every email to the contact.
@@ -10190,6 +10884,17 @@ export interface components {
       metaDescription?: string;
       /** @description The author's display name. */
       name: string;
+    };
+    CreateAutomationBody: {
+      /** @description Name in the dashboard, never shown to recipients. */
+      name: string;
+      trigger: components['schemas']['AutomationTriggerInput'];
+      /**
+       * @description Who can go through it again. Default `once`.
+       * @enum {string}
+       */
+      reEntry?: 'once' | 'after_finish' | 'per_job';
+      definition?: components['schemas']['AutomationDefinitionInput'];
     };
     CreateBackfillRuleBody: {
       name: string;
@@ -10483,6 +11188,7 @@ export interface components {
       slug?: string;
       /** @description Short text about the category, up to 300 characters. */
       description?: string;
+      icon?: components['schemas']['HelpCategoryIconInput'];
     };
     CreateInboxSavedReplyBody: {
       /** @description Searched in the composer. */
@@ -11272,6 +11978,57 @@ export interface components {
       /** @description Unsubscribes from this email. */
       unsubscribed: number;
     };
+    DeliverabilityEmail: {
+      /** @description Unique identifier for the email. */
+      id: string;
+      /**
+       * @description String representing the object's type.
+       * @enum {string}
+       */
+      object: 'deliverability_email';
+      /** @description The contact it went to, as `GET /v1/contacts/{id}` takes it. */
+      contact_id: string;
+      /** @description The contact's address now. `null` once the contact is gone. */
+      to: string | null;
+      /**
+       * @description What the email was, as `GET /v1/contacts/{id}/emails` lists it.
+       * @enum {string}
+       */
+      kind:
+        | 'job_alert_digest'
+        | 'job_matches_digest'
+        | 'import_confirmation'
+        | 'job_alert_confirmation'
+        | 'subscribe_confirmation'
+        | 'sign_in_link'
+        | 'email_verification'
+        | 'password_reset'
+        | 'tip_receipt'
+        | 'purchase_receipt'
+        | 'campaign'
+        | 'new_application';
+      /** @description The email's subject line. */
+      subject: string;
+      /**
+       * @description Its latest status: `sent`, `deferred` (still being retried), `delivered`, `bounced`, `complained` (marked as spam after delivery) or `failed`.
+       * @enum {string}
+       */
+      status:
+        | 'sent'
+        | 'deferred'
+        | 'delivered'
+        | 'bounced'
+        | 'complained'
+        | 'failed';
+      /** @description Why it was delayed, bounced or failed: the receiving server's reply, with email addresses redacted. A delivered email keeps the reason it was delayed. `null` when none was given. */
+      reason: string | null;
+      /** @description How many times the receiving server asked for it to be retried. `null` on emails sent before retries were counted. */
+      delay_count: number | null;
+      /** @description ISO-8601 timestamp of when the email was sent. */
+      sent_at: string;
+      /** @description ISO-8601 timestamp of when it was delivered, bounced or failed. `null` while it is on its way, and on emails sent before this was recorded. */
+      final_at: string | null;
+    };
     DeliverabilityProvider: {
       /**
        * @description The mailbox provider, from the recipient address.
@@ -11296,6 +12053,8 @@ export interface components {
       slow_for_many_senders: boolean;
       /** @description Marketing emails waiting at the provider now. They retry on their own. */
       waiting: number;
+      /** @description Unsubscribes from this email by people at this provider. Unsubscribes counted before providers were split count under none, so the rows can add up to less than `totals.unsubscribed`. */
+      unsubscribed: number;
     };
     DevelopmentOrigin: {
       id: string;
@@ -11681,6 +12440,13 @@ export interface components {
       role: 'system' | 'newsletter' | null;
       /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
       currentVersionId: string | null;
+      /** @description Always `null`: no version is held for a person, so none is rejected. */
+      lastRejection: {
+        /** @description Why Cavuno rejected the held version. */
+        note: string;
+        /** @description Time it was rejected. ISO 8601 datetime. */
+        decidedAt: string;
+      } | null;
       /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
       createdAt: string | null;
       /** @description The working copy. Emails keep sending the published version until the draft is published. */
@@ -11729,6 +12495,13 @@ export interface components {
       role: 'system' | 'newsletter' | null;
       /** @description The published version emails send with, or `null` when it has never been published (the System template then sends the built-in design). */
       currentVersionId: string | null;
+      /** @description Always `null`: no version is held for a person, so none is rejected. */
+      lastRejection: {
+        /** @description Why Cavuno rejected the held version. */
+        note: string;
+        /** @description Time it was rejected. ISO 8601 datetime. */
+        decidedAt: string;
+      } | null;
       /** @description Time the template was created. ISO 8601 datetime. `null` for the built-in System template. */
       createdAt: string | null;
       /** @description How many emails use this template, counting every email left on System. */
@@ -11780,7 +12553,7 @@ export interface components {
       /** @description The AI content review of the version, run on the template rendered with the sign-in link email. Null when the review couldn’t run. */
       review: {
         /**
-         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @description `allow` or `block` (phishing, a scam or impersonation, or a system email selling something). When the first review can’t decide, a stronger model makes the final call, so new reviews are never `hold`; `hold` appears only on reviews recorded before that. Where the review is enforced, `block` refuses the publish; otherwise the verdict is only recorded.
          * @enum {string}
          */
         outcome: 'allow' | 'hold' | 'block';
@@ -11801,6 +12574,16 @@ export interface components {
           /** @description What is wrong, in a sentence. */
           message: string;
           /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Borderline wording worth a look. The email still publishes: warnings never change the outcome. Empty or absent when there is nothing to flag. */
+        warnings?: {
+          /**
+           * @description `promotional_wording`: a line in a system email reads a little promotional. System emails go to everyone, including people who didn’t agree to marketing.
+           * @enum {string}
+           */
+          code: 'promotional_wording';
+          /** @description The text of the email the warning is about. */
           excerpt: string;
         }[];
         /** @description Time the content was reviewed. ISO 8601 datetime. */
@@ -11846,7 +12629,7 @@ export interface components {
       /** @description The AI content review of the version, run on the template rendered with the sign-in link email. Null when the review couldn’t run. */
       review: {
         /**
-         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @description `allow` or `block` (phishing, a scam or impersonation, or a system email selling something). When the first review can’t decide, a stronger model makes the final call, so new reviews are never `hold`; `hold` appears only on reviews recorded before that. Where the review is enforced, `block` refuses the publish; otherwise the verdict is only recorded.
          * @enum {string}
          */
         outcome: 'allow' | 'hold' | 'block';
@@ -11867,6 +12650,16 @@ export interface components {
           /** @description What is wrong, in a sentence. */
           message: string;
           /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Borderline wording worth a look. The email still publishes: warnings never change the outcome. Empty or absent when there is nothing to flag. */
+        warnings?: {
+          /**
+           * @description `promotional_wording`: a line in a system email reads a little promotional. System emails go to everyone, including people who didn’t agree to marketing.
+           * @enum {string}
+           */
+          code: 'promotional_wording';
+          /** @description The text of the email the warning is about. */
           excerpt: string;
         }[];
         /** @description Time the content was reviewed. ISO 8601 datetime. */
@@ -12092,7 +12885,7 @@ export interface components {
        * @enum {string}
        */
       kind: 'builtin';
-      /** @description The built-in field key. Job: `employmentType`, `seniority`, `title`, `workArrangement`, `location`, `remoteEligibility`, `description`, `salary`, `applyMethod`, `company`. Company: `name`, `website`, `summary`, `xUrl`, `linkedinUrl`, `facebookUrl`, `logo`, `description`. Talent: `name`, `email`, `avatar`, `headline`, `location`, `jobSearchStatus`, `bio`, `experience`, `education`, `skills`, `languages`. New built-ins may be added; skip keys you do not recognise. */
+      /** @description The built-in field key. Job: `employmentType`, `seniority`, `title`, `workArrangement`, `location`, `remoteEligibility`, `description`, `salary`, `applyMethod`, `company`. Company: `name`, `website`, `summary`, `xUrl`, `linkedinUrl`, `facebookUrl`, `logo`, `description`. Talent: `name`, `email`, `avatar`, `headline`, `location`, `jobSearchStatus`, `bio`, `interestedRoles`, `experience`, `education`, `skills`, `languages`. New built-ins may be added; skip keys you do not recognise. */
       key: string;
       /** @description Whether the form shows the field. */
       visible: boolean;
@@ -12187,6 +12980,8 @@ export interface components {
       title: string;
       slug: string;
       description: string | null;
+      /** @description The icon shown beside the category name; `null` when it has none. */
+      icon: (components['schemas']['HelpCategoryIcon'] & unknown) | null;
       /** @description 0-based index among the board's categories. */
       position: number;
       /** @description Articles in the category, drafts included. */
@@ -12194,6 +12989,88 @@ export interface components {
       createdAt: string;
       updatedAt: string;
     };
+    /** @description The icon shown beside the category name: an emoji, a built-in icon or an uploaded image. */
+    HelpCategoryIcon:
+      | {
+          /** @enum {string} */
+          type: 'emoji';
+          /** @description The emoji. */
+          value: string;
+        }
+      | {
+          /** @enum {string} */
+          type: 'icon';
+          /** @description Name of the built-in icon. One of `bell`, `book`, `briefcase`, `building`, `calendar`, `chart`, `credit-card`, `file`, `globe`, `graduation-cap`, `heart`, `help`, `life-buoy`, `lightbulb`, `lock`, `mail`, `map-pin`, `megaphone`, `message`, `receipt`, `rocket`, `search`, `settings`, `shield`, `star`, `tag`, `user`, `users`, `wrench`, `zap`. Names can be added. */
+          name: string;
+        }
+      | {
+          /** @enum {string} */
+          type: 'image';
+          /** @description URL of the uploaded image. */
+          url: string;
+        };
+    /** @description The icon shown beside the category name: an emoji, a built-in icon or an uploaded image. */
+    HelpCategoryIconInput:
+      | {
+          /**
+           * @description An emoji.
+           * @enum {string}
+           */
+          type: 'emoji';
+          /** @description One emoji. */
+          value: string;
+        }
+      | {
+          /**
+           * @description A built-in icon.
+           * @enum {string}
+           */
+          type: 'icon';
+          /**
+           * @description Name of the built-in icon.
+           * @enum {string}
+           */
+          name:
+            | 'bell'
+            | 'book'
+            | 'briefcase'
+            | 'building'
+            | 'calendar'
+            | 'chart'
+            | 'credit-card'
+            | 'file'
+            | 'globe'
+            | 'graduation-cap'
+            | 'heart'
+            | 'help'
+            | 'life-buoy'
+            | 'lightbulb'
+            | 'lock'
+            | 'mail'
+            | 'map-pin'
+            | 'megaphone'
+            | 'message'
+            | 'receipt'
+            | 'rocket'
+            | 'search'
+            | 'settings'
+            | 'shield'
+            | 'star'
+            | 'tag'
+            | 'user'
+            | 'users'
+            | 'wrench'
+            | 'zap';
+        }
+      | {
+          /**
+           * @description An uploaded image.
+           * @enum {string}
+           */
+          type: 'image';
+          /** @description The `id` of a media upload made with purpose `help_icon`. Square images fit best. */
+          mediaId: string;
+        };
     Import: {
       id: string;
       /** @enum {string} */
@@ -13267,7 +14144,9 @@ export interface components {
         | 'board_hero'
         | 'account_avatar'
         | 'company_logo'
-        | 'blog_image';
+        | 'blog_image'
+        | 'help_image'
+        | 'help_icon';
     };
     MediaUploadIntent: {
       /** @description Opaque staged media upload intent identifier. */
@@ -13296,7 +14175,9 @@ export interface components {
         | 'board_hero'
         | 'account_avatar'
         | 'company_logo'
-        | 'blog_image';
+        | 'blog_image'
+        | 'help_image'
+        | 'help_icon';
       resourceType?: string;
       resourceId?: string;
     };
@@ -15959,7 +16840,7 @@ export interface components {
       /** @description The AI content review of the published wording, run on the email rendered with its template and sample data. It runs shortly after a publish, so it is `null` until then, when the default is in use, or when the review couldn’t run. */
       review: {
         /**
-         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @description `allow` or `block` (phishing, a scam or impersonation, or a system email selling something). When the first review can’t decide, a stronger model makes the final call, so new reviews are never `hold`; `hold` appears only on reviews recorded before that. Where the review is enforced, `block` refuses the publish; otherwise the verdict is only recorded.
          * @enum {string}
          */
         outcome: 'allow' | 'hold' | 'block';
@@ -15980,6 +16861,16 @@ export interface components {
           /** @description What is wrong, in a sentence. */
           message: string;
           /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Borderline wording worth a look. The email still publishes: warnings never change the outcome. Empty or absent when there is nothing to flag. */
+        warnings?: {
+          /**
+           * @description `promotional_wording`: a line in a system email reads a little promotional. System emails go to everyone, including people who didn’t agree to marketing.
+           * @enum {string}
+           */
+          code: 'promotional_wording';
+          /** @description The text of the email the warning is about. */
           excerpt: string;
         }[];
         /** @description Time the content was reviewed. ISO 8601 datetime. */
@@ -16039,7 +16930,7 @@ export interface components {
       /** @description The AI content review of the published wording, run on the email rendered with its template and sample data. It runs shortly after a publish, so it is `null` until then, when the default is in use, or when the review couldn’t run. */
       review: {
         /**
-         * @description `allow`, `hold` (a person should check it) or `block` (phishing, a scam or impersonation). Recorded only for now: no outcome stops a publish.
+         * @description `allow` or `block` (phishing, a scam or impersonation, or a system email selling something). When the first review can’t decide, a stronger model makes the final call, so new reviews are never `hold`; `hold` appears only on reviews recorded before that. Where the review is enforced, `block` refuses the publish; otherwise the verdict is only recorded.
          * @enum {string}
          */
         outcome: 'allow' | 'hold' | 'block';
@@ -16060,6 +16951,16 @@ export interface components {
           /** @description What is wrong, in a sentence. */
           message: string;
           /** @description The text of the email the reason is about. */
+          excerpt: string;
+        }[];
+        /** @description Borderline wording worth a look. The email still publishes: warnings never change the outcome. Empty or absent when there is nothing to flag. */
+        warnings?: {
+          /**
+           * @description `promotional_wording`: a line in a system email reads a little promotional. System emails go to everyone, including people who didn’t agree to marketing.
+           * @enum {string}
+           */
+          code: 'promotional_wording';
+          /** @description The text of the email the warning is about. */
           excerpt: string;
         }[];
         /** @description Time the content was reviewed. ISO 8601 datetime. */
@@ -16359,6 +17260,10 @@ export interface components {
       /** Format: date-time */
       decidedAt: string | null;
     };
+    TestAutomationBody: {
+      /** @description Run as a sample person even when the board has a real record for the trigger. */
+      sample?: boolean;
+    };
     TestEmailLayoutBody: {
       /**
        * @description The email to render with the template, as listed by `GET /v1/email-templates`. Job alert and job match digests are not accepted.
@@ -16646,6 +17551,48 @@ export interface components {
       metaDescription?: string;
       /** @description The author's display name. */
       name?: string;
+    };
+    UpdateAutomationBody: {
+      /** @description The `revision` you read. A newer one refuses the edit with `automation_revision_conflict`. */
+      baseRevision: number;
+      /** @description New name. */
+      name?: string;
+      definition?: components['schemas']['AutomationDefinitionInput'] & unknown;
+      trigger?: components['schemas']['AutomationTriggerInput'];
+      /**
+       * @description Who can go through it again: `once` ever, `after_finish` once their run ends, or `per_job` once per job (job triggers).
+       * @enum {string}
+       */
+      reEntry?: 'once' | 'after_finish' | 'per_job';
+      /**
+       * @description Checked before every step; someone who matches it leaves. null clears it.
+       * @enum {string|null}
+       */
+      stopIf?: 'job_is_live' | 'has_job_alert' | null;
+      /**
+       * @description null clears it.
+       * @enum {string|null}
+       */
+      sendTo?: 'job_owner' | 'company_team' | null;
+      /** @description Most emails it sends a day; null removes the limit. */
+      dailyLimit?: number | null;
+    };
+    UpdateAutomationEmailBody: {
+      /** @description Subject line, up to 200 characters. */
+      subject: string;
+      /** @description Inbox preview text, up to 150 characters. */
+      previewText: string;
+      /** @description The email’s content as HTML. Sanitised as campaign content is; links must be https: or mailto:. Tokens: `{{first_name}}`, `{{email}}`, `{{board_name}}`, `{{board_url}}`. */
+      bodyHtml: string;
+      /** @description The email template it renders on (`GET /v1/email-layouts`). */
+      layoutId?: string;
+      /** @description What a token shows for a recipient with no value, such as `{ "first_name": "there" }`. */
+      tokenFallbacks?: {
+        first_name?: string;
+        email?: string;
+        board_name?: string;
+        board_url?: string;
+      };
     };
     UpdateBackfillRuleBody: {
       name?: string;
@@ -17010,6 +17957,8 @@ export interface components {
       slug?: string;
       /** @description Short text about the category, up to 300 characters. `null` clears it. */
       description?: string | null;
+      /** @description The icon shown beside the category name: an emoji, a built-in icon or an uploaded image. `null` removes it. */
+      icon?: (components['schemas']['HelpCategoryIconInput'] & unknown) | null;
       /** @description 0-based index among the board's categories. The others are renumbered; an index past the end means last. */
       position?: number;
     };
@@ -20175,7 +21124,8 @@ export interface operations {
           | 'inbox_saved_reply'
           | 'help_category'
           | 'help_article'
-          | 'campaign';
+          | 'campaign'
+          | 'automation';
         /** @description Only return entries at or after this time. ISO 8601 datetime. On the Grow plan entries older than 90 days are never returned. */
         from?: string;
         /** @description Only return entries at or before this time. ISO 8601 datetime. */
@@ -20263,6 +21213,547 @@ export interface operations {
       };
       /** @description Audit log entry not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listAutomations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/automations */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['AutomationSummary'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  createAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateAutomationBody'];
+      };
+    };
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The request is invalid (`automation_invalid_request`): a graph that loops or misses a step (`details.problems`), a link that isn’t https: or mailto:, or an unknown token. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board already has 100 automations of its own (`automation_limit_reached`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  deleteAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `automation_running`: turn it off first; or Weekly jobs. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateAutomationBody'];
+      };
+    };
+    responses: {
+      /** @description Updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The request is invalid (`automation_invalid_request`): a graph that loops or misses a step (`details.problems`), a link that isn’t https: or mailto:, or an unknown token. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `automation_revision_conflict` or `automation_default_not_editable`. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  duplicateAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `automation_default_not_editable`. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getAutomationEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+        /** @description The Send email step’s id. */
+        stepId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AutomationEmail'];
+        };
+      };
+      /** @description No such automation, or no email for this step yet. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  updateAutomationEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+        /** @description The Send email step’s id. */
+        stepId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateAutomationEmailBody'];
+      };
+    };
+    responses: {
+      /** @description Updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The request is invalid (`automation_invalid_request`): a graph that loops or misses a step (`details.problems`), a link that isn’t https: or mailto:, or an unknown token. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No such automation, or no Send email step with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listAutomationEnrolments: {
+    parameters: {
+      query?: {
+        /** @description Only runs with this status. */
+        status?: 'waiting' | 'completed' | 'exited';
+        /** @description `nextCursor` from the previous page. */
+        cursor?: string;
+        /** @description Runs per page, 1 to 100. Default 25. */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/automations/new_application/enrolments */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['AutomationEnrolment'][];
+          };
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  pauseAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paused. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `automation_not_live` or `automation_default_not_editable`. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  publishAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Published. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description `automation_publish_checks_failed`, or Weekly jobs. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  stopAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Turned off. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Automation'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Weekly jobs. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  testAutomation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Automation ID: a default’s key (such as `new_application`) or the id of one the board built. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TestAutomationBody'];
+      };
+    };
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AutomationTest'];
+        };
+      };
+      /** @description The board has no automation with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description Weekly jobs runs on the job alert digest and has no test. */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -22553,7 +24044,7 @@ export interface operations {
           'application/json': components['schemas']['Error'];
         };
       };
-      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. Campaign sending isn’t on for this board yet (`campaign_sending_off`). Or it isn’t a draft (`campaign_not_draft`), its checks aren’t current (`campaign_checks_required`), or they found problems (`campaign_checks_blocking`, listed in `details.blocking`). */
+      /** @description The board can’t send campaigns yet (`campaigns_not_ready`): `GET /v1/campaign-readiness` names what’s left. Campaign sending isn’t on for this board yet (`campaign_sending_off`). Or it isn’t a draft (`campaign_not_draft`), its checks aren’t current (`campaign_checks_required`), or they found problems (`campaign_checks_blocking`, listed in `details.blocking`; when the AI content review blocked it, `review_blocked` with the review’s reason codes and quoted lines in `details.reviewReasons`, or `review_unavailable` when it couldn’t run). */
       409: {
         headers: {
           [name: string]: unknown;
@@ -26896,6 +28387,56 @@ export interface operations {
       };
     };
   };
+  listDeliverabilityEmails: {
+    parameters: {
+      query?: {
+        /** @description Emails sent over the last 7 or 30 UTC days, today included. Defaults to 30. */
+        days?: '7' | '30';
+        /** @description Which email to list: `all` (default), or one email by its key, as `GET /v1/deliverability` counts it, such as `job-alert-digest`, `board-magic-link` or `campaign`. An email the board does not record per person, such as `board-inbox-reply`, lists nothing. */
+        email?: string;
+        /** @description Only emails that were `delivered`, `bounced`, or `delayed` at least once, whatever happened next. An email reported as spam (`complained`) lists under `delivered`. Omit for every email. */
+        status?: 'delivered' | 'delayed' | 'bounced';
+        /** @description Only emails to this exact address (case-insensitive). Lists nothing when the address isn't a person on the board. A person keeps their latest 50 emails, so this returns them in one page and ignores `limit` and `cursor`. */
+        address?: string;
+        /** @description Pagination cursor, the `nextCursor` of the previous page. */
+        cursor?: string;
+        /** @description Page size (1–100, default 50). */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/deliverability/emails */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['DeliverabilityEmail'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
   listDevelopmentOrigins: {
     parameters: {
       query?: never;
@@ -29619,6 +31160,173 @@ export interface operations {
       };
       /** @description Membership not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  listEmployersWebsiteChanges: {
+    parameters: {
+      query?: {
+        /** @description Pagination cursor. */
+        cursor?: string;
+        /** @description Page size (1–100, default 50). */
+        limit?: number;
+        /** @description Filter by status. Defaults to `pending_review`, the changes waiting for the board. */
+        status?: 'pending_review' | 'awaiting_verification';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful response. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            object: 'list';
+            /** @example /v1/employers/website-changes */
+            url: string;
+            hasMore: boolean;
+            nextCursor: string | null;
+            data: components['schemas']['CompanyWebsiteChange'][];
+          };
+        };
+      };
+      /** @description An error. Every non-2xx response uses the same envelope; see the Errors section of the introduction. */
+      default: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  getEmployersWebsiteChange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The company website change id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The website change. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyWebsiteChange'];
+        };
+      };
+      /** @description No open website change with that id (`employers_website_change_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  approveEmployersWebsiteChange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The company website change id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The approved website change. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyWebsiteChange'];
+        };
+      };
+      /** @description Another company on the board already uses the requested domain (`validation_error`). */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description No open website change with that id (`employers_website_change_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The change still waits for the employer to verify it (`employers_website_change_not_reviewable`). */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+    };
+  };
+  rejectEmployersWebsiteChange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The company website change id. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The rejected website change. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CompanyWebsiteChange'];
+        };
+      };
+      /** @description No open website change with that id (`employers_website_change_not_found`). */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Error'];
+        };
+      };
+      /** @description The change still waits for the employer to verify it (`employers_website_change_not_reviewable`). */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -33629,7 +35337,9 @@ export interface operations {
             | 'board_hero'
             | 'account_avatar'
             | 'company_logo'
-            | 'blog_image';
+            | 'blog_image'
+            | 'help_image'
+            | 'help_icon';
           resourceType?: string;
           resourceId?: string;
         };
@@ -37905,7 +39615,7 @@ export interface operations {
           'application/json': components['schemas']['SystemEmail'];
         };
       };
-      /** @description The subject, preview text or body was rejected (`system_emails_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`), drops the button that links to the email’s main link (`reason: missing_cta`), or links somewhere other than the email’s own links or the board’s contact address (`reason: link_not_allowed`). `error.details` names the `field`, the `reason`, and the `token` or `href`. */
+      /** @description The subject, preview text or body was rejected (`system_emails_invalid_content`): it is too long, contains a malformed or unsupported token, is missing a required body token, puts a sensitive token (a `*_url` token, the verification code or an HTML chunk) anywhere but a body link href (`reason: unsafe_token_placement`), drops the button that links to the email’s main link (`reason: missing_cta`), or links somewhere other than the email’s own links or the board’s contact address (`reason: link_not_allowed`), or the AI content review blocked it (`reason: review_blocked`) or couldn’t check it, so try again (`reason: review_unavailable`). `error.details` names the `field`, the `reason`, and the `token` or `href`. */
       400: {
         headers: {
           [name: string]: unknown;
