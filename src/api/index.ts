@@ -99,6 +99,15 @@ export {
   type UpdateCampaignBody,
 } from './campaigns.js';
 export {
+  createAutomationsClient,
+  type AutomationsClient,
+  type CreateAutomationBody,
+  type ListAutomationEnrolmentsQuery,
+  type TestAutomationBody,
+  type UpdateAutomationBody,
+  type UpdateAutomationEmailBody,
+} from './automations.js';
+export {
   createRedirectsClient,
   type RedirectsClient,
   type RedirectListQuery,
