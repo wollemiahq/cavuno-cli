@@ -2,6 +2,7 @@ import { Command } from 'commander';
 
 import { registerAnalyticsCommand } from './commands/analytics.js';
 import { refreshStoredSession, registerAuthCommand } from './commands/auth.js';
+import { registerAutomationsCommand } from './commands/automations.js';
 import { registerBackfillCommand } from './commands/backfill.js';
 import { registerBillingCommand } from './commands/billing.js';
 import { registerBlogCommand } from './commands/blog.js';
@@ -57,6 +58,7 @@ export const PUBLIC_GROUPS = [
   'email-layouts',
   'system-emails',
   'campaigns',
+  'automations',
   'operations',
   'taxonomies',
   'candidates',
@@ -119,6 +121,7 @@ export function createCliProgram(version: string) {
   registerEmailLayoutsCommand(program);
   registerSystemEmailsCommand(program);
   registerCampaignsCommand(program);
+  registerAutomationsCommand(program);
   registerBlogCommand(program);
   registerCandidatesCommand(program);
   registerEmployersCommand(program);
